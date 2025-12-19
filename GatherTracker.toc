@@ -1,0 +1,9 @@
+## Title: GatherTracker
+## Author: Petazo
+## Version: 1.0.0
+## Interface: 11505
+## SavedVariables: GatherTrackerDB
+## Notes: A tracking switch addon, with the ability to pause while not moving.
+
+Embeds.xml
+GatherTracker.lua
