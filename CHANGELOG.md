@@ -6,3 +6,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Created `README_EN.md` and `README_ES.md` for multilingual support.
 - Initial release of GatherTracker.
+
+## [Unreleased]
+### Added
+- Created `ROADMAP.md` with a detailed plan for versions v1.1.0 to v1.5.0.
+- Organized features into thematic packs: Visuals, Automation, Data, Social, and Customization.

@@ -34,6 +34,10 @@ En el menú de opciones (Clic Derecho en el botón o `/gt opt`), puedes:
 
 Creado por **Petazo**.
 
+## Roadmap
+
+Puedes consultar nuestros planes futuros en [ROADMAP.md](ROADMAP.md).
+
 ## Licencia
 
 Este proyecto es de código abierto.
