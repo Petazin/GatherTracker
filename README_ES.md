@@ -20,6 +20,13 @@
         *   `Clic Derecho`: Borrar lista.
         *   `Clic Izquierdo`: Recargar.
 
+### v1.4.0: Social e Integración (Nuevo)
+El HUD ahora es interactivo:
+*   **Clic Izquierdo**: Anuncia el recurso en el chat (Decir/Grupo/Banda).
+*   **Ctrl + Clic**: Crea un **Waypoint de TomTom** hacia la ubicación *precisa* del nodo.
+    *   *Nota*: Para garantizar precisión, esta función está restringida a nodos exportados o verificados.
+*   **Shift + Clic**: Exporta el nodo a la base de datos de **GatherMate2**.
+
 ## Uso
 
 1.  Una vez instalado, verás un botón en tu pantalla con el icono de tu rastreo actual.

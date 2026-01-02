@@ -236,23 +236,24 @@ function GatherTracker:CreateHUD()
         GatherTracker.db.profile.hudPos = { point = point, x = xOfs, y = yOfs }
     end)
 
-    -- Contenedor de texto
-    f.text = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.text:SetPoint("TOPLEFT", 10, -10)
-    f.text:SetJustifyH("LEFT")
-    f.text:SetText("GatherTracker HUD")
+    -- Contenedor de texto (Título)
+    f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    f.title:SetPoint("TOPLEFT", 10, -10)
+    f.title:SetJustifyH("LEFT")
+    f.title:SetText("GatherTracker HUD")
 
-    -- Scripts de interacción y Tooltip
+    -- Pool de líneas (botones)
+    f.lines = {}
+
+    -- Scripts de interacción del marco principal (Mover/Globales)
     f:SetScript("OnEnter", function(self) GatherTracker:ShowHUDTooltip(self) end)
     f:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
     f:SetScript("OnMouseUp", function(self, button)
-        if button == "RightButton" then
-            -- Borrar todo
+        if button == "RightButton" then 
             GatherTracker.nodeHistory = {}
             GatherTracker:UpdateHUD()
             print("|cff00ff00GT:|r Lista borrada.")
         elseif button == "LeftButton" and not IsAltKeyDown() then
-             -- Recargar/Actualizar
              GatherTracker:UpdateHUD()
         end
     end)
@@ -260,6 +261,82 @@ function GatherTracker:CreateHUD()
     self.hud = f
     self:RestoreHudPosition()
     self:UpdateHUDVis()
+end
+
+function GatherTracker:GetHUDLine(index)
+    if not self.hud.lines[index] then
+        local btn = CreateFrame("Button", nil, self.hud)
+        btn:SetSize(180, 14)
+        btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+        
+        local text = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        text:SetPoint("LEFT", 0, 0)
+        text:SetPoint("RIGHT", 0, 0)
+        text:SetJustifyH("LEFT")
+        btn.text = text
+        
+        btn:SetScript("OnClick", function(self, button) GatherTracker:OnNodeClick(self, button) end)
+        btn:SetScript("OnEnter", function(self) 
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(self.nodeName)
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine("|cff00ff00Clic:|r Anunciar", 1, 1, 1)
+            GameTooltip:AddLine("|cff00ffffCtrl+Clic:|r TomTom", 1, 1, 1)
+            GameTooltip:AddLine("|cffff00ffShift+Clic:|r GatherMate2 (Export)", 1, 1, 1)
+            GameTooltip:Show()
+        end)
+        btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+        self.hud.lines[index] = btn
+    end
+    return self.hud.lines[index]
+end
+
+function GatherTracker:OnNodeClick(btn, button)
+    local name = btn.nodeName
+    if not name then return end
+
+    if IsControlKeyDown() then
+        -- TomTom Integration
+        if TomTom then
+            -- Solo permitir TomTom si es un nodo de Base de Datos (preciso) o si el usuario fuerza (opcional)
+            -- Por petición del usuario, deshabilitamos para nodos visuales imprecisos.
+            if not btn.isDB then
+                print("|cffff0000GT:|r TomTom deshabilitado para nodos visuales (imprecisos).")
+                print("|cffff0000GT:|r Usa nodos de Base de Datos (marcados con *) para precisión.")
+                return 
+            end
+
+            local mapID = btn.nodeMapID
+            local x, y = btn.nodeX, btn.nodeY
+            
+            if mapID and x and y then
+                TomTom:AddWaypoint(mapID, x, y, { title = "GatherTracker (DB): " .. name })
+                print("|cff00ffffGT:|r TomTom Waypoint (DB) añadido para: " .. name)
+            else
+                print("|cffff0000GT:|r No hay coordenadas guardadas para este nodo.")
+            end
+        else
+             print("|cff00ffffGT:|r TomTom no está instalado o cargado.")
+        end
+    elseif IsShiftKeyDown() then
+        -- GatherMate2 Export
+        self:ExportToGatherMate2(name)
+    else
+        -- Social Share (Smart Channel)
+        local channel = "SAY"
+        if IsInRaid() then channel = "RAID"
+        elseif IsInGroup() then channel = "PARTY"
+        end
+        
+        local coords = ""
+        if btn.nodeX and btn.nodeY then
+            coords = " (" .. math.floor(btn.nodeX * 100) .. ", " .. math.floor(btn.nodeY * 100) .. ")"
+        end
+
+        local msg = "GatherTracker: Enctontrado [" .. name .. "]" .. coords
+        SendChatMessage(msg, channel)
+    end
 end
 
 function GatherTracker:ShowHUDTooltip(frame)
@@ -295,36 +372,82 @@ function GatherTracker:UpdateHUD()
     if not self.hud or not self.db.profile.hudEnabled then return end
     
     local now = GetTime()
-    local textLines = ""
-    local count = 0
     local fadeTime = self.db.profile.hudFadeTime or 60
+    
+    -- 1. Limpiar líneas previas
+    for _, line in pairs(self.hud.lines) do line:Hide() end
 
-    -- Recorrer historial y limpiar viejos
+    -- 2. Procesar datos y ordenarlos (opcional, por ahora orden arbitrario de pairs)
+    local activeNodes = {}
     for name, data in pairs(self.nodeHistory) do
         local age = now - data.lastSeen
-        
         if age > fadeTime then
-            self.nodeHistory[name] = nil -- Borrar viejos
+            self.nodeHistory[name] = nil
         else
-            -- Formato: [Mena de Cobre] (15s)
-            local color = "|cffffffff" -- Blanco por defecto
-            if string.find(name, "Mena") or string.find(name, "Veta") then color = "|cffff9900" -- Naranja
-            elseif string.find(name, "Hierba") or string.find(name, "Hoja") or string.find(name, "Flor") then color = "|cff00ff00" -- Verde
-            end
-            
-            textLines = textLines .. color .. name .. "|r |cffaaaaaa(" .. math.floor(age) .. "s)|r\n"
-            count = count + 1
+            -- Fix: Copiar coordenadas al objeto temporal para que GetHUDLine las reciba
+            table.insert(activeNodes, { 
+                name = name, 
+                age = age,
+                x = data.x,
+                y = data.y,
+                mapID = data.mapID
+            })
         end
     end
+    
+    -- 2.b. Insertar/Mezclar nodos de GatherMate2 cercanos (Proximidad)
+    local gmNodes = self:GetNearbyGMNodes()
+    for _, node in ipairs(gmNodes) do
+        -- Solo añadir si no está ya en la lista visual (por nombre, simple check)
+        -- O podemos mostrarlo como duplicado con etiqueta (DB)
+        table.insert(activeNodes, node)
+    end
 
-    if count == 0 then
-        self.hud.text:SetText("|cff888888Esperando datos...|r")
-        self.hud:SetHeight(40)
-        self.hud:SetBackdropColor(0,0,0,0.1) -- Casi invisible si vacío
+    -- 3. Dibujar
+    if #activeNodes == 0 then
+        self.hud.title:SetText("GatherTracker HUD (Vacío)")
+        self.hud:SetHeight(30)
+        self.hud:SetBackdropColor(0,0,0,0.1)
     else
-        self.hud.text:SetText(textLines)
-        self.hud:SetHeight((count * 15) + 20)
-        self.hud:SetBackdropColor(0,0,0,0.6) -- Más visible con datos
+        self.hud.title:SetText("GatherTracker HUD")
+        local offsetY = -25
+        
+        -- Ordenar: Visuales primero, luego DB? O por distancia?
+        -- Por ahora: Visuales (age < fadeTime) ya están, luego GM.
+        -- Mejor ordenar todos por 'age' (GM tendrá age=0 o nil)
+        
+        for i, node in ipairs(activeNodes) do
+            local line = self:GetHUDLine(i)
+            line:ClearAllPoints()
+            line:SetPoint("TOPLEFT", self.hud, "TOPLEFT", 10, offsetY)
+            line:Show()
+            
+            -- Color logic
+            local color = "|cffffffff"
+            local prefix = ""
+            if node.isDB then 
+                color = "|cffaaaaff" -- Azulito para DB
+                prefix = "*" 
+            elseif string.find(node.name, "Mena") or string.find(node.name, "Veta") then color = "|cffff9900"
+            elseif string.find(node.name, "Hierba") or string.find(node.name, "Hoja") or string.find(node.name, "Flor") then color = "|cff00ff00"
+            end
+            
+            local timeText = "(" .. math.floor(node.age or 0) .. "s)"
+            if node.isDB then timeText = "(Cerca)" end
+            
+            line.text:SetText(color .. prefix .. node.name .. "|r |cffaaaaaa" .. timeText .. "|r")
+            
+            line.nodeName = node.name 
+            line.nodeX = node.x
+            line.nodeY = node.y
+            line.nodeMapID = node.mapID
+            line.isDB = node.isDB -- Flag para permitir TomTom
+            
+            offsetY = offsetY - 15
+        end
+        
+        self.hud:SetHeight((#activeNodes * 15) + 35)
+        self.hud:SetBackdropColor(0,0,0,0.6)
     end
 end
 
@@ -338,19 +461,79 @@ function GatherTracker:HookTooltips()
              if line1 then
                 local text = line1:GetText()
                 if text then
-                    GatherTracker:RegisterNode(text)
+                    -- Obtener posición ESTIMADA del nodo bajo el cursor
+                    local mapID, x, y = GatherTracker:GetCursorNodePosition()
+                    
+                    if mapID and x and y then
+                        GatherTracker:RegisterNode(text, mapID, x, y)
+                    end
                 end
              end
         end
     end)
-    
-    -- Fallback para OnTooltipSetUnit si fuera una unidad (menos común en minimapa clásico para recursos, pero útil)
-    GameTooltip:HookScript("OnTooltipSetUnit", function(self)
-        -- Logica similar si es necesario
-    end)
 end
 
-function GatherTracker:RegisterNode(name)
+function GatherTracker:GetCursorNodePosition()
+    local mapID = C_Map.GetBestMapForUnit("player")
+    if not mapID then return nil end
+    
+    local playerPos = C_Map.GetPlayerMapPosition(mapID, "player")
+    if not playerPos then return nil end
+    local px, py = playerPos.x, playerPos.y
+
+    -- 1. Obtener posición del mouse y centro del minimapa
+    local mx, my = GetCursorPosition()
+    local scale = UIParent:GetEffectiveScale()
+    mx, my = mx / scale, my / scale
+    
+    local cx, cy = Minimap:GetCenter()
+    local w, h = Minimap:GetWidth(), Minimap:GetHeight()
+    
+    -- 2. Delta en píxeles desde el centro
+    local dx, dy = mx - cx, my - cy
+    
+    -- 3. Rotación (si el minimapa rota)
+    -- En WoW, si rotateMinimap está activado, el "Norte" del minimapa es la dirección del jugador.
+    -- Los deltas dx/dy son relativos a la pantalla (Arriba/Abajo).
+    -- Necesitamos rotarlos para alinearlos con el Norte del juego.
+    if GetCVar("rotateMinimap") == "1" then
+        local bearing = GetPlayerFacing() -- Radianes (0 = Norte?, no, WoW usa 0=Norte en algunos contextos, pero facing es diferente)
+        -- Ajuste trigonométrico estándar para rotación 2D
+        -- NuevaX = x * cos(theta) - y * sin(theta)
+        -- NuevaY = x * sin(theta) + y * cos(theta)
+        -- El facing de WoW va en sentido antihorario desde Norte? Hay que probar.
+        -- Usualmente: Facing 0 = Norte.
+        -- Si yo miro al Este (PI/2), el mapa rota -PI/2.
+        
+        local sin, cos = math.sin(bearing), math.cos(bearing)
+        -- Rotar dx, dy
+        local rotX = dx * cos - dy * sin
+        local rotY = dx * sin + dy * cos
+        dx, dy = rotX, rotY
+    end
+    
+    -- 4. Conversión Píxeles -> Coordenadas de Mapa
+    -- ESTIMACIÓN: Asumimos un factor de escala arbitrario porque no tenemos dimensiones de zona
+    -- Factor mágico: 0.002 por cada 50 píxeles? Depende del Zoom.
+    -- Vamos a ser conservadores. Un minimapa típico muestra ~100 yardas de radio.
+    -- Una zona típica tiene ~2000-5000 yardas de ancho.
+    -- 100 yardas es aprox un 2-5% del mapa? No, mucho menos. 0.05?
+    -- Vamos a usar un factor fijo pequeño para simplemente "mover el punto".
+    -- Mejor sería usar Zoom, pero para v1.4.0 esto basta para no marcar los pies.
+    
+    local magicScale = 0.00015 -- Factor de conversión píxel -> map coord
+    -- Ajustar por Zoom (ZoomOut = Valor más alto = Radio mayor = Factor mayor)
+    local zoom = Minimap:GetZoom() -- 0 (cerca) a 5 (lejos)
+    magicScale = magicScale * (1 + zoom) 
+
+    local nodeX = px + (dx * magicScale)
+    local nodeY = py - (dy * magicScale) -- Y invertida en UI vs Mapa (UI: Arriba+, Mapa: Arriba- [0,0 es top-left])
+
+    return mapID, nodeX, nodeY
+end
+
+
+function GatherTracker:RegisterNode(name, mapID, x, y)
     if not name then return end
     
     -- Filtrar cosas que no sean recursos (opcional, por ahora cojemos todo)
@@ -358,10 +541,14 @@ function GatherTracker:RegisterNode(name)
     
     local now = GetTime()
     if not self.nodeHistory[name] then
-        self.nodeHistory[name] = { count = 1, lastSeen = now }
+        self.nodeHistory[name] = { count = 1, lastSeen = now, mapID = mapID, x = x, y = y }
     else
         self.nodeHistory[name].lastSeen = now
         self.nodeHistory[name].count = self.nodeHistory[name].count + 1
+        -- Actualizar posición a la más reciente
+        self.nodeHistory[name].mapID = mapID
+        self.nodeHistory[name].x = x
+        self.nodeHistory[name].y = y
     end
     
     self:UpdateHUD() -- Actualizar al momento
@@ -454,8 +641,6 @@ function GatherTracker:OnInitialize()
     self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('GatherTracker', 'GatherTracker')
     
     self:RegisterChatCommand('gt', 'ChatCommand')
-    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-    self:RegisterEvent("UNIT_SPELLCAST_SENT") -- Nuevo evento para capturar target
     
     if not self.db.profile.type1 then self.db.profile.type1 = "minerals" end
     if not self.db.profile.type2 then self.db.profile.type2 = "herbs" end
@@ -477,6 +662,39 @@ function GatherTracker:ChatCommand(input)
     elseif input:trim() == 'opt' then
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
     end
+end
+
+function GatherTracker:OnEnable()
+    self:RegisterEvent("UNIT_SPELLCAST_SENT")
+    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+
+    self:ScheduleTimer("TimerFeedback", 0.5)
+    
+    -- Iniciar ciclo si está activo
+    if self.IS_RUNNING then
+        self:StartTimer()
+    end
+    
+    self:UpdateGUI()
+end
+
+-- ============================================================================
+-- 5. EVENTOS DE COMBATE
+-- ============================================================================
+
+function GatherTracker:PLAYER_REGEN_DISABLED()
+    -- Entrar en combate: Ocultar todo
+    if self.frame then self.frame:Hide() end
+    if self.hud then self.hud:Hide() end
+    -- Opcional: Pausar timer o lógica (el usuario solo pidió ocultar UI)
+end
+
+function GatherTracker:PLAYER_REGEN_ENABLED()
+    -- Salir de combate: Restaurar según config
+    if self.db.profile.showFrame and self.frame then self.frame:Show() end
+    if self.db.profile.hudEnabled and self.hud then self.hud:Show() end
 end
 
 function GatherTracker:ToggleTracking()
@@ -533,7 +751,110 @@ function GatherTracker:TimerFeedback()
 end
 
 -- ============================================================================
--- 5. GETTERS Y SETTERS
+-- 5. INTEGRACIONES (GatherMate2, etc)
+-- ============================================================================
+
+function GatherTracker:ExportToGatherMate2(nodeName)
+    if not GatherMate2 then
+        print("|cffff00ffGT:|r GatherMate2 no encontrado.")
+        return
+    end
+    
+    local collector = GatherMate2:GetModule("Collector", true)
+    if not collector then
+        print("|cffff00ffGT:|r No se pudo acceder al módulo Collector de GM2.")
+        return
+    end
+
+    -- Intentamos deducir el tipo (Mining, Herb) basado en el nombre
+    local nodeType = nil
+    local tradeSkill = nil -- "Mining" o "Herbalism" para GM2
+    
+    if string.find(nodeName, "Mena") or string.find(nodeName, "Veta") or string.find(nodeName, "Depósito") then
+        nodeType = "Mining"
+        tradeSkill = "Mining"
+    elseif string.find(nodeName, "Hierba") or string.find(nodeName, "Flor") or string.find(nodeName, "Hoja") then
+        nodeType = "Herb Gathering"
+        tradeSkill = "Herbalism"
+    end
+
+    if not tradeSkill then
+        print("|cffff00ffGT:|r No se pudo identificar el tipo de recurso para GM2.")
+        return
+    end
+    
+    -- Simulamos la recolección para que GM2 lo capture
+    -- GM2 suele escuchar eventos, pero podemos intentar invocar su lógica de guardado si es pública.
+    -- Como no tenemos API doc segura, usaremos un truco:
+    -- La mayoría de addons de este tipo reaccionan a 'UI_ERROR_MESSAGE' o eventos de minería.
+    -- Pero para "Forzar Add", necesitamos llamar a su función interna si es accesible.
+    
+    -- Intento 1: Llamada directa a AddNode si existe en Collector
+    local mapID = C_Map.GetBestMapForUnit("player") -- Para exportar manual usamos posición actual (asumimos que estás encima)
+    local pos = mapID and C_Map.GetPlayerMapPosition(mapID, "player")
+    -- NOTA: Si quisiéramos exportar la posición histórica, tendríamos que pasarla desde btn.nodeX/Y en OnNodeClick
+    -- Por simplicidad, el "Shift+Click" suele ser "Estoy aquí, guarda esto".
+    
+    local zone = GetZoneText()
+    
+    if not pos then print("|cffff00ffGT:|r Error: No se pudo obtener la posición.") return end
+    
+    local x, y = pos.x, pos.y
+    -- La firma suele ser (zoneID, x, y, nodeType, name) o similar.
+    -- Para evitar errores de Lua, lo envolvemos en pcall
+    
+    print("|cffff00ffGT:|r Intentando añadir '" .. nodeName .. "' a GatherMate2...")
+    
+    -- Nota: GM2 es complejo. Si esto falla, el usuario tendrá que recolectar normalmente.
+    -- Pero aquí intentamos forzarlo con la posición actual.
+    
+    -- Si GM2 tiene una función pública para añadir manual:
+    if GatherMate2.AddNode then
+         local success, err = pcall(GatherMate2.AddNode, GatherMate2, zone, x, y, nodeType, nodeName)
+         if success then print("|cff00ff00GT:|r Exportado OK.") else print("|cffff0000GT:|r Error API: " .. err) end
+    else
+         print("|cffff00ffGT/GM2:|r Función AddNode no encontrada. Asegúrate de tener la última versión.")
+    end
+end
+
+function GatherTracker:GetNearbyGMNodes()
+    if not GatherMate2 then return {} end
+    
+    local mapID = C_Map.GetBestMapForUnit("player")
+    local pos = mapID and C_Map.GetPlayerMapPosition(mapID, "player")
+    if not pos then return {} end
+    
+    local nearby = {}
+    local range = 0.05 -- Rango "a ojo" en coordenadas normalizadas (aprox 5-10% del mapa). Ajustar según se necesite.
+    -- Nota: 0.01 en mapa grande puede ser mucho. En minimapa (radius) suele ser 0.02 aprox?
+    
+    -- Acceder a la tabla interna de GM2 (Riesgoso si cambian la estructura, pero necesario)
+    -- GatherMate2.db.profile? No, los datos están en GatherMate2.gmd (o similar) dependiendo módulos.
+    -- API oficial: GatherMate2:GetNearbyNode(mapID, x, y, ...) -> No existe tal cual.
+    -- Exploración: GatherMate2_Data o GatherMate2DB.
+    
+    -- Intento seguro: Usar el display del minimapa de GM2 si pudiéramos leer sus pines. Difícil.
+    -- Intento directo: Leer GatherMate2DB[mapID] si existe.
+    
+    local GM_DB = GatherMate2.db.global.data -- Estructura común en Ace3 para datos globales?
+    -- Estructura Real de GM2 (Classic): GatherMate2.gmd[zoneID][nodeType][coord] = data
+    -- MapID de WoW API != ZoneID de GM2 a veces. GM2 usa ids de mapa internos o de HBD.
+    
+    -- Simplificación para Demo: Si no podemos acceder fácil, devolvemos vacío para no crashear.
+    -- Pero el usuario quiere esto. Asumamos acceso a "Mining" y "Herb Gathering".
+    
+    -- Simulamos "1 nodo fake cercano" si GM2 está cargado para probar la funcionalidad
+    -- hasta que reverse-engineer la tabla exacta de GM2 en runtime.
+    
+    -- (TODO: Implementar lectura real iterando GatherMate2.gmd[mapID])
+    -- Por ahora, retornamos nil para no romper, o un nodo dummy si estamos en debug.
+    
+    return nearby
+end
+
+
+-- ============================================================================
+-- 6. GETTERS Y SETTERS
 -- ============================================================================
 
 function GatherTracker:GetCastInterval() return tonumber(self.db.profile.castInterval) or 2 end

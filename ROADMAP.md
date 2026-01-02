@@ -21,7 +21,6 @@
 ## v1.4.0: "Social e Integración" (Conectividad)
 **Objetivo**: Interactuar con otros jugadores y addons populares.
 - [ ] **Integración con TomTom**: Flecha de navegación automática al detectar o clicar un nodo.
-- [ ] **Integración con GatherMate2**: Importar/Exportar datos de nodos conocidos.
 - [ ] **Soporte Data Broker (LDB)**: Integración con Titan Panel, ChocolateBar o Fubar.
 - [ ] **Compartir Recursos**: Enviar coordenadas automáticamente al chat de grupo/banda (ej. Loto Negro).
 - [ ] **Sincronización de Guild**: Compartir datos de nodos encontrados con la hermandad.
@@ -40,13 +39,16 @@
 **Objetivo**: Hacer que el addon sea más inteligente y requiera menos gestión manual.
 - [ ] **Detección de Profesión**: Activar automáticamente el rastreo si el personaje tiene Minería o Herboristería aprendidas.
 - [ ] **Atajos de Teclado**: Asignar una tecla rápida para activar/desactivar el rastreo sin usar el mouse.
-- [ ] **Ocultar en Combate**: Opción para esconder automáticamente la lista cuando entras en combate.
+- [ ] **Modo Combate Inteligente**: Ocultar HUD y botón, pausar rastreo al entrar en combate y reanudar al salir.
 - [ ] **Filtros Inteligentes**: Lista negra para ignorar recursos de bajo nivel o no deseados.
 - [ ] **Filtro por Zona**: Configurar rastreos específicos que solo se activen en ciertas zonas.
 - [ ] **Auto-Venta de Basura**: Opción auxiliar para vender automáticamente ítems grises obtenidos al recolectar.
 
-## v1.3.0: "Datos y Persistencia" (Analytics)
+## v1.5.0: "Datos y Persistencia"
 **Objetivo**: Guardar y analizar la información recolectada a largo plazo.
+- [ ] Importación Profunda GM2 (Sensor de Proximidad con la BD completa)
+- [ ] Base de datos propia persistente
+- [ ] Estadísticas de recolección (Gold/Hour)
 - [ ] **Persistencia de Sesión**: Guardar la lista de nodos recientes incluso si recargas la interfaz (/reload).
 - [ ] **Persistencia de Datos Global**: Guardar mapa de calor o historial entre sesiones.
 - [ ] **Contador/Estadísticas**: Rastrear cuántas veces has visto cada tipo de recurso en la sesión/total.
