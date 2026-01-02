@@ -1,4 +1,4 @@
-GatherTracker = LibStub("AceAddon-3.0"):NewAddon("GatherTracker", "AceTimer-3.0", "AceConsole-3.0")
+GatherTracker = LibStub("AceAddon-3.0"):NewAddon("GatherTracker", "AceTimer-3.0", "AceConsole-3.0", "AceEvent-3.0")
 
 -- ============================================================================
 -- 1. TABLAS DE DATOS
@@ -52,6 +52,10 @@ local options = {
         type2 = { order = 3, name = "Rastreo Secundario", type = "select", values = classTrackingValues, get = 'GetType2', set = 'SetType2' },
         castInterval = { order = 4, name = "Intervalo (segundos)", type = "range", min = 2, max = 60, step = 1, get = 'GetCastInterval', set = 'SetCastInterval', width = "full" },
         showFrame = { order = 5, name = "Mostrar Botón Flotante", type = "toggle", get = 'GetShowFrame', set = 'SetShowFrame', width = "full" },
+        
+        header2 = { order = 6, type = "header", name = "Visualización (HUD)" },
+        hudEnabled = { order = 7, name = "Habilitar HUD", type = "toggle", get = 'GetHudEnabled', set = 'SetHudEnabled', width = "full" },
+        hudFade = { order = 8, name = "Tiempo de Borrado (s)", type = "range", min = 10, max = 300, step = 10, get = 'GetHudFade', set = 'SetHudFade' },
     }
 }
 
@@ -59,9 +63,17 @@ local defaults = {
     profile  = {
         type1 = "minerals", type2 = "herbs", castInterval = 2,
         showFrame = true,
-        pos = { point = "CENTER", x = 0, y = 0 }
+        pos = { point = "CENTER", x = 0, y = 0 },
+        -- Nuevas opciones v1.1.0
+        hudEnabled = true,
+        hudAlpha = 0.8,
+        hudFadeTime = 60, -- segundos
+        hudPos = { point = "CENTER", x = 100, y = 0 }
     }
 }
+
+-- Lista temporal de nodos vistos
+GatherTracker.nodeHistory = {}
 
 -- ============================================================================
 -- 3. SISTEMA DE INTERFAZ GRÁFICA (GUI)
@@ -74,6 +86,7 @@ function GatherTracker:CreateGUI()
     f:SetSize(40, 40)
     f:SetMovable(true)
     f:EnableMouse(true)
+    f:RegisterForClicks("LeftButtonUp", "RightButtonUp") -- FIX: Registrar Clic Derecho
     f:EnableMouseWheel(true) -- Habilitar Rueda del Ratón
     f:RegisterForDrag("LeftButton")
     f:SetClampedToScreen(true)
@@ -191,8 +204,249 @@ function GatherTracker:UpdateGUI()
 end
 
 -- ============================================================================
+-- 3.B SISTEMA HUD (v1.1.0)
+-- ============================================================================
+
+function GatherTracker:CreateHUD()
+    if self.hud then return end
+
+    local f = CreateFrame("Frame", "GatherTrackerHUD", UIParent, "BackdropTemplate")
+    f:SetSize(200, 20) -- Altura dinámica luego
+    f:SetPoint("CENTER", 100, 0)
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:RegisterForDrag("LeftButton")
+    
+    -- Fondo semi-transparente para moverlo
+    f:SetBackdrop({
+        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", 
+        tile = true, tileSize = 16, edgeSize = 16, 
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    f:SetBackdropColor(0, 0, 0, 0.4) -- Fondo negro transparente
+    
+    -- Hacerlo movible con Alt
+    f:SetScript("OnDragStart", function(self)
+        if IsAltKeyDown() then self:StartMoving() end
+    end)
+    f:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        local point, _, relativePoint, xOfs, yOfs = self:GetPoint()
+        GatherTracker.db.profile.hudPos = { point = point, x = xOfs, y = yOfs }
+    end)
+
+    -- Contenedor de texto
+    f.text = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    f.text:SetPoint("TOPLEFT", 10, -10)
+    f.text:SetJustifyH("LEFT")
+    f.text:SetText("GatherTracker HUD")
+
+    -- Scripts de interacción y Tooltip
+    f:SetScript("OnEnter", function(self) GatherTracker:ShowHUDTooltip(self) end)
+    f:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+    f:SetScript("OnMouseUp", function(self, button)
+        if button == "RightButton" then
+            -- Borrar todo
+            GatherTracker.nodeHistory = {}
+            GatherTracker:UpdateHUD()
+            print("|cff00ff00GT:|r Lista borrada.")
+        elseif button == "LeftButton" and not IsAltKeyDown() then
+             -- Recargar/Actualizar
+             GatherTracker:UpdateHUD()
+        end
+    end)
+
+    self.hud = f
+    self:RestoreHudPosition()
+    self:UpdateHUDVis()
+end
+
+function GatherTracker:ShowHUDTooltip(frame)
+    GameTooltip:SetOwner(frame, "ANCHOR_TOP")
+    GameTooltip:ClearLines()
+    GameTooltip:AddLine("GatherTracker HUD")
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddLine("|cffFFFFFFAlt+Arrastrar:|r Mover lista")
+    GameTooltip:AddLine("|cffFFFFFFClic Der:|r Borrar lista")
+    GameTooltip:AddLine("|cffFFFFFFClic Izq:|r Recargar lista")
+    GameTooltip:Show()
+end
+
+function GatherTracker:RestoreHudPosition()
+    if not self.hud then return end
+    local pos = self.db.profile.hudPos
+    if pos then
+        self.hud:ClearAllPoints()
+        self.hud:SetPoint(pos.point, UIParent, pos.point, pos.x, pos.y)
+    end
+end
+
+function GatherTracker:UpdateHUDVis()
+    if not self.hud then return end
+    if self.db.profile.hudEnabled then
+        self.hud:Show()
+    else
+        self.hud:Hide()
+    end
+end
+
+function GatherTracker:UpdateHUD()
+    if not self.hud or not self.db.profile.hudEnabled then return end
+    
+    local now = GetTime()
+    local textLines = ""
+    local count = 0
+    local fadeTime = self.db.profile.hudFadeTime or 60
+
+    -- Recorrer historial y limpiar viejos
+    for name, data in pairs(self.nodeHistory) do
+        local age = now - data.lastSeen
+        
+        if age > fadeTime then
+            self.nodeHistory[name] = nil -- Borrar viejos
+        else
+            -- Formato: [Mena de Cobre] (15s)
+            local color = "|cffffffff" -- Blanco por defecto
+            if string.find(name, "Mena") or string.find(name, "Veta") then color = "|cffff9900" -- Naranja
+            elseif string.find(name, "Hierba") or string.find(name, "Hoja") or string.find(name, "Flor") then color = "|cff00ff00" -- Verde
+            end
+            
+            textLines = textLines .. color .. name .. "|r |cffaaaaaa(" .. math.floor(age) .. "s)|r\n"
+            count = count + 1
+        end
+    end
+
+    if count == 0 then
+        self.hud.text:SetText("|cff888888Esperando datos...|r")
+        self.hud:SetHeight(40)
+        self.hud:SetBackdropColor(0,0,0,0.1) -- Casi invisible si vacío
+    else
+        self.hud.text:SetText(textLines)
+        self.hud:SetHeight((count * 15) + 20)
+        self.hud:SetBackdropColor(0,0,0,0.6) -- Más visible con datos
+    end
+end
+
+function GatherTracker:HookTooltips()
+    -- Hook simple: cuando se muestra el tooltip, leer la línea 1
+    GameTooltip:HookScript("OnShow", function(self)
+        local owner = self:GetOwner()
+        if owner and owner == Minimap then
+             -- Solo nos importa si viene del minimapa (puntitos amarillos)
+             local line1 = _G["GameTooltipTextLeft1"]
+             if line1 then
+                local text = line1:GetText()
+                if text then
+                    GatherTracker:RegisterNode(text)
+                end
+             end
+        end
+    end)
+    
+    -- Fallback para OnTooltipSetUnit si fuera una unidad (menos común en minimapa clásico para recursos, pero útil)
+    GameTooltip:HookScript("OnTooltipSetUnit", function(self)
+        -- Logica similar si es necesario
+    end)
+end
+
+function GatherTracker:RegisterNode(name)
+    if not name then return end
+    
+    -- Filtrar cosas que no sean recursos (opcional, por ahora cojemos todo)
+    -- Si es "Mi Personaje" o nombres de jugadores, podríamos ignorar.
+    
+    local now = GetTime()
+    if not self.nodeHistory[name] then
+        self.nodeHistory[name] = { count = 1, lastSeen = now }
+    else
+        self.nodeHistory[name].lastSeen = now
+        self.nodeHistory[name].count = self.nodeHistory[name].count + 1
+    end
+    
+    self:UpdateHUD() -- Actualizar al momento
+end
+
+-- ============================================================================
 -- 4. FUNCIONES PRINCIPALES
 -- ============================================================================
+
+-- Variables para rastrear el objetivo del crafteo
+GatherTracker.lastSentTarget = nil
+GatherTracker.lastSentSpell = nil
+
+function GatherTracker:UNIT_SPELLCAST_SENT(event, unit, target, castGUID, spellID)
+    if unit ~= "player" then return end
+    self.lastSentTarget = target
+    self.lastSentSpell = spellID
+end
+
+function GatherTracker:UNIT_SPELLCAST_SUCCEEDED(event, unit, castGUID, spellID)
+    if unit ~= "player" then return end
+    
+    local spellName = GetSpellInfo(spellID)
+    if not spellName then return end
+
+    -- Palabras clave para detectar recolección
+    local keywords = {"Min", "Herb", "Reco", "Gather", "Abrir", "Open"}
+    local isGathering = false
+    
+    for _, word in ipairs(keywords) do
+        if string.find(spellName, word) then
+            isGathering = true
+            break
+        end
+    end
+
+    if isGathering then
+        -- Usar el target guardado en SENT si coincide con el hechizo actual (aproximado)
+        -- O si tenemos un target explícito
+        local targetToRemove = self.lastSentTarget
+        
+        -- Si no hay target en SENT (ej. click derecho sin target), intentamos UnitName("target")
+        if not targetToRemove then
+            targetToRemove = UnitName("target")
+        end
+
+        if targetToRemove then
+             self:RemoveSpecificNode(targetToRemove)
+        end
+        
+        -- Limpiar
+        self.lastSentTarget = nil
+    end
+end
+
+function GatherTracker:RemoveSpecificNode(nodeName)
+    if not nodeName then return end
+    
+    -- Buscamos si existe en el historial
+    if self.nodeHistory[nodeName] then
+        self.nodeHistory[nodeName] = nil
+        self:UpdateHUD()
+--      print("|cff00ff00GT:|r Nodo eliminado: " .. nodeName) -- Debug opcional
+    end
+end
+
+function GatherTracker:RemoveMostRecentNode()
+    local now = GetTime()
+    local bestName = nil
+    local minDiff = 10 -- Solo borrar si se vio hace menos de 10 segundos
+    
+    for name, data in pairs(self.nodeHistory) do
+        local diff = now - data.lastSeen
+        if diff < minDiff then
+            minDiff = diff
+            bestName = name
+        end
+    end
+    
+    if bestName then
+        self.nodeHistory[bestName] = nil
+        self:UpdateHUD()
+    end
+end
+
 
 function GatherTracker:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("GatherTrackerCharDB", defaults, true)
@@ -200,13 +454,21 @@ function GatherTracker:OnInitialize()
     self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('GatherTracker', 'GatherTracker')
     
     self:RegisterChatCommand('gt', 'ChatCommand')
+    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    self:RegisterEvent("UNIT_SPELLCAST_SENT") -- Nuevo evento para capturar target
     
     if not self.db.profile.type1 then self.db.profile.type1 = "minerals" end
     if not self.db.profile.type2 then self.db.profile.type2 = "herbs" end
     if not self.db.profile.castInterval then self.db.profile.castInterval = 2 end
-    
+    if self.db.profile.hudEnabled == nil then self.db.profile.hudEnabled = true end
+
     GatherTracker.IS_RUNNING = false
     self:CreateGUI()
+    self:CreateHUD() -- Crear el HUD al inicio
+    self:HookTooltips() -- Activar el espía de tooltips
+
+    -- Timer para actualizar el HUD (cada 1s es suficiente para contadores)
+    self:ScheduleRepeatingTimer("UpdateHUD", 1)
 end
 
 function GatherTracker:ChatCommand(input)
@@ -291,3 +553,12 @@ function GatherTracker:SetShowFrame(info, val)
     self.db.profile.showFrame = val 
     self:UpdateGUI() 
 end
+
+function GatherTracker:GetHudEnabled() return self.db.profile.hudEnabled end
+function GatherTracker:SetHudEnabled(info, val)
+    self.db.profile.hudEnabled = val
+    self:UpdateHUDVis()
+end
+
+function GatherTracker:GetHudFade() return self.db.profile.hudFadeTime end
+function GatherTracker:SetHudFade(info, val) self.db.profile.hudFadeTime = val end

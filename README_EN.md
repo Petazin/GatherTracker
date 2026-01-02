@@ -12,6 +12,13 @@
     *   **Mouse Wheel:** Quickly increase or decrease the time interval.
     *   **Alt + Drag:** Move the button anywhere on the screen.
 *   **Smart Detection:** Automatically pauses if you are casting, in combat, or dead.
+*   **Visual HUD (v1.1.0):**
+    *   Displays an on-screen list of resources spotted on the minimap.
+    *   **Smart Cleanup:** Nodes automatically disappear when gathered.
+    *   **Interactive:**
+        *   `Alt + Drag`: Move list.
+        *   `Right Click`: Clear list.
+        *   `Left Click`: Reload.
 
 ## Usage
 

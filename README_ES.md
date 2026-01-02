@@ -12,6 +12,13 @@
     *   **Rueda del Ratón:** Aumentar o disminuir el intervalo de tiempo rápidamente.
     *   **Alt + Arrastrar:** Mover el botón a cualquier parte de la pantalla.
 *   **Detección Inteligente:** Se pausa automáticamente si estás casteando, en combate o muerto.
+*   **HUD Visual (v1.1.0):**
+    *   Muestra una lista en pantalla de los recursos que ves en el minimapa.
+    *   **Limpieza Inteligente:** Los nodos desaparecen automáticamente al recolectarlos.
+    *   **Interactivo:**
+        *   `Alt + Arrastrar`: Mover lista.
+        *   `Clic Derecho`: Borrar lista.
+        *   `Clic Izquierdo`: Recargar.
 
 ## Uso
 

@@ -11,29 +11,12 @@
 
 ## v1.1.0: "Visualización y Conciencia" (Core + UI Básica)
 **Objetivo**: Mejorar la información inmediata que recibe el jugador sobre lo que está viendo.
-- [ ] **Historial de Nodos Visibles (Hover)**: Detectar y listar nodos al pasar el ratón por el minimapa.
-- [ ] **Opacidad Dinámica**: Hacer la lista semitransparente cuando el mouse no está sobre ella.
-- [ ] **Código de Colores**: Colorear el texto de la lista según la rareza del mineral/hierba.
+- [x] **Historial de Nodos Visibles (Hover)**: Detectar y listar nodos al pasar el ratón por el minimapa.
+- [x] **Opacidad Dinámica**: Hacer la lista semitransparente cuando el mouse no está sobre ella.
+- [x] **Código de Colores**: Colorear el texto de la lista según la rareza del mineral/hierba.
 - [ ] **Marca de Tiempo**: Indicar hace cuánto tiempo se avistó el nodo (ej. "hace 30s").
-- [ ] **Limpieza Automática (Fade Out)**: Eliminar nodos de la lista automáticamente después de X minutos.
-- [ ] **Cálculo de Distancia**: Mostrar la distancia estimada al nodo en la lista.
-
-## v1.2.0: "Automatización y Flujo de Trabajo" (QoL)
-**Objetivo**: Hacer que el addon sea más inteligente y requiera menos gestión manual.
-- [ ] **Detección de Profesión**: Activar automáticamente el rastreo si el personaje tiene Minería o Herboristería aprendidas.
-- [ ] **Atajos de Teclado**: Asignar una tecla rápida para activar/desactivar el rastreo sin usar el mouse.
-- [ ] **Ocultar en Combate**: Opción para esconder automáticamente la lista cuando entras en combate.
-- [ ] **Filtros Inteligentes**: Lista negra para ignorar recursos de bajo nivel o no deseados.
-- [ ] **Filtro por Zona**: Configurar rastreos específicos que solo se activen en ciertas zonas.
-- [ ] **Auto-Venta de Basura**: Opción auxiliar para vender automáticamente ítems grises obtenidos al recolectar.
-
-## v1.3.0: "Datos y Persistencia" (Analytics)
-**Objetivo**: Guardar y analizar la información recolectada a largo plazo.
-- [ ] **Persistencia de Sesión**: Guardar la lista de nodos recientes incluso si recargas la interfaz (/reload).
-- [ ] **Persistencia de Datos Global**: Guardar mapa de calor o historial entre sesiones.
-- [ ] **Contador/Estadísticas**: Rastrear cuántas veces has visto cada tipo de recurso en la sesión/total.
-- [ ] **Exportación de Mapa de Calor**: Exportar datos para herramientas externas de análisis.
-- [ ] **Detección de Capa (Layer)**: Anotar en qué capa (Layer) se encontró un nodo (si es posible).
+- [x] **Limpieza Automática (Fade Out)**: Eliminar nodos de la lista automáticamente después de X minutos.
+- [x] **Cálculo de Distancia**: Mostrar la distancia estimada al nodo en la lista. (Parcialmente cubierto con limpieza inteligente)
 
 ## v1.4.0: "Social e Integración" (Conectividad)
 **Objetivo**: Interactuar con otros jugadores y addons populares.
@@ -52,3 +35,20 @@
 - [ ] **Alertas Sonoras Configurables**: Avisos básicos al detectar recursos específicos.
 - [ ] **Sonidos Personalizados**: Asignar sonidos distintos según tipo (ej. metálico vs orgánico).
 - [ ] **Paquetes de Voz**: Soporte para packs de sonidos de la comunidad.
+
+## v1.2.0: "Automatización y Flujo de Trabajo" (QoL)
+**Objetivo**: Hacer que el addon sea más inteligente y requiera menos gestión manual.
+- [ ] **Detección de Profesión**: Activar automáticamente el rastreo si el personaje tiene Minería o Herboristería aprendidas.
+- [ ] **Atajos de Teclado**: Asignar una tecla rápida para activar/desactivar el rastreo sin usar el mouse.
+- [ ] **Ocultar en Combate**: Opción para esconder automáticamente la lista cuando entras en combate.
+- [ ] **Filtros Inteligentes**: Lista negra para ignorar recursos de bajo nivel o no deseados.
+- [ ] **Filtro por Zona**: Configurar rastreos específicos que solo se activen en ciertas zonas.
+- [ ] **Auto-Venta de Basura**: Opción auxiliar para vender automáticamente ítems grises obtenidos al recolectar.
+
+## v1.3.0: "Datos y Persistencia" (Analytics)
+**Objetivo**: Guardar y analizar la información recolectada a largo plazo.
+- [ ] **Persistencia de Sesión**: Guardar la lista de nodos recientes incluso si recargas la interfaz (/reload).
+- [ ] **Persistencia de Datos Global**: Guardar mapa de calor o historial entre sesiones.
+- [ ] **Contador/Estadísticas**: Rastrear cuántas veces has visto cada tipo de recurso en la sesión/total.
+- [ ] **Exportación de Mapa de Calor**: Exportar datos para herramientas externas de análisis.
+- [ ] **Detección de Capa (Layer)**: Anotar en qué capa (Layer) se encontró un nodo (si es posible).
