@@ -16,6 +16,9 @@ GatherTracker es un addon para WoW Classic que permite alternar automáticamente
     - **HUD**: Botones interactivos con Clic (Chat), Ctrl+Clic (TomTom), Shift+Clic (Export GM2).
     - **UX**: Ocultamiento automático en Combate.
     - **Integración**: TomTom restringido a nodos precisos (DB) para evitar errores visuales.
+- **v1.5.0 (En progreso)**:
+    - Implementada Persistencia básica (DB) y Ventana de Estadísticas (Shift+Clic).
+    - Pendiente: Ingeniería inversa de GatherMate2 para "Sensor de Proximidad".
 
 ## Documentación
 - `ROADMAP.md`: Plan de desarrollo y futuras características.

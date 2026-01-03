@@ -69,6 +69,11 @@ local defaults = {
         hudAlpha = 0.8,
         hudFadeTime = 60, -- segundos
         hudPos = { point = "CENTER", x = 100, y = 0 }
+    },
+    global = {
+        totalNodesFound = 0,
+        nodeStats = {}, -- [name] = count
+        knownNodes = {}, -- [mapID] = { [coords] = name }
     }
 }
 
@@ -118,7 +123,11 @@ function GatherTracker:CreateGUI()
     -- Clics
     f:SetScript("OnClick", function(self, button)
         if button == "LeftButton" then
-            GatherTracker:ToggleTracking()
+            if IsShiftKeyDown() then
+                GatherTracker:ShowStatsWindow()
+            else
+                GatherTracker:ToggleTracking()
+            end
         elseif button == "RightButton" then
             LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
         end
@@ -163,9 +172,11 @@ function GatherTracker:UpdateTooltip(frame)
     GameTooltip:AddDoubleLine("Intervalo:", "|cffFFFF00" .. GatherTracker:GetCastInterval() .. " seg|r")
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine("|cffFFFFFFClic Izq:|r Activar/Pausar")
+    GameTooltip:AddLine("|cffFFFFFFShift+Clic:|r Estadísticas")
     GameTooltip:AddLine("|cffFFFFFFRueda:|r Ajustar Tiempo (+/-)")
     GameTooltip:AddLine("|cffFFFFFFClic Der:|r Menú Opciones")
     GameTooltip:AddLine("|cffFFFFFFAlt+Arrastrar:|r Mover")
+    GameTooltip:Show()
     GameTooltip:Show()
 end
 
@@ -552,6 +563,20 @@ function GatherTracker:RegisterNode(name, mapID, x, y)
     end
     
     self:UpdateHUD() -- Actualizar al momento
+    
+    -- v1.5.0: Persistencia y Estadísticas
+    if self.db and self.db.global then
+        self.db.global.totalNodesFound = (self.db.global.totalNodesFound or 0) + 1
+        self.db.global.nodeStats[name] = (self.db.global.nodeStats[name] or 0) + 1
+        
+        -- Guardar posición conocida (Simple, sin hash complejo por ahora)
+        if mapID and x and y then
+            if not self.db.global.knownNodes[mapID] then self.db.global.knownNodes[mapID] = {} end
+            -- Usamos un string simple "x:y" (con 2 decimales basta) como clave para evitar duplicados masivos
+            local coordKey = string.format("%.3f:%.3f", x, y)
+            self.db.global.knownNodes[mapID][coordKey] = name
+        end
+    end
 end
 
 -- ============================================================================
@@ -850,6 +875,77 @@ function GatherTracker:GetNearbyGMNodes()
     -- Por ahora, retornamos nil para no romper, o un nodo dummy si estamos en debug.
     
     return nearby
+end
+
+-- ============================================================================
+-- 5.B ESTADÍSTICAS (v1.5.0)
+-- ============================================================================
+
+function GatherTracker:ShowStatsWindow()
+    -- Singleton check: Si ya existe y está visible, no hacer nada (o traer al frente)
+    if self.statsFrame then return end
+
+    -- Cargar AceGUI si no está cargado (ya debería estarlo por AceConfig)
+    local AceGUI = LibStub("AceGUI-3.0")
+    
+    -- Crear marco principal
+    local frame = AceGUI:Create("Frame")
+    self.statsFrame = frame -- Guardar referencia
+    
+    frame:SetTitle("Estadísticas de GatherTracker")
+    frame:SetCallback("OnClose", function(widget) 
+        AceGUI:Release(widget) 
+        GatherTracker.statsFrame = nil -- Limpiar referencia al cerrar
+    end)
+    frame:SetLayout("Flow")
+    frame:SetWidth(400)
+    frame:SetHeight(500)
+    
+    -- Cabecera
+    local header = AceGUI:Create("Heading")
+    header:SetText("Resumen Global")
+    header:SetFullWidth(true)
+    frame:AddChild(header)
+    
+    local totalCheck = AceGUI:Create("Label")
+    local total = self.db.global.totalNodesFound or 0
+    totalCheck:SetText("Total de Nodos Encontrados: " .. total)
+    totalCheck:SetFontObject(GameFontNormalLarge)
+    totalCheck:SetFullWidth(true)
+    frame:AddChild(totalCheck)
+    
+    local spacer = AceGUI:Create("Label")
+    spacer:SetText(" ")
+    spacer:SetFullWidth(true)
+    frame:AddChild(spacer)
+    
+    local header2 = AceGUI:Create("Heading")
+    header2:SetText("Detalle por Recurso")
+    header2:SetFullWidth(true)
+    frame:AddChild(header2)
+    
+    -- Contenedor con Scroll
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("List")
+    scroll:SetFullWidth(true)
+    scroll:SetFullHeight(true) -- Ojo, AceGUI flow a veces requiere fix de altura
+    frame:AddChild(scroll)
+    
+    -- Llenar lista
+    local stats = self.db.global.nodeStats or {}
+    -- Ordenar por cantidad
+    local sortable = {}
+    for name, count in pairs(stats) do
+        table.insert(sortable, {name = name, count = count})
+    end
+    table.sort(sortable, function(a,b) return a.count > b.count end)
+    
+    for _, item in ipairs(sortable) do
+        local label = AceGUI:Create("Label")
+        label:SetText(item.name .. ": " .. item.count)
+        label:SetFullWidth(true)
+        scroll:AddChild(label)
+    end
 end
 
 

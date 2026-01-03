@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 - Created `README_EN.md` and `README_ES.md` for multilingual support.
 - Initial release of GatherTracker.
 
+## [Unreleased] (v1.5.0 WIP)
+### Added
+- **Persistence**: SavedVariables implemented (`GatherTrackerDB`) to store global stats.
+- **Statistics UI**: Shifts+Click on Minimap button opens a stats window.
+- **Global Counters**: Tracks total nodes found and count per resource type.
+
 ## [1.4.0] - 2026-01-02
 ### Added
 - **Interactive HUD**: Refactored HUD list into interactive buttons.
