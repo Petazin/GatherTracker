@@ -1,6 +1,6 @@
 # GatherTracker
 
-**GatherTracker** es un addon ligero y eficiente para World of Warcraft Classic que alterna automáticamente tu rastreo en el minimapa (ej: Minerales y Hierbas) en intervalos configurables. ¡Perfecto para recolectores que no quieren perderse nada!
+**GatherTracker** es un addon ligero y eficiente para World of Warcraft Classic (y TBC) que alterna automáticamente tu rastreo en el minimapa (ej: Minerales y Hierbas) en intervalos configurables. ¡Perfecto para recolectores que no quieren perderse nada!
 
 ## Características
 
@@ -33,10 +33,6 @@ En el menú de opciones (Clic Derecho en el botón o `/gt opt`), puedes:
 ## Autor
 
 Creado por **Petazo**.
-
-## Roadmap
-
-Check out our future plans in [ROADMAP.md](ROADMAP.md).
 
 ## Licencia
 

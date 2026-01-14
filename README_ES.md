@@ -1,6 +1,6 @@
 # GatherTracker
 
-**GatherTracker** es un addon ligero y eficiente para World of Warcraft Classic que alterna automáticamente tu rastreo en el minimapa (ej: Minerales y Hierbas) en intervalos configurables. ¡Perfecto para recolectores que no quieren perderse nada!
+**GatherTracker** es un addon ligero y eficiente para World of Warcraft Classic (y TBC) que alterna automáticamente tu rastreo en el minimapa (ej: Minerales y Hierbas) en intervalos configurables. ¡Perfecto para recolectores que no quieren perderse nada!
 
 ## Características
 
@@ -12,20 +12,6 @@
     *   **Rueda del Ratón:** Aumentar o disminuir el intervalo de tiempo rápidamente.
     *   **Alt + Arrastrar:** Mover el botón a cualquier parte de la pantalla.
 *   **Detección Inteligente:** Se pausa automáticamente si estás casteando, en combate o muerto.
-*   **HUD Visual (v1.1.0):**
-    *   Muestra una lista en pantalla de los recursos que ves en el minimapa.
-    *   **Limpieza Inteligente:** Los nodos desaparecen automáticamente al recolectarlos.
-    *   **Interactivo:**
-        *   `Alt + Arrastrar`: Mover lista.
-        *   `Clic Derecho`: Borrar lista.
-        *   `Clic Izquierdo`: Recargar.
-
-### v1.4.0: Social e Integración (Nuevo)
-El HUD ahora es interactivo:
-*   **Clic Izquierdo**: Anuncia el recurso en el chat (Decir/Grupo/Banda).
-*   **Ctrl + Clic**: Crea un **Waypoint de TomTom** hacia la ubicación *precisa* del nodo.
-    *   *Nota*: Para garantizar precisión, esta función está restringida a nodos exportados o verificados.
-*   **Shift + Clic**: Exporta el nodo a la base de datos de **GatherMate2**.
 
 ## Uso
 
@@ -47,10 +33,6 @@ En el menú de opciones (Clic Derecho en el botón o `/gt opt`), puedes:
 ## Autor
 
 Creado por **Petazo**.
-
-## Roadmap
-
-Puedes consultar nuestros planes futuros en [ROADMAP.md](ROADMAP.md).
 
 ## Licencia
 
