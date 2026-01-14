@@ -12,6 +12,12 @@
     *   **Mouse Wheel:** Quickly increase or decrease the time interval.
     *   **Alt + Drag:** Move the button anywhere on the screen.
 *   **Smart Detection:** Automatically pauses if you are casting, in combat, or dead.
+*   **Social & History:**
+    *   **HUD:** Hover over the button to see recently detected nodes.
+    *   **Chat Share:** Shift+Click to announce the last found node.
+*   **Automation:**
+    *   **Auto-Sell:** Option to automatically sell gray items at vendors.
+    *   **Profession Check:** Auto-configures tracking based on your skills upon login.
 
 ## Usage
 
@@ -21,12 +27,13 @@
 
 ### Chat Commands
 
-*   `/gt` - Toggles the tracker on or off.
-*   `/gt opt` - Opens the full configuration panel.
+*   `/gtr` or `/gtrack` - Toggles the tracker on or off.
+*   `/gtr opt` - Opens the full configuration panel.
+*   `/gtr reset` - Resets the button position to center.
 
 ## Configuration
 
-In the options menu (Right Click on the button or `/gt opt`), you can:
+In the options menu (Right Click on the button or `/gtr opt`), you can:
 *   Select which two resource types you want to track (e.g., Minerals and Herbs, or Treasure and Beasts for Dwarves/Hunters).
 *   Hide the minimap button if you prefer using only hotkeys.
 

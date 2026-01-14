@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="GATHERTRACKER_TOGGLE" header="GATHERTRACKER">
+		GatherTracker:ToggleTracking()
+	</Binding>
+</Bindings>

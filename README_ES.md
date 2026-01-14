@@ -4,14 +4,19 @@
 
 ## Características
 
-*   **Alternancia Automática:** Cambia entre dos tipos de rastreo (Rastreo Primario y Secundario) cíclicamente.
-*   **Intervalo Configurable:** Ajusta la velocidad de cambio desde 2 segundos hasta 60 segundos.
-*   **Botón de Minimapa Inteligente:**
-    *   **Clic Izquierdo:** Activar/Pausar el rastreador.
-    *   **Clic Derecho:** Abrir el menú de configuración.
-    *   **Rueda del Ratón:** Aumentar o disminuir el intervalo de tiempo rápidamente.
-    *   **Alt + Arrastrar:** Mover el botón a cualquier parte de la pantalla.
-*   **Detección Inteligente:** Se pausa automáticamente si estás casteando, en combate o muerto.
+- **Alternancia Inteligente**: Cambia automáticamente entre Buscar Minerales, Hierbas y otros rastreos.
+- **Historial en Pantalla (HUD)**: Muestra una lista de los últimos recursos detectados al pasar el mouse.
+- **Automatización**:
+  - Detecta tus profesiones automáticamente.
+  - Vende objetos grises automáticamente (opcional).
+  - Se oculta/atenúa en combate.
+- **Integración**:
+  - Anuncios al Chat (Shift+Clic).
+  - Soporte **Data Broker** (Titan Panel).
+- **Personalización**:
+  - Intervalos configurables (2s - 60s).
+  - Perfiles por personaje.
+  - Alertas de sonido.
 
 ## Uso
 
@@ -19,14 +24,15 @@
 2.  Haz **Clic Izquierdo** en el botón para iniciar la alternancia.
 3.  Usa la **Rueda del Ratón** sobre el botón para ajustar qué tan rápido cambia el rastreo.
 
-### Comandos de Chat
-
-*   `/gt` - Activa o desactiva el rastreador.
-*   `/gt opt` - Abre el panel de configuración completo.
+## Comandos
+- `/gtr` o `/gtrack`: Activar/Pausar.
+- `/gtr opt`: Abrir configuración.
+- `/gtr reset`: Restablecer posición del botón.
+- **Shift + Clic** (en botón): Anunciar último nodo.
 
 ## Configuración
 
-En el menú de opciones (Clic Derecho en el botón o `/gt opt`), puedes:
+En el menú de opciones (Clic Derecho en el botón o `/gtr opt`), puedes:
 *   Seleccionar qué dos tipos de recursos quieres rastrear (ej: Minerales y Hierbas, o Tesoros y Bestias para Enanos/Cazadores).
 *   Ocultar el botón del minimapa si prefieres usar solo atajos.
 

@@ -2,7 +2,8 @@
 ## Author: Petazo
 ## Version: 1.0.0
 ## Interface: 20504
-## SavedVariables: GatherTrackerDB
+## SavedVariables: GatherTrackerDB, GatherTrackerGlobalDB
+## OptionalDeps: Ace3
 ## Notes: A tracking switch addon, with the ability to pause while not moving.
 
 Embeds.xml
