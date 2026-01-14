@@ -1,39 +1,46 @@
 # GatherTracker
 
-**GatherTracker** es un addon ligero y eficiente para World of Warcraft Classic (y TBC) que alterna automáticamente tu rastreo en el minimapa (ej: Minerales y Hierbas) en intervalos configurables. ¡Perfecto para recolectores que no quieren perderse nada!
+**GatherTracker** is a lightweight and efficient addon for World of Warcraft Classic (and TBC) that automatically toggles your minimap tracking (e.g., Minerals and Herbs) at configurable intervals. Perfect for gatherers who don't want to miss anything!
 
-## Características
+## Features
 
-*   **Alternancia Automática:** Cambia entre dos tipos de rastreo (Rastreo Primario y Secundario) cíclicamente.
-*   **Intervalo Configurable:** Ajusta la velocidad de cambio desde 2 segundos hasta 60 segundos.
-*   **Botón de Minimapa Inteligente:**
-    *   **Clic Izquierdo:** Activar/Pausar el rastreador.
-    *   **Clic Derecho:** Abrir el menú de configuración.
-    *   **Rueda del Ratón:** Aumentar o disminuir el intervalo de tiempo rápidamente.
-    *   **Alt + Arrastrar:** Mover el botón a cualquier parte de la pantalla.
-*   **Detección Inteligente:** Se pausa automáticamente si estás casteando, en combate o muerto.
+*   **Automatic Toggling:** Cycles between two tracking types (Primary and Secondary Tracking).
+*   **Configurable Interval:** Adjust the switching speed from 2 seconds to 60 seconds.
+*   **Smart Minimap Button:**
+    *   **Left Click:** Toggle/Pause the tracker.
+    *   **Right Click:** Open configuration menu.
+    *   **Mouse Wheel:** Quickly increase or decrease the time interval.
+    *   **Alt + Drag:** Move the button anywhere on the screen.
+*   **Smart Detection:** Automatically pauses if you are casting, in combat, or dead.
+*   **Social & History:**
+    *   **HUD:** Hover over the button to see recently detected nodes.
+    *   **Chat Share:** Shift+Click to announce the last found node.
+*   **Automation:**
+    *   **Auto-Sell:** Option to automatically sell gray items at vendors.
+    *   **Profession Check:** Auto-configures tracking based on your skills upon login.
 
-## Uso
+## Usage
 
-1.  Una vez instalado, verás un botón en tu pantalla con el icono de tu rastreo actual.
-2.  Haz **Clic Izquierdo** en el botón para iniciar la alternancia.
-3.  Usa la **Rueda del Ratón** sobre el botón para ajustar qué tan rápido cambia el rastreo.
+1.  Once installed, you will see a button on your screen showing your current tracking icon.
+2.  **Left Click** the button to start toggling.
+3.  Use the **Mouse Wheel** on the button to adjust how fast the tracking switches.
 
-### Comandos de Chat
+### Chat Commands
 
-*   `/gt` - Activa o desactiva el rastreador.
-*   `/gt opt` - Abre el panel de configuración completo.
+*   `/gtr` or `/gtrack` - Toggles the tracker on or off.
+*   `/gtr opt` - Opens the full configuration panel.
+*   `/gtr reset` - Resets the button position to center.
 
-## Configuración
+## Configuration
 
-En el menú de opciones (Clic Derecho en el botón o `/gt opt`), puedes:
-*   Seleccionar qué dos tipos de recursos quieres rastrear (ej: Minerales y Hierbas, o Tesoros y Bestias para Enanos/Cazadores).
-*   Ocultar el botón del minimapa si prefieres usar solo atajos.
+In the options menu (Right Click on the button or `/gtr opt`), you can:
+*   Select which two resource types you want to track (e.g., Minerals and Herbs, or Treasure and Beasts for Dwarves/Hunters).
+*   Hide the minimap button if you prefer using only hotkeys.
 
-## Autor
+## Author
 
-Creado por **Petazo**.
+Created by **Petazo**.
 
-## Licencia
+## License
 
-Este proyecto es de código abierto.
+This project is open source.
