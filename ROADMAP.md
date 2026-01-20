@@ -34,6 +34,7 @@ Este documento rastrea el desarrollo del proyecto.
 - [ ] **Skinning de Botón**: Soporte real para LibDBIcon / MinimapButtonBag (Faltan librerías).
 - [ ] **Sonidos Personalizados**: Alertas de sonido funcionales al cambiar rastreo o encontrar loot raro.
 - [ ] **Configuración Persistente**: Asegurar que opciones (Auto-Venta, Sonidos, Combat Hide) se guarden tras /reload (Fix DB mismatch).
+- [ ] **Alineación Visual**: Centrar/Alinear columnas de precio Venta vs AH en el tooltip para mejor lectura.
 - [ ] **Durabilidad Promedio**: Mostrar el porcentaje de durabilidad del equipo en el tooltip/HUD.
 - [ ] **Persistencia de Loot**: Guardar el historial de "Session Loot" para que no se borre al hacer /reload.
 
