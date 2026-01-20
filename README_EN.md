@@ -11,7 +11,17 @@
     *   **Right Click:** Open configuration menu.
     *   **Mouse Wheel:** Quickly increase or decrease the time interval.
     *   **Alt + Drag:** Move the button anywhere on the screen.
-*   **Smart Detection:** Automatically pauses if you are casting, in combat, or dead.
+*   **Session Loot Tracker (NEW):**
+    *   Tracks gathered items (Ores, Herbs, Stones, Gems).
+    *   Displays **Session Totals** and **Bag Totals**.
+    *   Shows Vendor and Auction values (supports TSM/Auctionator).
+*   **Smart Automation:**
+    *   **Universal Detection:** Automatically detects professions in any game language.
+    *   **Auto-Sell:** Option to automatically sell gray items at vendors.
+    *   **Enhanced Combat Mode:** Hides in combat and conditionally resumes tracking.
+*   **Integration:**
+    *   **Data Broker:** Launcher icon for Titan Panel/ChocolateBar.
+    *   **Profiles:** Per-character configuration (Ace3).
 
 ## Usage
 
@@ -21,12 +31,13 @@
 
 ### Chat Commands
 
-*   `/gt` - Toggles the tracker on or off.
-*   `/gt opt` - Opens the full configuration panel.
+*   `/gtr` or `/gtrack` - Toggles the tracker on or off.
+*   `/gtr opt` - Opens the full configuration panel.
+*   `/gtr reset` - Resets the button position to center.
 
 ## Configuration
 
-In the options menu (Right Click on the button or `/gt opt`), you can:
+In the options menu (Right Click on the button or `/gtr opt`), you can:
 *   Select which two resource types you want to track (e.g., Minerals and Herbs, or Treasure and Beasts for Dwarves/Hunters).
 *   Hide the minimap button if you prefer using only hotkeys.
 

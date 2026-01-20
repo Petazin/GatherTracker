@@ -19,8 +19,14 @@
 - [x] **Cálculo de Distancia**: Mostrar la distancia estimada al nodo en la lista. (Parcialmente cubierto con limpieza inteligente)
 
 ## v1.4.0: "Social e Integración" (Conectividad)
-**Objetivo**: Interactuar con otros jugadores y addons populares.
-- [ ] **Integración con TomTom**: Flecha de navegación automática al detectar o clicar un nodo.
+**Objetivo**:- [x] **Integración LDB**: Soporte para Titan Panel. (v1.5)
+- [x] ~~**Integración TomTom**: Ctrl+Clic para waypoint.~~ (Eliminada por solicitud de usuario v1.5)
+- [x] **Anuncio Chat**: Shift+Clic para compartir nodo. (v1.5)
+
+## v2.0.0 - Futuras Implementaciones (Wishlist)
+- [ ] **Ruta Inteligente GatherMate2**: Integración con BD de GatherMate2 para calcular valor y tiempo de ruta óptimo entre nodos visibles.
+- [ ] Priorización de menas/hierbas basada en valor de subasta (Gold value).
+- [ ] Algoritmo de "Vecino más cercano" para sugerir siguiente nodo.
 - [ ] **Soporte Data Broker (LDB)**: Integración con Titan Panel, ChocolateBar o Fubar.
 - [ ] **Compartir Recursos**: Enviar coordenadas automáticamente al chat de grupo/banda (ej. Loto Negro).
 - [ ] **Sincronización de Guild**: Compartir datos de nodos encontrados con la hermandad.
@@ -46,11 +52,9 @@
 
 ## v1.5.0: "Datos y Persistencia"
 **Objetivo**: Guardar y analizar la información recolectada a largo plazo.
-- [ ] Importación Profunda GM2 (Sensor de Proximidad con la BD completa)
-- [ ] Base de datos propia persistente
-- [ ] Estadísticas de recolección (Gold/Hour)
-- [ ] **Persistencia de Sesión**: Guardar la lista de nodos recientes incluso si recargas la interfaz (/reload).
-- [ ] **Persistencia de Datos Global**: Guardar mapa de calor o historial entre sesiones.
-- [ ] **Contador/Estadísticas**: Rastrear cuántas veces has visto cada tipo de recurso en la sesión/total.
-- [ ] **Exportación de Mapa de Calor**: Exportar datos para herramientas externas de análisis.
-- [ ] **Detección de Capa (Layer)**: Anotar en qué capa (Layer) se encontró un nodo (si es posible).
+- [x] Base de datos propia persistente
+- [x] **Persistencia de Sesión**: Guardar la lista de nodos recientes incluso si recargas la interfaz (/reload).
+- [x] **Persistencia de Datos Global**: Guardar mapa de calor o historial entre sesiones.
+- [x] **Contador/Estadísticas**: Rastrear cuántas veces has visto cada tipo de recurso en la sesión/total.
+- [x] **Exportación de Mapa de Calor**: Exportar datos para herramientas externas de análisis.
+- [x] **Detección de Capa (Layer)**: Anotar en qué capa (Layer) se encontró un nodo (si es posible).

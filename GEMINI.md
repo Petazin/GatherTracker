@@ -20,9 +20,13 @@ GatherTracker es un addon para WoW Classic que permite alternar automáticamente
     - **Compatibilidad**: Actualizado para cliente TBC (Interface 20504).
     - **API**: Reemplazo de APIs obsoletas (`CastSpellByName` -> `C_Minimap.SetTracking`, `GetTrackingTexture` -> `C_Minimap.GetTrackingInfo`).
     - **Eventos**: Implementado `MINIMAP_UPDATE_TRACKING` para respuesta UI inmediata.
-- **v1.5.0 (En progreso)**:
-    - Implementada Persistencia básica (DB) y Ventana de Estadísticas (Shift+Clic).
-    - Pendiente: Ingeniería inversa de GatherMate2 para "Sensor de Proximidad".
+- **v1.5.0 (COMPLETADO)**:
+    - **Core**: Historial de Nodos, HUD mejorado (Tooltip).
+    - **Social**: Integración LDB, TomTom, Chat.
+    - **Auto**: Detección de Profesión, Auto-Venta, Modo Combate.
+    - **Persistencia**: Perfiles Ace3, GlobalDB básica.
+    - **Validación**: Script python incluido.
+    - **Pendiente**: Ingeniería inversa profunda de GatherMate2 (pospuesto).
 
 ## Documentación
 - `ROADMAP.md`: Plan de desarrollo y futuras características.

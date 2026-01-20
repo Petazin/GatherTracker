@@ -4,14 +4,18 @@
 
 ## Características
 
-*   **Alternancia Automática:** Cambia entre dos tipos de rastreo (Rastreo Primario y Secundario) cíclicamente.
-*   **Intervalo Configurable:** Ajusta la velocidad de cambio desde 2 segundos hasta 60 segundos.
-*   **Botón de Minimapa Inteligente:**
-    *   **Clic Izquierdo:** Activar/Pausar el rastreador.
-    *   **Clic Derecho:** Abrir el menú de configuración.
-    *   **Rueda del Ratón:** Aumentar o disminuir el intervalo de tiempo rápidamente.
-    *   **Alt + Arrastrar:** Mover el botón a cualquier parte de la pantalla.
-*   **Detección Inteligente:** Se pausa automáticamente si estás casteando, en combate o muerto.
+- **Alternancia Inteligente**: Cambia automáticamente entre Buscar Minerales, Hierbas y otros rastreos.
+- **Rastreador de Loot de Sesión (NUEVO)**:
+  - Registra Minerales, Hierbas, Piedras y Gemas recolectadas.
+  - Muestra **Totales de Sesión** y **Totales en Bolsa**.
+  - Muestra valor en Vendedor y Subasta (si tienes TSM/Auctionator).
+- **Automatización Inteligente**:
+  - **Detección Universal**: Detecta profesiones en cualquier idioma del juego.
+  - **Auto-Venta**: Vende objetos grises automáticamente al visitar al vendedor.
+  - **Modo Combate Mejorado**: Se oculta en combate y decide si reanudar o no al salir.
+- **Integración**:
+  - Soporte **Data Broker** (Titan Panel).
+  - Configurable por personaje (Ace3 Profiles).
 
 ## Uso
 
@@ -19,14 +23,14 @@
 2.  Haz **Clic Izquierdo** en el botón para iniciar la alternancia.
 3.  Usa la **Rueda del Ratón** sobre el botón para ajustar qué tan rápido cambia el rastreo.
 
-### Comandos de Chat
-
-*   `/gt` - Activa o desactiva el rastreador.
-*   `/gt opt` - Abre el panel de configuración completo.
+## Comandos
+- `/gtr` o `/gtrack`: Activar/Pausar.
+- `/gtr opt`: Abrir configuración.
+- `/gtr reset`: Restablecer posición del botón.
 
 ## Configuración
 
-En el menú de opciones (Clic Derecho en el botón o `/gt opt`), puedes:
+En el menú de opciones (Clic Derecho en el botón o `/gtr opt`), puedes:
 *   Seleccionar qué dos tipos de recursos quieres rastrear (ej: Minerales y Hierbas, o Tesoros y Bestias para Enanos/Cazadores).
 *   Ocultar el botón del minimapa si prefieres usar solo atajos.
 
