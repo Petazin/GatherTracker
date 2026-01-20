@@ -2,12 +2,9 @@
 
 Todas las actualizaciones notables de este proyecto se documentarán en este archivo.
 
-## [v1.5.0] - 2026-01-14
+## [v1.5.1] - 2026-01-20
 ### Added
-- **Node History**: HUD now displays a list of recently spotted nodes with elapsed time (v1.1.0).
 - **Social Integration**:
-    - **Data Broker (LDB)**: Launcher icon for Titan Panel/ChocolateBar (v1.4.0).
-    - **Chat**: Shift+Click on the button announces the last found node.
 - **Automation (QoL)**:
     - **Profession Detection**: Automatically configures tracking on login based on character skills (v1.2.0).
     - **Auto-Sell**: New option to automatically sell gray items when visiting a vendor.
@@ -16,8 +13,6 @@ Todas las actualizaciones notables de este proyecto se documentarán en este arc
 - **Configuration**:
     - Complete Ace3 Profile system (v1.5.0).
     - Sound alert options on node detection.
-- **Global Persistence**: Basic tracking of found nodes in a global database (heatmap support groundwork).
-    - Added Layer detection support.
 - **Validation**: Included syntax validation script.
 
 ### Hotfixes
@@ -36,7 +31,7 @@ Todas las actualizaciones notables de este proyecto se documentarán en este arc
     - Displays Session Totals (Quantity, Vendor Value, AH Value).
     - Displays Bag Totals for tracked items.
     - Shows "N/A" for AH if no auction addon is detected.
-- Fixed XML loading errors by removing `Bindings.xml`.
+- Fixed XML loading errors by temporarily removing `Bindings.xml`. (Keybinding menu support disabled due to client errors).
 
 ### Changed
 - Chat command changed to `/gtr` or `/gtrack` to avoid conflicts.
