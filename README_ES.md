@@ -14,7 +14,6 @@
   - **Auto-Venta**: Vende objetos grises automáticamente al visitar al vendedor.
   - **Modo Combate Mejorado**: Se oculta en combate y decide si reanudar o no al salir.
 - **Integración**:
-  - Soporte **Data Broker** (Titan Panel).
   - Configurable por personaje (Ace3 Profiles).
 
 ## Uso

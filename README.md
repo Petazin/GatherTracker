@@ -20,7 +20,6 @@
     *   **Auto-Sell:** Option to automatically sell gray items at vendors.
     *   **Enhanced Combat Mode:** Hides in combat and conditionally resumes tracking.
 *   **Integration:**
-    *   **Data Broker:** Launcher icon for Titan Panel/ChocolateBar.
     *   **Profiles:** Per-character configuration (Ace3).
 
 ## Usage

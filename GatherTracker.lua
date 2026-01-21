@@ -252,11 +252,7 @@ function GatherTracker:CreateGUI()
     -- Clics
     f:SetScript("OnClick", function(self, button)
         if button == "LeftButton" then
-            if IsShiftKeyDown() then
-                GatherTracker:AnnounceLastNode()
-            else
-                GatherTracker:ToggleTracking()
-            end
+            GatherTracker:ToggleTracking()
         elseif button == "RightButton" then
             LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
         end
