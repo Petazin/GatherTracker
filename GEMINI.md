@@ -4,9 +4,10 @@
 GatherTracker es un addon para WoW Classic que permite alternar automáticamente entre rastreos de minimapa.
 
 ## Reglas y Preferencias
-- Mantener documentación en Español (`README_ES.md`) e Inglés (`README_EN.md`).
+- Documentación unificada en `README.md` (Inglés / Español).
 - Comentarios en código en Español.
 - Actualizar `CHANGELOG.md` con cada cambio significativo.
+- **IMPORTANTE**: Siempre pedir confirmación al usuario antes de realizar `git commit` o `git push`.
 
 ## Notas Técnicas
 - Estructura básica: `.toc`, `.lua`, `Embeds.xml`.
@@ -24,7 +25,6 @@ GatherTracker es un addon para WoW Classic que permite alternar automáticamente
     - **Core**: Historial de Nodos, HUD mejorado (Tooltip).
     - **Social**: Integración LDB, TomTom, Chat.
     - **Auto**: Detección de Profesión, Auto-Venta, Modo Combate.
-    - **Persistencia**: Perfiles Ace3, GlobalDB básica.
     - **Validación**: Script python incluido.
     - **Pendiente**: Ingeniería inversa profunda de GatherMate2 (pospuesto).
 

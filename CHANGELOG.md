@@ -11,7 +11,7 @@ Todas las actualizaciones notables de este proyecto se documentarán en este arc
     - **Combat Mode**: Button fades out/hides during combat.
     - **Keybindings**: Added support for key binding via WoW Key Bindings menu.
 - **Configuration**:
-    - Complete Ace3 Profile system (v1.5.0).
+    - (Reverted due to bugs) Profile system moved to v1.7.0.
 
 - **Validation**: Included syntax validation script.
 

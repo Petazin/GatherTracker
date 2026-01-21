@@ -12,7 +12,6 @@ Este documento rastrea el desarrollo del proyecto.
 - [x] Soporte de Clases/Razas: Cazador, Druida, Enano (Tesoros).
 - [x] Botón de minimapa movible (Drag & Drop con ALT).
 - [x] **Universalidad**: Detección de nodos y profesiones compatible con cualquier idioma del cliente (IDs internos).
-- [x] **Perfiles Ace3**: Configuración independiente por personaje.
 
 ### Automatización Inteligente (QoL - v1.2.0)
 - [x] **Detección de Profesión**: Auto-configura rastreo al loguear si eres minero/herborista.
@@ -50,6 +49,7 @@ Este documento rastrea el desarrollo del proyecto.
 *Enfoque: Expandir el sistema de rastreo y opciones de usuario.*
 
 - [ ] **Rastreo Universal**: Permitir seleccionar *cualquier* tipo de rastreo (Pesca, Buzones, Posaderos, etc.) como Primario o Secundario.
+- [ ] **Sistema de Perfiles**: Implementación completa de perfiles Ace3 para guardar configuraciones por personaje/cuenta.
 - [ ] **Sonidos Personalizados**: Alertas de sonido configurables para cambio de rastreo o loot raro.
 - [ ] **Atajos de Teclado (Keybindings)**: Integración nativa en el menú de teclado de WoW.
 
