@@ -1,0 +1,23 @@
+name: Publicar Addon
+
+on:
+  push:
+    tags:
+      - 'v*' # Se activa cuando creas un tag como v1.0, v1.0.1, etc.
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Necesario para generar el changelog correctamente
+
+      - name: Empaquetar y Publicar
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -w 1407967 # Tu ID de Proyecto CurseForge extraído de tu error
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
