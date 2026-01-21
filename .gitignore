@@ -1,0 +1,7 @@
+# Documentación Interna
+GEMINI.md
+ROADMAP.md
+task.md
+.gemini/
+.idea/
+*.log
