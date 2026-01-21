@@ -41,94 +41,7 @@ local _, raceEn = UnitRace("player")
 if raceEn == 'Dwarf' then classTrackingValues['treasure'] = GetName(2481) end
 
 -- Diccionario de Nodos (Simplificado)
-local validNodes = {
-    -- Minerales
-    ["Copper Vein"] = true, ["Filón de cobre"] = true,
-    ["Tin Vein"] = true, ["Filón de estaño"] = true,
-    ["Silver Vein"] = true, ["Filón de plata"] = true,
-    ["Iron Deposit"] = true, ["Depósito de hierro"] = true,
-    ["Gold Vein"] = true, ["Filón de oro"] = true,
-    ["Mithril Deposit"] = true, ["Depósito de mitril"] = true,
-    ["Truesilver Deposit"] = true, ["Depósito de veraplata"] = true,
-    ["Thorium Vein"] = true, ["Filón de torio"] = true,
-    ["Rich Thorium Vein"] = true, ["Filón de torio rico"] = true,
-    -- TBC
-    ["Fel Iron Deposit"] = true, ["Depósito de hierro vil"] = true,
-    ["Adamantite Deposit"] = true, ["Depósito de adamantita"] = true,
-    ["Khorium Vein"] = true, ["Filón de korio"] = true,
-    
-    -- Items de Minería (Loot)
-    ["Copper Ore"] = true, ["Mena de cobre"] = true,
-    ["Tin Ore"] = true, ["Mena de estaño"] = true,
-    ["Silver Ore"] = true, ["Mena de plata"] = true,
-    ["Iron Ore"] = true, ["Mena de hierro"] = true,
-    ["Gold Ore"] = true, ["Mena de oro"] = true,
-    ["Mithril Ore"] = true, ["Mena de mitril"] = true,
-    ["Truesilver Ore"] = true, ["Mena de veraplata"] = true,
-    ["Thorium Ore"] = true, ["Mena de torio"] = true,
-    ["Fel Iron Ore"] = true, ["Mena de hierro vil"] = true,
-    ["Adamantite Ore"] = true, ["Mena de adamantita"] = true,
-    ["Khorium Ore"] = true, ["Mena de korio"] = true,
-    ["Eternium Ore"] = true, ["Mena de eternio"] = true,
-    
-    -- Piedras y Gemas de Minería
-    ["Rough Stone"] = true, ["Piedra férrea"] = true,
-    ["Coarse Stone"] = true, ["Piedra burda"] = true,
-    ["Heavy Stone"] = true, ["Piedra pesada"] = true,
-    ["Solid Stone"] = true, ["Piedra sólida"] = true,
-    ["Dense Stone"] = true, ["Piedra densa"] = true,
-    ["Malachite"] = true, ["Malaquita"] = true,
-    ["Tigerseye"] = true, ["Ojo de tigre"] = true,
-    ["Shadowgem"] = true, ["Gema de las sombras"] = true,
-    ["Moss Agate"] = true, ["Ágata musgosa"] = true,
-    ["Lesser Moonstone"] = true, ["Piedra lunar inferior"] = true,
-    ["Jade"] = true, -- Igual en ES/EN
-    ["Citrine"] = true, ["Citrino"] = true,
-    ["Aquamarine"] = true, ["Aguamarina"] = true,
-    ["Azerothian Diamond"] = true, ["Diamante de Azeroth"] = true,
-    ["Blue Sapphire"] = true, ["Zafiro azul"] = true,
-    ["Large Opal"] = true, ["Ópalo grande"] = true,
-    ["Huge Emerald"] = true, ["Esmeralda enorme"] = true,
-    ["Arcane Crystal"] = true, ["Cristal arcano"] = true,
-    
-    -- Hierbas
-    ["Peacebloom"] = true, ["Flor de paz"] = true,
-    ["Silverleaf"] = true, ["Hoja de plata"] = true,
-    ["Earthroot"] = true, ["Raíz de tierra"] = true,
-    ["Mageroyal"] = true, ["Marregal"] = true,
-    ["Briarthorn"] = true, ["Brezospina"] = true,
-    ["Bruiseweed"] = true, ["Hierba cardenal"] = true,
-    ["Wild Steelbloom"] = true, ["Aceream"] = true,
-    ["Grave Moss"] = true, ["Musgo de tumba"] = true,
-    ["Kingsblood"] = true, ["Sangrerregia"] = true,
-    ["Liferoot"] = true, ["Vidarraíz"] = true,
-    ["Fadeleaf"] = true, ["Pálida"] = true,
-    ["Goldthorn"] = true, ["Espina de oro"] = true,
-    ["Khadgar's Whisker"] = true, ["Bigote de Khadgar"] = true,
-    ["Wintersbite"] = true, ["Mordedura de invierno"] = true,
-    ["Firebloom"] = true, ["Flor de fuego"] = true,
-    ["Purple Lotus"] = true, ["Loto cárdeno"] = true,
-    ["Arthas' Tears"] = true, ["Lágrimas de Arthas"] = true,
-    ["Sungrass"] = true, ["Solea"] = true,
-    ["Blindweed"] = true, ["Ciega"] = true,
-    ["Ghost Mushroom"] = true, ["Champiñón fantasma"] = true,
-    ["Gromsblood"] = true, ["Gromsanguina"] = true,
-    ["Golden Sansam"] = true, ["Sansam dorado"] = true,
-    ["Dreamfoil"] = true, ["Hoja de sueño"] = true,
-    ["Mountain Silversage"] = true, ["Salvia de montaña"] = true,
-    ["Plaguebloom"] = true, ["Flor de peste"] = true,
-    ["Icecap"] = true, ["Setelo"] = true,
-    ["Black Lotus"] = true, ["Loto negro"] = true,
-    -- TBC Herbs
-    ["Felweed"] = true, ["Hierba vil"] = true,
-    ["Dreaming Glory"] = true, ["Gloria de ensueño"] = true,
-    ["Ragveil"] = true, ["Velada"] = true,
-    ["Terocone"] = true, ["Terocono"] = true,
-    ["Ancient Lichen"] = true, ["Liquen antiguo"] = true,
-    ["Netherbloom"] = true, ["Flor abisal"] = true,
-    ["Nightmare Vine"] = true, ["Vid de pesadilla"] = true,
-    ["Mana Thistle"] = true, ["Cardo de maná"] = true,
-}
+
 
 -- ID UNIVERSAL LIST (Para Loot Tracking Agnóstico al Idioma)
 local validItemIDs = {
@@ -193,7 +106,7 @@ local options = {
         autoSell = { order = 7, name = "Auto-Vender Grises", desc = "Vende automáticamente objetos de calidad gris al visitar un comerciante.", type = "toggle", get = 'GetAutoSell', set = 'SetAutoSell', width = "full" },
         combatHide = { order = 8, name = "Ocultar en Combate", desc = "Oculta el botón y pausa el rastreo al entrar en combate.", type = "toggle", get = 'GetCombatHide', set = 'SetCombatHide', width = "full" },
         resumeAfterCombat = { order = 9, name = "Autoreanudar tras Combate", desc = "Si está activado, el rastreo se volverá a iniciar automáticamente al salir de combate.", type = "toggle", get = 'GetResumeAfterCombat', set = 'SetResumeAfterCombat', width = "full" },
-        soundAlerts = { order = 10, name = "Alertas de Sonido", desc = "Reproduce un sonido al detectar un nodo (Requiere detección avanzada).", type = "toggle", get = 'GetSoundAlerts', set = 'SetSoundAlerts', width = "full" },
+
     }
 }
 
@@ -204,7 +117,6 @@ local defaults = {
         autoSell = false,
         combatHide = true,
         resumeAfterCombat = false, -- Por defecto desactivado como se pidió (opcional)
-        soundAlerts = false,
         pos = { point = "CENTER", x = 0, y = 0 }
     }
 }
@@ -391,6 +303,8 @@ function GatherTracker:OnInitialize()
     self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('GatherTracker', 'GatherTracker')
     
     self:RegisterChatCommand('gt', 'ChatCommand')
+    self:RegisterChatCommand('gtr', 'ChatCommand')
+    self:RegisterChatCommand('gtrack', 'ChatCommand')
     
     -- Eventos
     self:RegisterEvent("MINIMAP_UPDATE_TRACKING")
@@ -659,8 +573,7 @@ function GatherTracker:SetAutoSell(info, val) self.db.profile.autoSell = val end
 function GatherTracker:GetCombatHide() return self.db.profile.combatHide end
 function GatherTracker:SetCombatHide(info, val) self.db.profile.combatHide = val end
 
-function GatherTracker:GetSoundAlerts() return self.db.profile.soundAlerts end
-function GatherTracker:SetSoundAlerts(info, val) self.db.profile.soundAlerts = val end
+
 
 function GatherTracker:GetResumeAfterCombat() return self.db.profile.resumeAfterCombat end
 function GatherTracker:SetResumeAfterCombat(info, val) self.db.profile.resumeAfterCombat = val end

@@ -30,20 +30,42 @@ Este documento rastrea el desarrollo del proyecto.
 
 ## 🚧 Pendiente / En Desarrollo
 
-### Mejoras de Interfaz (v1.6.0)
-- [ ] **Skinning de Botón**: Soporte real para LibDBIcon / MinimapButtonBag (Faltan librerías).
-- [ ] **Sonidos Personalizados**: Alertas de sonido funcionales al cambiar rastreo o encontrar loot raro.
-- [ ] **Configuración Persistente**: Asegurar que opciones (Auto-Venta, Sonidos, Combat Hide) se guarden tras /reload (Fix DB mismatch).
+### v1.6.0: Control y Automatización (QoL)
+*Enfoque: Mejoras de calidad de vida sencillas y opciones de control de automatización.*
+
+- [ ] **Silenciar Cambio de Rastreo**: Opción para desactivar el sonido que se reproduce al alternar entre rastreos.
 - [ ] **Alineación Visual**: Centrar/Alinear columnas de precio Venta vs AH en el tooltip para mejor lectura.
 - [ ] **Durabilidad Promedio**: Mostrar el porcentaje de durabilidad del equipo en el tooltip/HUD.
-- [ ] **Persistencia de Loot**: Guardar el historial de "Session Loot" para que no se borre al hacer /reload.
+- [ ] **Nivel de Profesión**: Mostrar/Ocultar el nivel de habilidad actual de la profesión rastreada en el tooltip.
+- [ ] **Configuración Persistente**: Fix para asegurar que opciones (Auto-Venta, Sonidos, Combat Hide) se guarden tras /reload.
+- [ ] **Control de Automatización (Triggers de Pausa)**:
+    - [ ] **Combate**: Opción para ignorar el modo "Ocultar en Combate" (seguir rastreando).
+    - [ ] **Combate (Montura)**: Seguir rastreando en combate SOLO si se está montado.
+    - [ ] **Sigilo**: Pausar automáticamente al entrar en sigilo.
+    - [ ] **Descanso**: Pausar automáticamente en Posadas o Ciudades.
+    - [ ] **Target Enemigo**: Pausar si se tiene un enemigo seleccionado.
+    - [ ] **Instancias**: Pausar automáticamente en Mazmorras y Bandas (BG/Arena incluido).
 
-### Funcionalidad Avanzada (v2.0.0)
-- [ ] **Ruta Inteligente GatherMate2**: Sugerir ruta basada en nodos conocidos.
-- [ ] **Filtros Avanzados**: Ignorar ciertos tipos de mineral/hierba en el conteo de loot.
-- [ ] **Atajos de Teclado (Menú)**: Integración nativa en el menú de "Teclado" de WoW (actualmente deshabilitado por error XML).
-- [ ] **Persistencia Global (Heatmap)**: Guardar historial de nodos entre sesiones y mostrar mapa de calor.
-- [ ] **Sincronización de Hermandad**: Compartir datos de hallazgos con la guild.
+### v1.7.0: Personalización y Universalidad
+*Enfoque: Expandir el sistema de rastreo y opciones de usuario.*
+
+- [ ] **Rastreo Universal**: Permitir seleccionar *cualquier* tipo de rastreo (Pesca, Buzones, Posaderos, etc.) como Primario o Secundario.
+- [ ] **Sonidos Personalizados**: Alertas de sonido configurables para cambio de rastreo o loot raro.
+- [ ] **Atajos de Teclado (Keybindings)**: Integración nativa en el menú de teclado de WoW.
+
+### v1.8.0: Persistencia Visual y Externa
+*Enfoque: Mejoras visuales que requieren librerías externas o bases de datos complejas.*
+
+- [ ] **Persistencia de Loot**: Guardar el historial de "Session Loot" entre sesiones (DB).
+- [ ] **Filtros Avanzados**: Configuración para ignorar ciertos items en el conteo de loot.
+- [ ] **Skinning de Botón**: Soporte real para `LibDBIcon` o `MinimapButtonBag`.
+
+### v2.0.0: Inteligencia de Datos (Complexity High)
+*Enfoque: Nuevos sistemas complejos de navegación y datos compartidos.*
+
+- [ ] **Ruta Inteligente GatherMate2**: Sugerir ruta de farmeo basada en nodos conocidos.
+- [ ] **Persistencia Global (Heatmap)**: Mapa de calor de nodos encontrados.
+- [ ] **Sincronización de Hermandad**: Compartir datos de hallazgos en tiempo real con la guild.
 
 ---
 

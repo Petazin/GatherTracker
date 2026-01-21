@@ -29,4 +29,5 @@ GatherTracker es un addon para WoW Classic que permite alternar automáticamente
     - **Pendiente**: Ingeniería inversa profunda de GatherMate2 (pospuesto).
 
 ## Documentación
-- `ROADMAP.md`: Plan de desarrollo y futuras características.
+## Documentación
+- `ROADMAP.md`: Reorganizado y Priorizado (v1.6 - v2.0). Plan de desarrollo detallado.
