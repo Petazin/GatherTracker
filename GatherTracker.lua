@@ -3,42 +3,14 @@ GatherTracker = LibStub("AceAddon-3.0"):NewAddon("GatherTracker", "AceTimer-3.0"
 -- ============================================================================
 -- 1. TABLAS DE DATOS
 -- ============================================================================
-local function GetName(id)
-    local name = GetSpellInfo(id)
-    return name or "Hechizo Desconocido (" .. id .. ")"
-end
-local trackingMasterList = {
-    minerals        = { icon = 136025, spellID = 2580 },
-    herbs           = { icon = 133939, spellID = 2383 },
-    hidden          = { icon = 132320, spellID = 19885 },
-    beasts          = { icon = 132328, spellID = 1494 },
-    dragonkin       = { icon = 134153, spellID = 19879 },
-    elementals      = { icon = 135861, spellID = 19880 },
-    undead          = { icon = 136142, spellID = 19884 },
-    demons          = { icon = 136217, spellID = 19878 },
-    giants          = { icon = 132275, spellID = 19882 },
-    humanoids       = { icon = 135942, spellID = 19883 },
-    humanoids_druid = { icon = 132328, spellID = 19883 },
-    treasure        = { icon = 135725, spellID = 2481 }
-}
+-- ============================================================================
+-- 1. TABLAS DE DATOS
+-- ============================================================================
+-- Se ha eliminado trackingMasterList y los valores estáticos por clase.
+-- Ahora se detectan dinámicamente en tiempo de ejecución.
 
--- Listas para menú
-local trackingValues = { minerals = GetName(2580), herbs = GetName(2383) }
-local hunterValues = {
-    minerals = GetName(2580), herbs = GetName(2383), hidden = GetName(19885),
-    beasts = GetName(1494), dragonkin = GetName(19879), elementals = GetName(19880),
-    undead = GetName(19884), giants = GetName(19882), humanoids = GetName(19883),
-    demons = GetName(19878),
-}
-local druidValues = { minerals = GetName(2580), herbs = GetName(2383), humanoids_druid = GetName(19883) }
-
-local classTrackingValues = trackingValues
-local _, englishClass = UnitClass("player")
-if englishClass == 'DRUID' then classTrackingValues = druidValues
-elseif englishClass == 'HUNTER' then classTrackingValues = hunterValues end
-
-local _, raceEn = UnitRace("player")
-if raceEn == 'Dwarf' then classTrackingValues['treasure'] = GetName(2481) end
+-- Almacenará las opciones detectadas: [NombreLocalizado] = NombreLocalizado
+local availableTrackingTypes = {}
 
 -- Diccionario de Nodos (Simplificado)
 
@@ -98,26 +70,48 @@ local options = {
     name = 'GatherTracker', handler = GatherTracker, type = 'group',
     args = {
         header = { order = 1, type = "header", name = "Configuración de Rastreo" },
-        type1 = { order = 2, name = "Rastreo Primario", type = "select", values = classTrackingValues, get = 'GetType1', set = 'SetType1' },
-        type2 = { order = 3, name = "Rastreo Secundario", type = "select", values = classTrackingValues, get = 'GetType2', set = 'SetType2' },
+        type1 = { order = 2, name = "Rastreo Primario", type = "select", values = function() return availableTrackingTypes end, get = 'GetType1', set = 'SetType1' },
+        type2 = { order = 3, name = "Rastreo Secundario", type = "select", values = function() return availableTrackingTypes end, get = 'GetType2', set = 'SetType2' },
         castInterval = { order = 4, name = "Intervalo (segundos)", type = "range", min = 2, max = 60, step = 1, get = 'GetCastInterval', set = 'SetCastInterval', width = "full" },
         showFrame = { order = 5, name = "Mostrar Botón Flotante", type = "toggle", get = 'GetShowFrame', set = 'SetShowFrame', width = "full" },
-        headerAuto = { order = 6, type = "header", name = "Automatización" },
-        autoSell = { order = 7, name = "Auto-Vender Grises", desc = "Vende automáticamente objetos de calidad gris al visitar un comerciante.", type = "toggle", get = 'GetAutoSell', set = 'SetAutoSell', width = "full" },
-        combatHide = { order = 8, name = "Ocultar en Combate", desc = "Oculta el botón y pausa el rastreo al entrar en combate.", type = "toggle", get = 'GetCombatHide', set = 'SetCombatHide', width = "full" },
-        resumeAfterCombat = { order = 9, name = "Autoreanudar tras Combate", desc = "Si está activado, el rastreo se volverá a iniciar automáticamente al salir de combate.", type = "toggle", get = 'GetResumeAfterCombat', set = 'SetResumeAfterCombat', width = "full" },
+        muteSound = { order = 6, name = "Silenciar Sonidos", desc = "Desactiva el sonido al cambiar de rastreo.", type = "toggle", get = 'GetMuteSound', set = 'SetMuteSound' },
+        
+        headerInfo = { order = 10, type = "header", name = "Información del Tooltip" },
+        showDurability = { order = 11, name = "Mostrar Durabilidad", type = "toggle", get = 'GetShowDurability', set = 'SetShowDurability' },
+        showSkillLevel = { order = 12, name = "Nivel de Profesión", type = "toggle", get = 'GetShowSkillLevel', set = 'SetShowSkillLevel' },
+
+        headerAuto = { order = 20, type = "header", name = "Automatización" },
+        autoSell = { order = 21, name = "Auto-Vender Grises", desc = "Vende automáticamente objetos de calidad gris al visitar un comerciante.", type = "toggle", get = 'GetAutoSell', set = 'SetAutoSell', width = "full" },
+        combatHide = { order = 22, name = "Ocultar en Combate", desc = "Oculta el botón y pausa el rastreo al entrar en combate.", type = "toggle", get = 'GetCombatHide', set = 'SetCombatHide' },
+        combatHideMounted = { order = 23, name = "Permitir si Montado", desc = "Si estás montado, sigue rastreando incluso en combate.", type = "toggle", get = 'GetCombatHideMounted', set = 'SetCombatHideMounted', disabled = function() return not GatherTracker.db.profile.combatHide end },
+        resumeAfterCombat = { order = 24, name = "Autoreanudar tras Combate", desc = "Si está activado, el rastreo se volverá a iniciar automáticamente al salir de combate.", type = "toggle", get = 'GetResumeAfterCombat', set = 'SetResumeAfterCombat', width = "full" },
+        
+        headerPause = { order = 30, type = "header", name = "Pausar Automáticamente" },
+        pauseInStealth = { order = 31, name = "En Sigilo", type = "toggle", get = 'GetPauseInStealth', set = 'SetPauseInStealth' },
+        pauseInResting = { order = 32, name = "En Zona de Descanso", type = "toggle", get = 'GetPauseInResting', set = 'SetPauseInResting' },
+        pauseTargetEnemy = { order = 33, name = "Al seleccionar Enemigo", type = "toggle", get = 'GetPauseTargetEnemy', set = 'SetPauseTargetEnemy' },
+        pauseInInstance = { order = 34, name = "En Mazmorra/Raid", type = "toggle", get = 'GetPauseInInstance', set = 'SetPauseInInstance' },
 
     }
 }
 
 local defaults = {
     profile  = {
-        type1 = "minerals", type2 = "herbs", castInterval = 2,
+        type1 = "", type2 = "", castInterval = 2,
         showFrame = true,
         autoSell = false,
         combatHide = true,
-        resumeAfterCombat = false, -- Por defecto desactivado como se pidió (opcional)
-        pos = { point = "CENTER", x = 0, y = 0 }
+        resumeAfterCombat = false, 
+        pos = { point = "CENTER", x = 0, y = 0 },
+        -- v1.6.0
+        muteSound = false,
+        showDurability = false,
+        showSkillLevel = true,
+        pauseInStealth = false,
+        pauseInResting = false,
+        pauseTargetEnemy = false,
+        pauseInInstance = false,
+        combatHideMounted = false 
     }
 }
 
@@ -298,7 +292,7 @@ end
 -- ============================================================================
 
 function GatherTracker:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("GatherTrackerCharDB", defaults, true)
+    self.db = LibStub("AceDB-3.0"):New("GatherTrackerDB", defaults, true)
     LibStub('AceConfig-3.0'):RegisterOptionsTable('GatherTracker', options)
     self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('GatherTracker', 'GatherTracker')
     
@@ -311,14 +305,24 @@ function GatherTracker:OnInitialize()
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnCombatEnter")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnCombatLeave")
     self:RegisterEvent("MERCHANT_SHOW", "OnMerchantShow")
-    self:RegisterEvent("MERCHANT_SHOW", "OnMerchantShow")
-    self:RegisterEvent("PLAYER_ENTERING_WORLD", "CheckProfessionsDelayed")
-    self:RegisterEvent("SKILL_LINES_CHANGED", "CheckProfessions")
+    -- self:RegisterEvent("SKILL_LINES_CHANGED", "CheckProfessions") -- Obsolte, now fully dynamic on tracking update
     
-    if not self.db.profile.type1 then self.db.profile.type1 = "minerals" end
-    if not self.db.profile.type2 then self.db.profile.type2 = "herbs" end
     if not self.db.profile.castInterval then self.db.profile.castInterval = 2 end
     
+    self:ScanTrackingSpells() -- Escaneo inicial
+    
+    -- Establecer valores por defecto inteligentes si están vacíos
+    if (not self.db.profile.type1 or self.db.profile.type1 == "") and next(availableTrackingTypes) then
+        for name, _ in pairs(availableTrackingTypes) do
+             if not self.db.profile.type1 or self.db.profile.type1 == "" then
+                self.db.profile.type1 = name
+             elseif not self.db.profile.type2 or self.db.profile.type2 == "" then
+                self.db.profile.type2 = name
+                break
+             end
+        end
+    end
+
     GatherTracker.IS_RUNNING = false
     self:CreateGUI()
     self.lootSession = {} -- Tabla de sesión: [itemID] = { count, name, link }
@@ -389,6 +393,65 @@ end
 
 -- Funciones eliminadas: ScanTooltip, AnnounceLastNode (ya no aplica nodeHistory)
 -- Reemplazamos UpdateTooltip para mostrar tabla de loot
+-- Helper para durabilidad
+function GatherTracker:GetAverageDurability()
+    local cur, max = 0, 0
+    for i = 1, 18 do
+        local c, m = GetInventoryItemDurability(i)
+        if c and m then
+            cur = cur + c
+            max = max + m
+        end
+    end
+    if max == 0 then return 100 end
+    return (cur / max) * 100
+end
+
+-- Helper para skill level (Hybrid: Modern APIs + Legacy Scan)
+function GatherTracker:GetAllGatheringSkills()
+    local skills = {}
+    local relevantNames = { 
+        ["Mining"]=true, ["Minería"]=true, 
+        ["Herbalism"]=true, ["Herboristería"]=true, 
+        ["Skinning"]=true, ["Desuello"]=true, 
+        ["Fishing"]=true, ["Pesca"]=true 
+    }
+    
+    -- Method 1: GetProfessions (Modern/WotLK+)
+    if GetProfessions then
+        local profs = {GetProfessions()}
+        local relevantIDs = { [182]=true, [186]=true, [393]=true, [356]=true }
+        
+        for _, index in pairs(profs) do
+            if index then
+                local name, _, rank, maxRank, _, _, skillLineID = GetProfessionInfo(index)
+                local isRelevant = false
+                
+                if skillLineID and relevantIDs[skillLineID] then isRelevant = true end
+                if not isRelevant and name and relevantNames[name] then isRelevant = true end
+                
+                if isRelevant then
+                    table.insert(skills, { name = name, rank = rank, max = maxRank })
+                end
+            end
+        end
+    end
+
+    -- Method 2: Legacy Scan (Classic/TBC fallback)
+    -- Si el método 1 no devolvió nada, escaneamos el libro de habilidades manualmente
+    if #skills == 0 then
+        local numSkills = GetNumSkillLines()
+        for i = 1, numSkills do
+            local skillName, isHeader, _, skillRank, _, _, skillMaxRank = GetSkillLineInfo(i)
+            if not isHeader and skillName and relevantNames[skillName] then
+                 table.insert(skills, { name = skillName, rank = skillRank, max = skillMaxRank })
+            end
+        end
+    end
+    
+    return skills
+end
+
 function GatherTracker:UpdateTooltip(frame)
     GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
     GameTooltip:ClearLines()
@@ -402,54 +465,79 @@ function GatherTracker:UpdateTooltip(frame)
     
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine("Intervalo:", "|cffFFFF00" .. GatherTracker:GetCastInterval() .. " seg|r")
-    GameTooltip:AddLine(" ")
-    
-    -- Sección de Loot
-    GameTooltip:AddLine("Sesión de Farm:", 0, 1, 1)
-    
-    local hasLoot = false
-    -- Cabecera
-    GameTooltip:AddDoubleLine("Item (Cant)", "Venta | AH", 0.7, 0.7, 0.7, 0.7, 0.7, 0.7)
-    
-    -- Inicializar totales
-    local sUnits, sVendor, sAH = 0, 0, 0
-    local bUnits, bVendor, bAH = 0, 0, 0
-    
-    for id, data in pairs(GatherTracker.lootSession) do
-        hasLoot = true
-        
-        -- Datos Session
-        local vendorPrice = select(11, GetItemInfo(data.link)) or 0
-        local ahPrice = GatherTracker:GetAuctionPrice(data.link) or 0
-        
-        sUnits = sUnits + data.count
-        sVendor = sVendor + (vendorPrice * data.count)
-        if ahPrice > 0 then sAH = sAH + (ahPrice * data.count) end
 
-        -- Datos Bolsa (De este item)
-        local bagCount = GetItemCount(id)
-        bUnits = bUnits + bagCount
-        bVendor = bVendor + (vendorPrice * bagCount)
-        if ahPrice > 0 then bAH = bAH + (ahPrice * bagCount) end
-        
-        local totalVendor = GetCoinTextureString(vendorPrice * data.count)
-        local totalAH = (ahPrice > 0) and GetCoinTextureString(ahPrice * data.count) or "|cff808080N/A|r"
-        
-        GameTooltip:AddDoubleLine(data.name .. " x" .. data.count, totalVendor .. " | " .. totalAH, 1, 1, 1, 1, 1, 1)
+    -- V1.6.0 Info Extra
+    if self.db.profile.showDurability then
+        local dur = self:GetAverageDurability()
+        local r, g, b = 0, 1, 0 -- Verde
+        if dur < 30 then r, g, b = 1, 0, 0 -- Rojo
+        elseif dur < 70 then r, g, b = 1, 1, 0 end -- Amarillo
+        GameTooltip:AddDoubleLine("Durabilidad:", string.format("|cff%02x%02x%02x%d%%|r", r*255, g*255, b*255, dur))
     end
     
-    if not hasLoot then
-        GameTooltip:AddLine("Sin datos aún...", 0.5, 0.5, 0.5)
-    else
-        GameTooltip:AddLine(" ")
-        -- Totales
-        local sVStr = GetCoinTextureString(sVendor)
-        local sAHStr = (sAH > 0) and GetCoinTextureString(sAH) or "N/A"
-        GameTooltip:AddDoubleLine("|cff00ff00TOTAL SESIÓN ("..sUnits.."u)|r", sVStr .. " | " .. sAHStr)
+    -- Detectar skills una sola vez
+    local currentSkills = self:GetAllGatheringSkills()
+    
+    if self.db.profile.showSkillLevel then
+        for _, skill in ipairs(currentSkills) do
+            GameTooltip:AddDoubleLine(skill.name..":", skill.rank.."/"..skill.max, 1, 1, 1, 0.7, 0.7, 0.7)
+        end
+    end
+
+    GameTooltip:AddLine(" ")
+    
+    -- Sección de Loot (Smart Hide)
+    local hasLoot = next(GatherTracker.lootSession) ~= nil
+    local hasGatheringProfs = #currentSkills > 0
+    
+    -- Mostrar si tiene loot O si tiene profesiones (para mostrar 'Sin datos')
+    if hasLoot or hasGatheringProfs then
+        GameTooltip:AddLine("Sesión de Farm:", 0, 1, 1)
         
-        local bVStr = GetCoinTextureString(bVendor)
-        local bAHStr = (bAH > 0) and GetCoinTextureString(bAH) or "N/A"
-        GameTooltip:AddDoubleLine("|cff00ffffTOTAL BOLSA ("..bUnits.."u)|r", bVStr .. " | " .. bAHStr)
+        -- Cabecera con pipe para separar visualmente
+        GameTooltip:AddDoubleLine("Item (Cant)", "Venta  |  AH", 0.7, 0.7, 0.7, 0.7, 0.7, 0.7)
+        
+        local sUnits, sVendor, sAH = 0, 0, 0
+        local bUnits, bVendor, bAH = 0, 0, 0
+        local anyItem = false
+        
+        for id, data in pairs(GatherTracker.lootSession) do
+            anyItem = true
+            
+            -- Datos Session
+            local vendorPrice = select(11, GetItemInfo(data.link)) or 0
+            local ahPrice = GatherTracker:GetAuctionPrice(data.link) or 0
+            
+            sUnits = sUnits + data.count
+            sVendor = sVendor + (vendorPrice * data.count)
+            if ahPrice > 0 then sAH = sAH + (ahPrice * data.count) end
+    
+            -- Datos Bolsa (De este item)
+            local bagCount = GetItemCount(id)
+            bUnits = bUnits + bagCount
+            bVendor = bVendor + (vendorPrice * bagCount)
+            if ahPrice > 0 then bAH = bAH + (ahPrice * bagCount) end
+            
+            local totalVendor = GetCoinTextureString(vendorPrice * data.count)
+            local totalAH = (ahPrice > 0) and GetCoinTextureString(ahPrice * data.count) or "|cff808080N/A|r"
+            
+            -- Alineación " | "
+            GameTooltip:AddDoubleLine(data.name .. " x" .. data.count, totalVendor .. " | " .. totalAH, 1, 1, 1, 1, 1, 1)
+        end
+        
+        if not anyItem then
+            GameTooltip:AddLine("Sin datos aún...", 0.5, 0.5, 0.5)
+        else
+            GameTooltip:AddLine(" ")
+            -- Totales
+            local sVStr = GetCoinTextureString(sVendor)
+            local sAHStr = (sAH > 0) and GetCoinTextureString(sAH) or "N/A"
+            GameTooltip:AddDoubleLine("|cff00ff00TOTAL SESIÓN ("..sUnits.."u)|r", sVStr .. " | " .. sAHStr)
+            
+            local bVStr = GetCoinTextureString(bVendor)
+            local bAHStr = (bAH > 0) and GetCoinTextureString(bAH) or "N/A"
+            GameTooltip:AddDoubleLine("|cff00ffffTOTAL BOLSA ("..bUnits.."u)|r", bVStr .. " | " .. bAHStr)
+        end
     end
     
     GameTooltip:AddLine(" ")
@@ -460,15 +548,20 @@ function GatherTracker:UpdateTooltip(frame)
 end
 
 function GatherTracker:MINIMAP_UPDATE_TRACKING()
+    self:ScanTrackingSpells() -- Actualizar lista de posibles
     self:UpdateGUI()
 end
 
 function GatherTracker:OnCombatEnter()
     self.inCombat = true
     if self.db.profile.combatHide then
+        -- V1.6.0: Permitir si montado
+        if self.db.profile.combatHideMounted and IsMounted() then
+             return
+        end
         if self.frame then self.frame:Hide() end
+        self:StopTimer()
     end
-    self:StopTimer()
 end
 
 function GatherTracker:OnCombatLeave()
@@ -506,65 +599,33 @@ function GatherTracker:OnMerchantShow()
 end
 
 
-function GatherTracker:CheckProfessions()
-    -- Variables locales para esta ejecución
-    local foundMining = false
-    local foundHerbalism = false
-
-    -- 1. Método Moderno (GetProfessions)
-    local prof1, prof2, arch, fish, cook, firstAid = GetProfessions()
-    local function CheckID(index)
-        if not index then return end
-        local _, _, _, _, _, _, skillLineID = GetProfessionInfo(index)
-        if skillLineID == 186 then foundMining = true end
-        if skillLineID == 182 then foundHerbalism = true end
-    end
-    CheckID(prof1)
-    CheckID(prof2)
-
-    -- 2. Fallback Universal (Scan Skill Lines) si GetProfessions falló
-    if not (foundMining or foundHerbalism) then
-        local miningName = GetSpellInfo(2575)
-        local herbalismName = GetSpellInfo(9134)
+function GatherTracker:ScanTrackingSpells()
+    -- Limpiar tabla, manteniendo referencia si es posible, o reasignando
+    for k in pairs(availableTrackingTypes) do availableTrackingTypes[k] = nil end
+    
+    local count = C_Minimap.GetNumTrackingTypes()
+    for i = 1, count do
+        local info = C_Minimap.GetTrackingInfo(i)
+        local name
+        if type(info) == "table" then
+            name = info.name
+        else
+            name = info
+        end
         
-        for i = 1, GetNumSkillLines() do
-            local name, header = GetSkillLineInfo(i)
-            if not header then
-                if miningName and (name == miningName or name == "Mining") then foundMining = true end
-                if herbalismName and (name == herbalismName or name == "Herbalism") then foundHerbalism = true end
-            end
+        -- Añadir a la lista de opciones válidas (Key = Name, Label = Name)
+        -- Usamos el nombre como Key para persistencia más amigable que IDs dinámicos
+        if name then
+            availableTrackingTypes[name] = name
         end
     end
     
-    -- Actualizar configuración y notificar SOLO si hubo cambios
-    local sig = (foundMining and "M" or "") .. (foundHerbalism and "H" or "")
-    if self.lastDetectedSig == sig then return end -- No imprimir si no ha cambiado nada
-    self.lastDetectedSig = sig
-    
-    -- Aplicar cambios
-    if foundMining then self.db.profile.type1 = "minerals" end
-    if foundHerbalism then self.db.profile.type2 = "herbs" end
-    
-    -- Mensaje (Solo una vez por cambio)
-    if foundMining or foundHerbalism then
-        local msg = "|cff00ff00GatherTracker:|r Profesiones detectadas:"
-        if foundMining then msg = msg .. " Minería" end
-        if foundHerbalism then msg = msg .. " Herboristería" end
-        -- Evitar spam inicial si ya estaba configurado igual, pero el usuario quiere verlo al loguear.
-        -- Como hemos comprobado 'sig', solo saldrá al loguear (nil -> sig) y si cambia.
-        print(msg)
-    else
-        -- Opcional: Notificar si no se detectó nada (solo si tenía algo antes)
-        if self.lastDetectedSig ~= "" then
-            print("|cff00ff00GatherTracker:|r No se detectaron profesiones de recolección.")
-        end
-    end
+    -- Notificar a AceConfig que las opciones han cambiado (si hiciera falta refresh manual)
+    -- LibStub("AceConfigRegistry-3.0"):NotifyChange("GatherTracker")
 end
 
--- Eliminamos el delayed wrapper complejo, confiamos en SKILL_LINES_CHANGED
-function GatherTracker:CheckProfessionsDelayed()
-    -- Compatibility stub if needed
-end
+-- CheckProfessions y CheckProfessionsDelayed ya no son necesarios con el sistema dinámico puro.
+-- Se eliminan para evitar sobrescribir configuraciones de usuario.
 
 -- Getters y Setters adicionales
 function GatherTracker:GetAutoSell() return self.db.profile.autoSell end
@@ -573,16 +634,42 @@ function GatherTracker:SetAutoSell(info, val) self.db.profile.autoSell = val end
 function GatherTracker:GetCombatHide() return self.db.profile.combatHide end
 function GatherTracker:SetCombatHide(info, val) self.db.profile.combatHide = val end
 
-
+function GatherTracker:GetCombatHideMounted() return self.db.profile.combatHideMounted end
+function GatherTracker:SetCombatHideMounted(info, val) self.db.profile.combatHideMounted = val end
 
 function GatherTracker:GetResumeAfterCombat() return self.db.profile.resumeAfterCombat end
 function GatherTracker:SetResumeAfterCombat(info, val) self.db.profile.resumeAfterCombat = val end
 
+-- v1.6.0 Getters/Setters
+function GatherTracker:GetMuteSound() return self.db.profile.muteSound end
+function GatherTracker:SetMuteSound(info, val) self.db.profile.muteSound = val end
+
+function GatherTracker:GetShowDurability() return self.db.profile.showDurability end
+function GatherTracker:SetShowDurability(info, val) self.db.profile.showDurability = val end
+
+function GatherTracker:GetShowSkillLevel() return self.db.profile.showSkillLevel end
+function GatherTracker:SetShowSkillLevel(info, val) self.db.profile.showSkillLevel = val end
+
+function GatherTracker:GetPauseInStealth() return self.db.profile.pauseInStealth end
+function GatherTracker:SetPauseInStealth(info, val) self.db.profile.pauseInStealth = val end
+
+function GatherTracker:GetPauseInResting() return self.db.profile.pauseInResting end
+function GatherTracker:SetPauseInResting(info, val) self.db.profile.pauseInResting = val end
+
+function GatherTracker:GetPauseTargetEnemy() return self.db.profile.pauseTargetEnemy end
+function GatherTracker:SetPauseTargetEnemy(info, val) self.db.profile.pauseTargetEnemy = val end
+
+function GatherTracker:GetPauseInInstance() return self.db.profile.pauseInInstance end
+function GatherTracker:SetPauseInInstance(info, val) self.db.profile.pauseInInstance = val end
+
 
 function GatherTracker:ChatCommand(input)
-    if not input or input:trim() == "" then
+    local command = input and input:trim()
+    if not command or command == "" then
         self:ToggleTracking()
-    elseif input:trim() == 'opt' then
+    elseif command == "opt" or command == "options" then
+        LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
+    else
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
     end
 end
@@ -599,6 +686,7 @@ function GatherTracker:ToggleTracking()
 end
 
 function GatherTracker:StartTimer()
+    if self.trackingTimer then self:CancelTimer(self.trackingTimer) end
     print('|cff00ff00GatherTracker:|r Iniciado. Intervalo: ' .. self:GetCastInterval() .. 's');
     self.trackingTimer = self:ScheduleRepeatingTimer('TimerFeedback', self:GetCastInterval())
     self.IS_RUNNING = true
@@ -612,40 +700,44 @@ function GatherTracker:StopTimer()
     self:UpdateGUI()
 end
 
-function GatherTracker:SetTrackingBySpellID(spellID, expectedIcon)
-    local count = C_Minimap.GetNumTrackingTypes()
-    local spellName = GetSpellInfo(spellID)
+-- Nueva función para activar por NOMBRE exacto
+function GatherTracker:SetTrackingByName(targetName)
+    if not targetName then return false end
     
+    local count = C_Minimap.GetNumTrackingTypes()
     for i = 1, count do
         local info = C_Minimap.GetTrackingInfo(i)
-        local name, texture, active
+        local name
+        if type(info) == "table" then name = info.name else name = info end
         
-        if type(info) == "table" then
-            name = info.name
-            texture = info.texture
-        else
-            -- Fallback por si acaso en alguna version retorna multiples valores
-            name = info
-        end
+        if name == targetName then
+            -- V1.6.0 Fix: Silenciar error "Facultad no lista" si hay GCD
+            UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
+            
+            -- V1.6.0 Fix: Silenciar sonido del sistema si está configurado
+            local shouldMute = self.db.profile.muteSound
+            local oldSFX
+            if shouldMute then
+                oldSFX = GetCVar("Sound_EnableSFX")
+                SetCVar("Sound_EnableSFX", "0")
+            end
 
-        -- 1. Intentar por Nombre
-        if spellName and name == spellName then
             C_Minimap.SetTracking(i, true)
-            return true
-        end
 
-        -- 2. Intentar por Icono/Textura
-        if expectedIcon and texture == expectedIcon then
-            C_Minimap.SetTracking(i, true)
+            if shouldMute and oldSFX then
+                SetCVar("Sound_EnableSFX", oldSFX)
+            end
+
+            UIErrorsFrame:RegisterEvent("UI_ERROR_MESSAGE")
             return true
         end
     end
     return false
 end
 
-function GatherTracker:IsTrackingActive(spellID)
-    local spellName = GetSpellInfo(spellID)
-    if not spellName then return false end
+-- Verificar si está activo por NOMBRE
+function GatherTracker:IsTrackingActive(targetName)
+    if not targetName then return false end
     
     local count = C_Minimap.GetNumTrackingTypes()
     for i = 1, count do
@@ -655,50 +747,68 @@ function GatherTracker:IsTrackingActive(spellID)
             name = info.name
             active = info.active
         else
-            -- Fallback api antigua
-            name, _, active = info, select(3, C_Minimap.GetTrackingInfo(i))
+             name, _, active = info, select(3, C_Minimap.GetTrackingInfo(i))
         end
 
-        if name == spellName and active then
+        if name == targetName and active then
             return true
         end
     end
     return false
 end
 
+-- Helper para verificar ataque
+local function IsEnemyTarget()
+    return UnitExists("target") and UnitCanAttack("player", "target") and not UnitIsDead("target")
+end
+
 function GatherTracker:TimerFeedback()
+    -- Checks Base: En combate siempre pausamos el cambio para evitar errores de API/GCD.
+    -- (Si combatHideMounted está activo, el frame seguirá visible pero estático).
     if UnitAffectingCombat("player") or UnitChannelInfo("player") or UnitCastingInfo("player") or UnitIsDeadOrGhost("player") then
         return 
     end
-
-    local type1Key = self:GetType1()
-    local type2Key = self:GetType2()
-
-    if not type1Key or not trackingMasterList[type1Key] then type1Key = "minerals" end
-    if not type2Key or not trackingMasterList[type2Key] then type2Key = "herbs" end
-
-    -- Lógica de conmutación basada en qué está activo realmente
-    local targetKey = nil
     
-    -- Verificamos si el TIPO 1 (Minerales) está activo
-    local isType1Active = self:IsTrackingActive(trackingMasterList[type1Key].spellID)
+    -- V1.6.0 Automation Triggers
+    if self.db.profile.pauseInStealth and IsStealthed() then return end
+    if self.db.profile.pauseInResting and IsResting() then return end
+    if self.db.profile.pauseInInstance and IsInInstance() then return end
+    if self.db.profile.pauseTargetEnemy and IsEnemyTarget() then return end
+
+    local type1Name = self:GetType1()
+    local type2Name = self:GetType2()
+
+    -- Validación básica
+    if not type1Name or type1Name == "" then return end
+    -- Si type2 no está definido, no hacemos toggle, solo mantenemos type1
+    if not type2Name or type2Name == "" then
+         if not self:IsTrackingActive(type1Name) then self:SetTrackingByName(type1Name) end
+         return
+    end
+
+    -- Lógica de conmutación
+    local targetName = nil
+    
+    -- Verificamos si el TIPO 1 está activo
+    local isType1Active = self:IsTrackingActive(type1Name)
 
     if not isType1Active then
         -- Si Type1 NO está activo -> Activarlo
-        targetKey = type1Key
+        targetName = type1Name
     else
         -- Si Type1 SI está activo -> Cambiar a Type2
-        targetKey = type2Key
+        targetName = type2Name
     end
 
-    local spellID = trackingMasterList[targetKey].spellID
-    local iconID = trackingMasterList[targetKey].icon
+    -- V1.6.0 Debug: Diagnóstico en combate
+    if inCombat and allowCombat then
+        -- print("Combate Montado: Intentando cambiar a " .. (targetName or "nil"))
+    end
     
-    -- Usar C_Minimap.SetTracking con lógica robusta
-    local success = self:SetTrackingBySpellID(spellID, iconID)
+    local success = self:SetTrackingByName(targetName)
     
     if success then
-        C_Timer.After(0.2, function() self:UpdateGUI() end)
+        self:UpdateGUI()
     end
 end
 

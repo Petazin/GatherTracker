@@ -11,23 +11,20 @@ Are you tired of constantly clicking buttons or spamming macros to switch betwee
 - **Smart Automation**: It detects your professions, pauses when you fight, and handles your vendor trash.
 - **Loot Awareness**: Know exactly what you've farmed and its Auction House value in real-time.
 
-## Features
+## Features ✨
 
-*   **Automatic Toggling:** Cycles between two tracking types (Primary and Secondary Tracking).
-*   **Configurable Interval:** Adjust the switching speed from 2 seconds to 60 seconds.
-*   **Smart Minimap Button:**
-    *   **Left Click:** Toggle/Pause the tracker.
-    *   **Right Click:** Open configuration menu.
-    *   **Mouse Wheel:** Quickly increase or decrease the time interval.
-    *   **Alt + Drag:** Move the button anywhere on the screen.
-*   **Session Loot Tracker (NEW):**
-    *   Tracks gathered items (Ores, Herbs, Stones, Gems).
-    *   Displays **Session Totals** and **Bag Totals**.
-    *   Shows Vendor and Auction values (supports TSM/Auctionator).
-*   **Smart Automation:**
-    *   **Universal Detection:** Automatically detects professions in any game language.
-    *   **Auto-Sell:** Option to automatically sell gray items at vendors.
-    *   **Enhanced Combat Mode:** Hides in combat and conditionally resumes tracking.
+*   **⚡ Smart Auto-Switching:** Automatically toggles between two tracking types.
+*   **🧠 Intelligent Automation (New in v1.6):**
+    *   **Context Aware:** Auto-pauses in **Cities/Inns**, **Stealth** (Rogue/Druid), **Instances**, or when targeting enemies.
+    *   **Combat Logic:** Hides in combat for a clean UI, but *optionally* stays visible if you are mounted.
+*   **📊 Session Loot Tracker:**
+    *   Tracks Ores, Herbs, and Gems in real-time.
+    *   **Smart Tooltip:** Shows Equipment **Durability** and **Profession Skill** levels.
+    *   Displays Vendor & Auction House values.
+*   **🎛️ Complete Control:**
+    *   **Sound:** Optional "Click" sound on switch (with Mute toggle).
+    *   **Universal:** Works with ANY game client language.
+    *   **Auto-Sell:** Automatically clear gray trash at vendors.
 
 ### 🔍 Supported Tracking Types
 GatherTracker works with all standard tracking spells, plus special ones for specific classes/races:
@@ -89,17 +86,20 @@ This project is open source.
 - **Automatización Inteligente**: Detecta tus profesiones, se pausa cuando entras en combate y gestiona tu basura en el vendedor.
 - **Control de Loot**: Conoce exactamente qué has farmeado y su valor en Subasta en tiempo real.
 
-## Características
+## Características ✨
 
-- **Alternancia Inteligente**: Cambia automáticamente entre Buscar Minerales, Hierbas y otros rastreos.
-- **Rastreador de Loot de Sesión (NUEVO)**:
-  - Registra Minerales, Hierbas, Piedras y Gemas recolectadas.
-  - Muestra **Totales de Sesión** y **Totales en Bolsa**.
-  - Muestra valor en Vendedor y Subasta (si tienes TSM/Auctionator).
-- **Automatización Inteligente**:
-  - **Detección Universal**: Detecta profesiones en cualquier idioma del juego.
-  - **Auto-Venta**: Vende objetos grises automáticamente al visitar al vendedor.
-  - **Modo Combate Mejorado**: Se oculta en combate y decide si reanudar o no al salir.
+- **⚡ Alternancia Inteligente**: Cambia automáticamente entre rastreos (ej: Minerales/Hierbas).
+- **🧠 Automatización Inteligente (Nuevo en v1.6)**:
+    - **Contexto**: Se pausa automáticamente en **Ciudades/Posadas**, **Sigilo**, **Mazmorras**, o al apuntar a un **Enemigo**.
+    - **Lógica de Combate**: Se oculta en combate para limpiar la UI, o (opcionalmente) permanece visible si estás montado.
+- **📊 Rastreador de Loot de Sesión**:
+    - Registra Minerales, Hierbas y Gemas en tiempo real.
+    - **Tooltip Mejorado**: Muestra **Durabilidad** del equipo y **Nivel de Profesión**.
+    - Integración de precios de Subasta y Vendedor.
+- **🎛️ Control Total**:
+    - **Sonido**: "Click" opcional al cambiar (con botón de silencio).
+    - **Universal**: Funciona en CUALQUIER idioma del cliente.
+    - **Auto-Venta**: Limpia basura gris en el vendedor automáticamente.
 
 ### 🔍 Rastreos Soportados
 GatherTracker funciona con todos los hechizos estándar, además de los especiales por clase/raza:

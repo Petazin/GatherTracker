@@ -2,6 +2,36 @@
 
 Todas las actualizaciones notables de este proyecto se documentarán en este archivo.
 
+## [v1.6.0] - 2026-01-21
+### ✨ New Features
+- **Tooltip Information**:
+    - **Durability**: Shows average equipment durability % (green/yellow/red).
+    - **Profession Level**: Displays current skill level of the tracked profession (e.g., Mining 150/300).
+    - **Smart Clean**: Automatically hides the "Session Loot" section if the character has no gathering professions.
+- **Advanced Automation (Pauses)**:
+    - Configurable options to automatically pause tracking in:
+        - **Resting Areas** (Inns/Cities).
+        - **Stealth** (Rogues/Druids).
+        - **Instances** (Dungeons/Raids/PVP).
+        - **Combat** (Hostile Target selected).
+- **Combat Improvements**:
+    - New **"Allow if Mounted"** option: Keeps the button visible during combat if you are mounted (pauses cycling for safety).
+- **Sound**:
+    - Added option to **Mute** the "Click" sound when switching tracking (temporarily suppresses system SFX).
+
+### 🐛 Bug Fixes
+- Fixed a critical bug where multiple timers would stack after leaving combat, causing the cycle to accelerate exponentially.
+- Fixed persistence issues where some options (Auto-Sell, CombatHide, Sounds) were not saved after `/reload`.
+- Optimized Tooltip display logic for price column alignment.
+
+## [v1.5.2] - 2026-01-21
+### Added
+- **Core**: Dynamic Tracking System.
+    - Replaced hardcoded class lists with a real-time scanner (`ScanTrackingSpells`).
+    - Finds *any* tracking ability available to the character (Professions, Racials, Class Spells) automatically.
+    - **Future-Proof**: Automatically supports new spells or changes without addon updates.
+    - **Paladin Fix**: "Sense Undead" is now natively supported via this new system.
+
 ## [v1.5.1] - 2026-01-20
 ### Added
 - **Social Integration**:
