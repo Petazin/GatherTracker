@@ -28,7 +28,8 @@ Are you tired of constantly clicking buttons or spamming macros to switch betwee
 29: *   **🏆 Gamification (New in v1.7):**
 30:     *   **Lifetime History:** Tracks your total gathered items forever (persists across reloads).
 31:     *   **Achievements:** Unlock medals and earn "Level Up" sounds as you reach gathering milestones.
-32:     *   **Trophy Room:** View your progress and badges with `/gt history`.
+32:     *   **Trophy Room:** View your progress and badges with `/gt history` (Shift+Click on minimap button).
+    *   **Points & Social:** Compete for high scores and announce your achievements to your Guild!
 33:
 
 ### 🔍 Supported Tracking Types
@@ -110,7 +111,8 @@ This project is open source.
 104: - **🏆 Gamificación (Nuevo en v1.7)**:
 105:     - **Historial de Vida**: Guarda el total de items recolectados para siempre (persiste tras reiniciar).
 106:     - **Logros**: Desbloquea medallas y sonidos épicos al alcanzar hitos de farmeo.
-107:     - **Sala de Trofeos**: Mira tu progreso y medallas con `/gt history`.
+107:     - **Sala de Trofeos**: Mira tu progreso y medallas con `/gt history` (Shift+Clic en el botón).
+    - **Puntos y Social**: ¡Compite por el puntaje máximo y anuncia tus logros a tu Hermandad!
 108:
 
 ### 🔍 Rastreos Soportados
