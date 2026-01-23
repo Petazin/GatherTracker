@@ -25,6 +25,11 @@ Are you tired of constantly clicking buttons or spamming macros to switch betwee
     *   **Sound:** Optional "Click" sound on switch (with Mute toggle).
     *   **Universal:** Works with ANY game client language.
     *   **Auto-Sell:** Automatically clear gray trash at vendors.
+29: *   **🏆 Gamification (New in v1.7):**
+30:     *   **Lifetime History:** Tracks your total gathered items forever (persists across reloads).
+31:     *   **Achievements:** Unlock medals and earn "Level Up" sounds as you reach gathering milestones.
+32:     *   **Trophy Room:** View your progress and badges with `/gt history`.
+33:
 
 ### 🔍 Supported Tracking Types
 GatherTracker works with all standard tracking spells, plus special ones for specific classes/races:
@@ -55,6 +60,8 @@ GatherTracker works with all standard tracking spells, plus special ones for spe
 *   `/gtr` or `/gtrack` - Toggles the tracker on or off.
 *   `/gtr opt` - Opens the full configuration panel.
 *   `/gtr reset` - Resets the button position to center.
+59: *   `/gtr history` - Opens the Trophy Room (Achievements).
+60:
 
 ## Configuration
 
@@ -100,6 +107,11 @@ This project is open source.
     - **Sonido**: "Click" opcional al cambiar (con botón de silencio).
     - **Universal**: Funciona en CUALQUIER idioma del cliente.
     - **Auto-Venta**: Limpia basura gris en el vendedor automáticamente.
+104: - **🏆 Gamificación (Nuevo en v1.7)**:
+105:     - **Historial de Vida**: Guarda el total de items recolectados para siempre (persiste tras reiniciar).
+106:     - **Logros**: Desbloquea medallas y sonidos épicos al alcanzar hitos de farmeo.
+107:     - **Sala de Trofeos**: Mira tu progreso y medallas con `/gt history`.
+108:
 
 ### 🔍 Rastreos Soportados
 GatherTracker funciona con todos los hechizos estándar, además de los especiales por clase/raza:
@@ -130,6 +142,8 @@ GatherTracker funciona con todos los hechizos estándar, además de los especial
 - `/gtr` o `/gtrack`: Activar/Pausar.
 - `/gtr opt`: Abrir configuración.
 - `/gtr reset`: Restablecer posición del botón.
+134: - `/gtr history`: Abrir Sala de Trofeos (Logros).
+135:
 
 ## Configuración
 

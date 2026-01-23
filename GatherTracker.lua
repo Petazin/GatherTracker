@@ -15,41 +15,32 @@ local availableTrackingTypes = {}
 -- Diccionario de Nodos (Simplificado)
 
 
--- ID UNIVERSAL LIST (Para Loot Tracking Agnóstico al Idioma)
-local validItemIDs = {
-    -- Classic Ores
-    [2770] = true, -- Copper Ore
-    [2771] = true, -- Tin Ore
-    [2775] = true, -- Silver Ore
-    [2772] = true, -- Iron Ore
-    [2776] = true, -- Gold Ore
-    [3858] = true, -- Mithril Ore
-    [7911] = true, -- Truesilver Ore
-    [10620] = true, -- Thorium Ore
-    [11370] = true, -- Dark Iron Ore
-    [12363] = true, -- Arcane Crystal
-    
-    -- TBC Ores
-    [23424] = true, -- Fel Iron Ore
-    [23425] = true, -- Adamantite Ore
-    [23426] = true, -- Khorium Ore
-    [23427] = true, -- Eternium Ore
-    
-    -- Stones
-    [2835] = true, -- Rough Stone
-    [2836] = true, -- Coarse Stone
-    [2838] = true, -- Heavy Stone
-    [7912] = true, -- Solid Stone
-    [12365] = true, -- Dense Stone
-    
-    -- Gems (Classic)
-    [774] = true, [1206] = true, [1210] = true, [1225] = true, [1705] = true, 
-    [5489] = true, [3864] = true, [7909] = true, [12799] = true, [7910] = true, 
-    [7907] = true, [12800] = true, 
-    -- Gems (TBC Uncut)
-    [23077] = true, [23076] = true, [23073] = true, [23071] = true,
-    [23072] = true, [23074] = true, [25867] = true, [25868] = true,
+-- ID UNIVERSAL LIST (Categorized for v1.7.1)
+-- Static Popup Dialog (v1.7.1 Security)
+StaticPopupDialogs["GT_RESET_CONFIRM"] = {
+    text = "¿Estás seguro de que quieres BORRAR permanentemente todo el historial y logros?",
+    button1 = "Sí, borrar",
+    button2 = "Cancelar",
+    OnAccept = function()
+        GatherTracker:ResetDatabase()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
 
+local miningIDs = {
+    -- Classic Ores
+    [2770] = true, [2771] = true, [2775] = true, [2772] = true, [2776] = true,
+    [3858] = true, [7911] = true, [10620] = true, [11370] = true, [12363] = true,
+    -- TBC Ores
+    [23424] = true, [23425] = true, [23426] = true, [23427] = true,
+    -- Stones
+    [2835] = true, [2836] = true, [2838] = true, [7912] = true, [12365] = true,
+}
+
+local herbIDs = {
     -- Classic Herbs
     [2447] = true, [765] = true, [2449] = true, [785] = true, [2450] = true,
     [3820] = true, [2453] = true, [3355] = true, [3356] = true, [3357] = true,
@@ -57,10 +48,103 @@ local validItemIDs = {
     [4625] = true, [8831] = true, [8836] = true, [8838] = true, [8839] = true,
     [8845] = true, [8846] = true, [13463] = true, [13464] = true, [13465] = true,
     [13466] = true, [13467] = true, [13468] = true,
-
     -- TBC Herbs
     [22785] = true, [22786] = true, [22787] = true, [22789] = true, [22790] = true,
     [22791] = true, [22792] = true, [22793] = true, [22794] = true
+}
+
+local gemIDs = {
+    -- Classic Gems
+    [774] = true, [1206] = true, [1210] = true, [1225] = true, [1705] = true, 
+    [5489] = true, [3864] = true, [7909] = true, [12799] = true, [7910] = true, 
+    [7907] = true, [12800] = true, 
+    -- TBC Gems
+    [23077] = true, [23076] = true, [23073] = true, [23071] = true,
+    [23072] = true, [23074] = true, [25867] = true, [25868] = true,
+}
+
+local fishingIDs = {
+    -- Classic Fish
+    [6290] = true, [6289] = true, [6522] = true, [6308] = true, [6317] = true,
+    [6358] = true, [6359] = true, [13422] = true,
+    -- TBC Fish
+    [27422] = true, [27425] = true, [27429] = true, [27430] = true, [27431] = true,
+    [27432] = true
+}
+
+local validItemIDs = {}
+for k,v in pairs(miningIDs) do validItemIDs[k] = true end
+for k,v in pairs(herbIDs) do validItemIDs[k] = true end
+for k,v in pairs(gemIDs) do validItemIDs[k] = true end
+for k,v in pairs(fishingIDs) do validItemIDs[k] = true end
+
+-- Lista de Logros (Gamification v1.7.0)
+-- Lista de Logros (Gamification v1.7.3)
+-- Campos: id, req_type, req_key, threshold, name, desc, icon, category, points
+local achievementsList = {
+    -- GENERAL (Total Items)
+    { category="General", id=1, req_type="total", threshold=100, points=5, name="Novato", desc="Recolecta 100 items.", icon="Interface\\Icons\\Inv_misc_bag_10" },
+    { category="General", id=2, req_type="total", threshold=500, points=5, name="Aprendiz", desc="Recolecta 500 items.", icon="Interface\\Icons\\Inv_misc_bag_09" },
+    { category="General", id=3, req_type="total", threshold=1000, points=10, name="Oficial", desc="Recolecta 1,000 items.", icon="Interface\\Icons\\Inv_misc_bag_19" },
+    { category="General", id=4, req_type="total", threshold=2500, points=10, name="Experto", desc="Recolecta 2,500 items.", icon="Interface\\Icons\\Inv_misc_bag_27" },
+    { category="General", id=5, req_type="total", threshold=5000, points=20, name="Maestro", desc="Recolecta 5,000 items.", icon="Interface\\Icons\\Inv_misc_bag_10_red" },
+    { category="General", id=6, req_type="total", threshold=10000, points=50, name="Gran Maestro", desc="Recolecta 10,000 items.", icon="Interface\\Icons\\Inv_misc_bag_10_green" },
+    { category="General", id=7, req_type="total", threshold=25000, points=100, name="Leyenda", desc="Recolecta 25,000 items.", icon="Interface\\Icons\\Inv_misc_bag_10_blue" },
+
+    -- MINERÍA
+    { category="Minería", id=8, req_type="category_count", req_key="Minería", threshold=1, points=5, name="Primera Piedra", desc="1 Mineral.", icon="Interface\\Icons\\Inv_stone_01" },
+    { category="Minería", id=9, req_type="category_count", req_key="Minería", threshold=10, points=5, name="Sucio", desc="10 Minerales.", icon="Interface\\Icons\\Inv_misc_dust_01" }, -- Fixed: clods -> dust
+    { category="Minería", id=10, req_type="category_count", req_key="Minería", threshold=50, points=5, name="Picapiedra", desc="50 Minerales.", icon="Interface\\Icons\\Inv_pick_01" },
+    { category="Minería", id=11, req_type="category_count", req_key="Minería", threshold=100, points=5, name="Minero de Cobre", desc="100 Minerales.", icon="Interface\\Icons\\Inv_ore_copper_01" },
+    { category="Minería", id=12, req_type="category_count", req_key="Minería", threshold=250, points=10, name="Minero de Hierro", desc="250 Minerales.", icon="Interface\\Icons\\Inv_ore_iron_01" },
+    { category="Minería", id=13, req_type="category_count", req_key="Minería", threshold=500, points=10, name="Minero de Mitril", desc="500 Minerales.", icon="Interface\\Icons\\Inv_ore_mithril_01" }, -- Fixed: 02 -> 01
+    { category="Minería", id=14, req_type="category_count", req_key="Minería", threshold=1000, points=20, name="Minero de Torio", desc="1,000 Minerales.", icon="Interface\\Icons\\Inv_ore_thorium_01" },
+    { category="Minería", id=15, req_type="category_count", req_key="Minería", threshold=2500, points=20, name="Minero Arcano", desc="2,500 Minerales.", icon="Interface\\Icons\\Inv_misc_gem_crystal_01" }, -- Fixed: arcanium -> crystal
+    { category="Minería", id=16, req_type="category_count", req_key="Minería", threshold=5000, points=50, name="Señor de la Roca", desc="5,000 Minerales.", icon="Interface\\Icons\\Trade_mining" },
+
+    -- HERBORISTERÍA
+    { category="Herboristería", id=18, req_type="category_count", req_key="Herboristería", threshold=1, points=5, name="Una Flor", desc="1 Hierba.", icon="Interface\\Icons\\Inv_misc_flower_01" },
+    { category="Herboristería", id=19, req_type="category_count", req_key="Herboristería", threshold=10, points=5, name="Ramo", desc="10 Hierbas.", icon="Interface\\Icons\\Inv_misc_flower_02" },
+    { category="Herboristería", id=20, req_type="category_count", req_key="Herboristería", threshold=50, points=5, name="Jardinero", desc="50 Hierbas.", icon="Interface\\Icons\\Inv_misc_flower_02" },
+    { category="Herboristería", id=21, req_type="category_count", req_key="Herboristería", threshold=100, points=5, name="Florista", desc="100 Hierbas.", icon="Interface\\Icons\\Inv_misc_herb_01" },
+    { category="Herboristería", id=22, req_type="category_count", req_key="Herboristería", threshold=250, points=10, name="Herborista", desc="250 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_sansamroot" },
+    { category="Herboristería", id=23, req_type="category_count", req_key="Herboristería", threshold=500, points=10, name="Botanista", desc="500 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_dreamfoil" },
+    { category="Herboristería", id=24, req_type="category_count", req_key="Herboristería", threshold=1000, points=20, name="Druida Honorario", desc="1,000 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_mountainsilversage" }, -- Fixed: mountain -> mountainsilversage
+    { category="Herboristería", id=25, req_type="category_count", req_key="Herboristería", threshold=2500, points=20, name="Guardián del Bosque", desc="2,500 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_icecap" }, -- Fixed: lotus -> icecap (safe)
+
+    -- PESCA
+    { category="Pesca", id=28, req_type="category_count", req_key="Pesca", threshold=1, points=5, name="Primer Pez", desc="1 Pez.", icon="Interface\\Icons\\Inv_misc_fish_01" },
+    { category="Pesca", id=29, req_type="category_count", req_key="Pesca", threshold=10, points=5, name="Cena", desc="10 Peces.", icon="Interface\\Icons\\Inv_misc_fish_02" },
+    { category="Pesca", id=30, req_type="category_count", req_key="Pesca", threshold=25, points=5, name="Pescador de Charca", desc="25 Peces.", icon="Interface\\Icons\\Inv_misc_fish_01" },
+    { category="Pesca", id=31, req_type="category_count", req_key="Pesca", threshold=50, points=5, name="Pescador de Río", desc="50 Peces.", icon="Interface\\Icons\\Inv_misc_fish_02" },
+    { category="Pesca", id=32, req_type="category_count", req_key="Pesca", threshold=100, points=10, name="Pescador de Mar", desc="100 Peces.", icon="Interface\\Icons\\Inv_misc_fish_03" },
+    { category="Pesca", id=33, req_type="category_count", req_key="Pesca", threshold=250, points=10, name="Viejo Lobo de Mar", desc="250 Peces.", icon="Interface\\Icons\\Inv_misc_fish_turtle_01" },
+    { category="Pesca", id=34, req_type="category_count", req_key="Pesca", threshold=500, points=20, name="Maestro Pescador", desc="500 Peces.", icon="Interface\\Icons\\Trade_Fishing" },
+
+    -- GEMAS & PIEDRAS
+    { category="Tesoros", id=40, req_type="category_count", req_key="Gemas", threshold=10, points=5, name="Brillante", desc="10 Gemas.", icon="Interface\\Icons\\inv_misc_gem_emerald_02" },
+    { category="Tesoros", id=41, req_type="category_count", req_key="Gemas", threshold=50, points=10, name="Joyero", desc="50 Gemas.", icon="Interface\\Icons\\inv_misc_gem_diamond_01" },
+    { category="Tesoros", id=42, req_type="category_count", req_key="Gemas", threshold=100, points=20, name="Apariciones Raras", desc="100 Gemas.", icon="Interface\\Icons\\inv_misc_gem_opal_01" },
+    { category="Tesoros", id=45, req_type="item_id", req_key=12363, threshold=10, points=20, name="Arcanista", desc="10 Cristales Arcanos.", icon="Interface\\Icons\\Inv_misc_gem_crystal_01" },
+
+    -- ECONOMÍA (Valor Estimado Venta NPC)
+    { category="Economía", id=50, req_type="total_value", threshold=100000, points=5, name="Ahorrador", desc="Valor recogido: 10g.", icon="Interface\\Icons\\inv_misc_coin_01" },
+    { category="Economía", id=51, req_type="total_value", threshold=500000, points=10, name="Mercader", desc="Valor recogido: 50g.", icon="Interface\\Icons\\inv_misc_coin_03" },
+    { category="Economía", id=52, req_type="total_value", threshold=1000000, points=10, name="Burgués", desc="Valor recogido: 100g.", icon="Interface\\Icons\\inv_misc_coin_05" },
+    { category="Economía", id=53, req_type="total_value", threshold=5000000, points=20, name="Magnate", desc="Valor recogido: 500g.", icon="Interface\\Icons\\inv_misc_coin_06" },
+    { category="Economía", id=54, req_type="total_value", threshold=10000000, points=50, name="Millonario", desc="Valor recogido: 1,000g.", icon="Interface\\Icons\\Inv_Box_01" },
+
+    -- ESPECÍFICOS (Hardcore v1.7.4)
+    { category="Especialista", id=101, req_type="item_id", req_key=2770, threshold=200, points=10, name="Edad de Cobre", desc="200 Mineral de Cobre.", icon="Interface\\Icons\\Inv_ore_copper_01" },
+    { category="Especialista", id=102, req_type="item_id", req_key=2772, threshold=200, points=10, name="Voluntad de Hierro", desc="200 Mineral de Hierro.", icon="Interface\\Icons\\Inv_ore_iron_01" },
+    { category="Especialista", id=103, req_type="item_id", req_key=10620, threshold=200, points=30, name="Poder de Torio", desc="200 Mineral de Torio.", icon="Interface\\Icons\\Inv_ore_thorium_02" },
+    
+    -- Hardcore (New v1.7.4)
+    { category="Especialista", id=110, req_type="item_id", req_key=11370, threshold=200, points=50, name="Corazón Oscuro", desc="200 Hierro Negro.", icon="Interface\\Icons\\Inv_ore_mithril_01" }, -- Dark Iron usually reuses textures in classic or has specific Inv_ore_darkiron_01? Using mithril as backup or Inv_ingot_01. Let's use Inv_ore_mithril_01 (blackish)
+    { category="Especialista", id=111, req_type="item_id", req_key=13466, threshold=200, points=50, name="Peste Latente", desc="200 Flor de Peste.", icon="Interface\\Icons\\Inv_misc_herb_13" }, -- Plaguebloom
+    { category="Especialista", id=112, req_type="item_id", req_key=13465, threshold=200, points=50, name="Sabio de Montaña", desc="200 Salvia de Montaña.", icon="Interface\\Icons\\inv_misc_herb_mountainsilversage" },
+    { category="Especialista", id=113, req_type="item_id", req_key=13464, threshold=200, points=40, name="Sueño Eterno", desc="200 Hoja de Sueño.", icon="Interface\\Icons\\Inv_misc_herb_12" }, -- Dreamfoil
+    { category="Especialista", id=114, req_type="item_id", req_key=13422, threshold=200, points=50, name="Escama Dura", desc="200 Anguilas Escama de P.", icon="Interface\\Icons\\inv_misc_fish_21" }, -- Stonescale fixed
 }
 
 -- ============================================================================
@@ -76,6 +160,9 @@ local options = {
         showFrame = { order = 5, name = "Mostrar Botón Flotante", type = "toggle", get = 'GetShowFrame', set = 'SetShowFrame', width = "full" },
         muteSound = { order = 6, name = "Silenciar Sonidos", desc = "Desactiva el sonido al cambiar de rastreo.", type = "toggle", get = 'GetMuteSound', set = 'SetMuteSound' },
         
+        -- v1.7.3 Social
+        announceGuild = { order = 7, name = "Anunciar Logros a Hermandad", desc = "Envía un mensaje al chat de hermandad cuando desbloqueas un logro.", type = "toggle", get = 'GetAnnounceGuild', set = 'SetAnnounceGuild', width = "full" },
+
         headerInfo = { order = 10, type = "header", name = "Información del Tooltip" },
         showDurability = { order = 11, name = "Mostrar Durabilidad", type = "toggle", get = 'GetShowDurability', set = 'SetShowDurability' },
         showSkillLevel = { order = 12, name = "Nivel de Profesión", type = "toggle", get = 'GetShowSkillLevel', set = 'SetShowSkillLevel' },
@@ -111,7 +198,15 @@ local defaults = {
         pauseInResting = false,
         pauseTargetEnemy = false,
         pauseInInstance = false,
-        combatHideMounted = false 
+        combatHideMounted = false,
+        announceGuild = false -- v1.7.3
+    },
+    global = {
+        history = {
+            totalItems = 0,
+            items = {},
+            achievements = {}
+        }
     }
 }
 
@@ -158,7 +253,11 @@ function GatherTracker:CreateGUI()
     -- Clics
     f:SetScript("OnClick", function(self, button)
         if button == "LeftButton" then
-            GatherTracker:ToggleTracking()
+            if IsShiftKeyDown() then
+                GatherTracker:CreateHistoryUI()
+            else
+                GatherTracker:ToggleTracking()
+            end
         elseif button == "RightButton" then
             LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
         end
@@ -288,6 +387,301 @@ function GatherTracker:UpdateGUI()
 end
 
 -- ============================================================================
+-- 3.1 GATHERMASTER UI (v1.7.0)
+-- ============================================================================
+
+function GatherTracker:CreateHistoryUI()
+    if self.historyFrame then
+        if self.historyFrame:IsShown() then self.historyFrame:Hide() else self.historyFrame:Show() end
+        return
+    end
+    
+    local f = CreateFrame("Frame", "GatherTrackerHistoryFrame", UIParent, "BackdropTemplate")
+    f:SetSize(450, 420) -- Expanded size
+    f:SetPoint("CENTER")
+    -- v1.7.5: Flat Dark Theme (AceConfig Style)
+    f:SetBackdrop({
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    f:SetBackdropColor(0.05, 0.05, 0.05, 0.95) -- Casi negro absoluto
+    f:SetBackdropBorderColor(0.5, 0.5, 0.5, 1) -- Borde grisáceo
+    
+    f:EnableMouse(true)
+    f:SetMovable(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetScript("OnDragStart", f.StartMoving)
+    f:SetScript("OnDragStop", f.StopMovingOrSizing)
+    
+    -- Close Button
+    local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", -5, -5)
+    
+    -- Title
+    f.title = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    f.title:SetPoint("TOP", 0, -15)
+    f.title:SetText("Sala de Trofeos - GatherTracker v1.7.3")
+    
+    -- Stats
+    f.stats = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    f.stats:SetPoint("TOPLEFT", 25, -45)
+    
+    -- Points Display (v1.7.3)
+    f.points = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+    f.points:SetPoint("TOPRIGHT", -25, -45)
+    f.points:SetText("Puntos: 0")
+    
+    -- Reset Button (v1.7.1 Safe Reset)
+    f.resetBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+    f.resetBtn:SetSize(100, 25)
+    f.resetBtn:SetPoint("BOTTOMLEFT", 20, 15)
+    f.resetBtn:SetText("Borrar Datos")
+    f.resetBtn:SetScript("OnClick", function()
+        StaticPopup_Show("GT_RESET_CONFIRM")
+    end)
+    
+    -- ScrollFrame
+    local sf = CreateFrame("ScrollFrame", "GatherTrackerHistoryScroll", f, "UIPanelScrollFrameTemplate")
+    sf:SetPoint("TOPLEFT", 20, -70)
+    sf:SetPoint("BOTTOMRIGHT", -40, 50) -- Más espacio para el botón abajo
+    
+    local content = CreateFrame("Frame", nil, sf)
+    content:SetSize(380, 800) -- Alto dinámico sería ideal, pero fijo alto funciona si es suficiente
+    sf:SetScrollChild(content)
+    
+    -- Achievements Grid (v1.7.2 Dynamic Headers)
+    f.achievements = {}
+    local x, y = 10, -10
+    local col = 0
+    local lastCat = ""
+    
+    for i, ach in ipairs(achievementsList) do
+        -- Check Category Change
+        local thisCat = ach.category or "Otros"
+        if thisCat ~= lastCat then
+            -- Nueva Línea
+            if col > 0 then
+                 col = 0
+                 x = 10
+                 y = y - 60
+            end
+            
+            -- Header
+            y = y - 10
+            local header = content:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+            header:SetPoint("TOPLEFT", x + 5, y)
+            header:SetText(thisCat)
+            y = y - 25 -- Espacio bajo header
+            lastCat = thisCat
+        end
+        
+        local btn = CreateFrame("Button", nil, content, "ItemButtonTemplate")
+        btn:SetPoint("TOPLEFT", x, y)
+        SetItemButtonTexture(btn, ach.icon)
+        
+        btn:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            local h = GatherTracker.db.global.history
+            local unlocked = h and h.achievements[ach.id]
+            
+            GameTooltip:AddLine(ach.name)
+            GameTooltip:AddLine(ach.desc, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Valor:", (ach.points or 0) .. " Ptos", 1, 1, 1, 0, 1, 0) -- v1.7.3 Points in Tooltip
+            
+            -- Progress Calculation
+            local current = 0
+            if ach.req_type == "total" then 
+                current = h.totalItems or 0
+            elseif ach.req_type == "item_id" then 
+                current = h.items[ach.req_key] or 0
+            elseif ach.req_type == "category_count" then
+                -- Calc on fly for tooltip
+                for id, count in pairs(h.items) do
+                    if GatherTracker:GetItemCategory(id) == ach.req_key then
+                        current = current + count
+                    end
+                end
+            elseif ach.req_type == "total_value" then
+                current = h.totalValue or 0
+            end
+            
+            local maxVal = ach.threshold
+            local percent = math.min(100, math.floor((current/maxVal)*100))
+            
+            if ach.req_type == "total_value" then
+                 GameTooltip:AddDoubleLine("Progreso:", GetCoinTextureString(current) .. " / " .. GetCoinTextureString(maxVal), 1,1,1, 1,1,0)
+            else
+                 GameTooltip:AddDoubleLine("Progreso:", current .. " / " .. maxVal .. " ("..percent.."%)", 1,1,1, 1,1,0)
+            end
+
+            if unlocked then
+                GameTooltip:AddLine("|cff00ff00[DESBLOQUEADO]|r", 1, 1, 1)
+            else
+                GameTooltip:AddLine("|cffff0000[BLOQUEADO]|r", 1, 1, 1)
+            end
+            GameTooltip:Show()
+        end)
+        btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        
+        f.achievements[i] = btn
+        
+        -- Grid 6 columns
+        x = x + 50
+        col = col + 1
+        if col >= 6 then
+            col = 0
+            x = 10
+            y = y - 50
+        end
+    end
+    
+    content:SetHeight(math.abs(y) + 60) -- Alto dinámico exacto
+    
+    -- Auto-Update on Show
+    f:SetScript("OnShow", function() GatherTracker:UpdateHistoryUI() end)
+    
+    self.historyFrame = f
+    self:UpdateHistoryUI()
+end
+
+
+
+function GatherTracker:CreateToastFrame()
+    if self.toastFrame then return end
+    
+    local f = CreateFrame("Frame", "GatherTrackerToast", UIParent, "BackdropTemplate")
+    -- v1.7.5: Re-diseño "Heroico" y Alegre
+    f:SetSize(300, 70)
+    f:SetPoint("TOP", 0, -150)
+    f:SetBackdrop({
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border", -- Borde Dorado Brillante
+        tile = true, tileSize = 16, edgeSize = 32,
+        insets = { left = 11, right = 12, top = 12, bottom = 11 }
+    })
+    -- Fondo con tinte azul oscuro para contrastar con el dorado
+    f:SetBackdropColor(0.0, 0.1, 0.2, 0.9) 
+    f:SetAlpha(0) 
+    
+    -- Icono Grande
+    f.icon = f:CreateTexture(nil, "ARTWORK")
+    f.icon:SetSize(50, 50)
+    f.icon:SetPoint("LEFT", 15, 0)
+    f.icon:SetTexture("Interface\\Icons\\Inv_misc_questionmark")
+    
+    -- Brillo (Glow) detrás del texto (Simulado con textura)
+    f.glow = f:CreateTexture(nil, "BACKGROUND")
+    f.glow:SetTexture("Interface\\Cooldown\\star4")
+    f.glow:SetBlendMode("ADD")
+    f.glow:SetAlpha(0.3)
+    f.glow:SetPoint("CENTER", f.icon, "CENTER", 0, 0)
+    f.glow:SetSize(80, 80)
+
+    -- Texto Título (Grande y Amarillo)
+    f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge") -- Fuente MUY grande
+    f.title:SetPoint("TOPLEFT", f.icon, "TOPRIGHT", 15, -10)
+    f.title:SetText("|cffFFFF00¡LOGRO!|r") -- Título corto y directo
+    
+    -- Texto Nombre (Grande y Blanco)
+    f.name = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    f.name:SetPoint("BOTTOMLEFT", f.icon, "BOTTOMRIGHT", 15, 10)
+    f.name:SetText("Nombre del Logro")
+    
+    -- Animación (Fade In / Fade Out)
+    f.animGroup = f:CreateAnimationGroup()
+    
+    local fadeIn = f.animGroup:CreateAnimation("Alpha")
+    fadeIn:SetFromAlpha(0)
+    fadeIn:SetToAlpha(1)
+    fadeIn:SetDuration(0.5)
+    fadeIn:SetOrder(1)
+    
+    local hold = f.animGroup:CreateAnimation("Alpha")
+    hold:SetFromAlpha(1)
+    hold:SetToAlpha(1)
+    hold:SetDuration(4.0) -- Mantener 4 segundos
+    hold:SetOrder(2)
+    
+    local fadeOut = f.animGroup:CreateAnimation("Alpha")
+    fadeOut:SetFromAlpha(1)
+    fadeOut:SetToAlpha(0)
+    fadeOut:SetDuration(0.5)
+    fadeOut:SetOrder(3)
+    
+    f.animGroup:SetScript("OnFinished", function() f:SetAlpha(0) end)
+    
+    self.toastFrame = f
+end
+
+function GatherTracker:ShowToast(achievementID)
+    if not self.toastFrame then self:CreateToastFrame() end
+    
+    local ach = nil
+    for _, a in ipairs(achievementsList) do
+        if a.id == achievementID then ach = a; break end
+    end
+    
+    if not ach then return end
+    
+    self.toastFrame.icon:SetTexture(ach.icon)
+    self.toastFrame.name:SetText(ach.name)
+    
+    self.toastFrame:SetAlpha(1) -- Asegurar visibilidad para animación
+    self.toastFrame.animGroup:Stop()
+    self.toastFrame.animGroup:Play()
+    
+    PlaySound(878) -- Quest Complete (Motivador y seguro)
+end
+
+function GatherTracker:UpdateHistoryUI()
+    if not self.historyFrame or not self.historyFrame:IsShown() then return end
+    
+    local h = self.db.global.history
+    if not h then return end
+    
+    
+    local unlockedPoints = 0
+    local totalPoints = 0
+    
+    -- Calc points
+    for _, ach in ipairs(achievementsList) do
+        totalPoints = totalPoints + (ach.points or 0)
+        if h.achievements[ach.id] then
+            unlockedPoints = unlockedPoints + (ach.points or 0)
+        end
+    end
+    
+    self.historyFrame.stats:SetText("Total Items Recolectados (Vida): |cffFFFFFF" .. (h.totalItems or 0) .. "|r")
+    
+    -- Update Points Text (v1.7.3)
+    if self.historyFrame.points then
+        local color = "|cffFF0000" -- Rojo
+        local pct = 0
+        if totalPoints > 0 then pct = unlockedPoints / totalPoints end
+        
+        if pct > 0.3 then color = "|cffFFFF00" end -- Amarillo
+        if pct > 0.7 then color = "|cff00FF00" end -- Verde
+        
+        self.historyFrame.points:SetText("Puntos: " .. color .. unlockedPoints .. "|r / " .. totalPoints)
+    end
+    
+    for i, ach in ipairs(achievementsList) do
+        local btn = self.historyFrame.achievements[i]
+        local unlocked = h.achievements[ach.id]
+        
+        if unlocked then
+            SetItemButtonDesaturated(btn, false)
+            btn.icon:SetVertexColor(1, 1, 1)
+        else
+            SetItemButtonDesaturated(btn, true)
+            btn.icon:SetVertexColor(0.2, 0.2, 0.2)
+        end
+    end
+end
+
+-- ============================================================================
 -- 4. FUNCIONES PRINCIPALES
 -- ============================================================================
 
@@ -366,6 +760,72 @@ function GatherTracker:OnLootMsg(event, msg)
         self.lootSession[itemID] = { count = 0, name = name, link = link }
     end
     self.lootSession[itemID].count = self.lootSession[itemID].count + count
+    
+    -- Actualizar Historial Global (v1.7.0)
+    self:UpdateHistory(itemID, count)
+end
+
+function GatherTracker:UpdateHistory(itemID, count)
+    if not itemID or not count then return end
+    
+    -- Asegurar inicialización (por si acaso)
+    if not self.db.global.history then 
+        self.db.global.history = { totalItems = 0, items = {}, achievements = {} } 
+    end
+    
+    local h = self.db.global.history
+    h.totalItems = (h.totalItems or 0) + count
+    h.items[itemID] = (h.items[itemID] or 0) + count
+    
+    -- V1.7.2 Value Tracking
+    local _, _, _, _, _, _, _, _, _, _, sellPrice = GetItemInfo(itemID)
+    if sellPrice and sellPrice > 0 then
+        h.totalValue = (h.totalValue or 0) + (sellPrice * count)
+    end
+    
+    self:CheckAchievements()
+    self:UpdateHistoryUI()
+end
+
+function GatherTracker:CheckAchievements()
+    local h = self.db.global.history
+    if not h then return end
+    
+    -- Pre-calcular totales de categoría para optimizar
+    local catTotals = {}
+    for id, count in pairs(h.items) do
+        local cat = self:GetItemCategory(id)
+        catTotals[cat] = (catTotals[cat] or 0) + count
+    end
+    
+    for _, ach in ipairs(achievementsList) do
+        local progress = 0
+        if ach.req_type == "total" then
+            progress = h.totalItems or 0
+        elseif ach.req_type == "item_id" then
+            progress = h.items[ach.req_key] or 0
+        elseif ach.req_type == "category_count" then
+            progress = catTotals[ach.req_key] or 0
+        elseif ach.req_type == "total_value" then
+            progress = h.totalValue or 0
+        end
+        
+        -- Verificar si cumple condición y no estaba desbloqueado
+        if progress >= ach.threshold and not h.achievements[ach.id] then
+            h.achievements[ach.id] = true
+            
+            -- Notificación Visual (Toast)
+            self:ShowToast(ach.id)
+            
+            -- Mensaje de respaldo en chat
+            print("|cff00ff00[GatherTracker]|r Logro desbloqueado: " .. ach.name .. " (+" .. (ach.points or 0) .. " pts)")
+            
+            -- v1.7.3 Social: Guild Announcement
+            if self.db.profile.announceGuild and IsInGuild() then
+                SendChatMessage("[GatherTracker] He desbloqueado el logro: " .. ach.name .. " ("..(ach.points or 0).." pts)!", "GUILD")
+            end
+        end
+    end
 end
 
 function GatherTracker:GetAuctionPrice(link)
@@ -393,6 +853,17 @@ end
 
 -- Funciones eliminadas: ScanTooltip, AnnounceLastNode (ya no aplica nodeHistory)
 -- Reemplazamos UpdateTooltip para mostrar tabla de loot
+
+-- Helper Category (v1.7.1)
+function GatherTracker:GetItemCategory(itemID)
+    if not itemID then return "Otro" end
+    if miningIDs[itemID] then return "Minería" end
+    if herbIDs[itemID] then return "Herboristería" end
+    if fishingIDs[itemID] then return "Pesca" end
+    if gemIDs[itemID] then return "Gemas" end
+    return "Otro"
+end
+
 -- Helper para durabilidad
 function GatherTracker:GetAverageDurability()
     local cur, max = 0, 0
@@ -541,7 +1012,9 @@ function GatherTracker:UpdateTooltip(frame)
     end
     
     GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(" ")
     GameTooltip:AddLine("|cffFFFFFFClic Izq:|r Activar/Pausar")
+    GameTooltip:AddLine("|cffFFFFFFShift + Clic:|r Logros / Historial")
     GameTooltip:AddLine("|cffFFFFFFRueda:|r Ajustar Tiempo")
     GameTooltip:AddLine("|cffFFFFFFClic Der:|r Opciones")
     GameTooltip:Show()
@@ -620,8 +1093,17 @@ function GatherTracker:ScanTrackingSpells()
         end
     end
     
-    -- Notificar a AceConfig que las opciones han cambiado (si hiciera falta refresh manual)
+    -- Notificar a AceConfigRegistry si es necesario
     -- LibStub("AceConfigRegistry-3.0"):NotifyChange("GatherTracker")
+end
+
+-- v1.7.1 Reset Logic
+function GatherTracker:ResetDatabase()
+    self.db.global.history = { totalItems = 0, items = {}, achievements = {}, totalValue = 0 }
+    print("|cff00ff00[GatherTracker]|r Base de datos reiniciada correctamente.")
+    
+    -- Actualización inmediata (Sin necesidad de reload)
+    self:UpdateHistoryUI()
 end
 
 -- CheckProfessions y CheckProfessionsDelayed ya no son necesarios con el sistema dinámico puro.
@@ -662,6 +1144,8 @@ function GatherTracker:SetPauseTargetEnemy(info, val) self.db.profile.pauseTarge
 function GatherTracker:GetPauseInInstance() return self.db.profile.pauseInInstance end
 function GatherTracker:SetPauseInInstance(info, val) self.db.profile.pauseInInstance = val end
 
+function GatherTracker:GetAnnounceGuild() return self.db.profile.announceGuild end
+function GatherTracker:SetAnnounceGuild(info, val) self.db.profile.announceGuild = val end
 
 function GatherTracker:ChatCommand(input)
     local command = input and input:trim()
@@ -669,6 +1153,11 @@ function GatherTracker:ChatCommand(input)
         self:ToggleTracking()
     elseif command == "opt" or command == "options" then
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
+    elseif command == "history" or command == "logros" then
+        self:CreateHistoryUI()
+    elseif command == "resetdb" then
+        -- Redirigir al flujo seguro
+        StaticPopup_Show("GT_RESET_CONFIRM")
     else
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
     end

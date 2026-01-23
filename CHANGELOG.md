@@ -2,6 +2,34 @@
 
 Todas las actualizaciones notables de este proyecto se documentarán en este archivo.
 
+## [v1.7.6] - 2026-01-23
+### Summary
+**"La Actualización de Gamificación - Edición Completa"**
+Esta versión masiva transforma GatherTracker en un juego dentro del juego. Introduce un sistema completo de logros con más de 50 objetivos, una "Sala de Trofeos" visualmente renovada, clasificaciones por rangos (Bronce a Diamante), y retos "Hardcore" para los recolectores más dedicados. Incluye correcciones visuales importantes y un rediseño de notificaciones.
+
+### New Features
+- **Sala de Trofeos Renodava (`/gt history`)**:
+    - **Interfaz Estandarizada**: Nuevo diseño oscuro/plano consistente con AceConfig.
+    - **Sistema de Puntos**: Visualización de "Puntos Obtenidos / Totales" con colores de progreso.
+    - **Categorización Visual**: Logros agrupados por secciones (Minería, Pesca, Economía, etc.) con encabezados claros.
+    - **Botón de Reset Seguro**: Nueva opción para borrar datos con doble confirmación.
+
+- **Sistema de Logros Expandido (50+)**:
+    - **Curva de Aprendizaje**: Nuevos logros de inicio (1 y 10 unidades) para todas las profesiones.
+    - **Rangos**: Progresión clara desde "Novato" hasta "Leyenda".
+    - **Especialista Hardcore**: Retos de 200 unidades para materiales de endgame (Torio, Hierro Negro, Flor de Peste).
+    - **Economía**: Logros basados en el valor de venta acumulado ("Millonario").
+
+- **Social & UX**:
+    - **Anuncios de Hermandad**: Opción para compartir automáticamente tus logros en el chat de Guild.
+    - **Notificaciones "Heroicas"**: Nuevo diseño de Toast (alerta de logro) más grande, dorado y animado.
+    - **Acceso Rápido**: `Shift + Click` en el botón del minimapa abre la Sala de Trofeos.
+
+### Bug Fixes & Polish
+- **Iconos**: Corregidos múltiples iconos faltantes o erróneos para el cliente Classic (incluyendo Pesca, Anguilas y Millonario).
+- **Estabilidad**: El reset de base de datos ahora refresca la interfaz instantáneamente sin requerir `/reload`.
+- **Feedback**: Mejorada la descripción de tooltips con valores detallados (Progreso y Puntos).
+
 ## [v1.6.0] - 2026-01-21
 ### ✨ New Features
 - **Tooltip Information**:
