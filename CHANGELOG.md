@@ -2,33 +2,40 @@
 
 Todas las actualizaciones notables de este proyecto se documentarán en este archivo.
 
+## [v1.8.0] - 2026-01-23
+### Localization
+- **Multi-Language Support (i18n)**:
+    - Added full English (enUS) and Spanish (esES) localization.
+    - The addon automatically detects the game client language.
+    - Refactored all in-game text, tooltips, and achievement names to use locale tables.
+
 ## [v1.7.6] - 2026-01-23
 ### Summary
-**"La Actualización de Gamificación - Edición Completa"**
-Esta versión masiva transforma GatherTracker en un juego dentro del juego. Introduce un sistema completo de logros con más de 50 objetivos, una "Sala de Trofeos" visualmente renovada, clasificaciones por rangos (Bronce a Diamante), y retos "Hardcore" para los recolectores más dedicados. Incluye correcciones visuales importantes y un rediseño de notificaciones.
+**"The Gamification Update - Complete Edition"**
+This massive update transforms GatherTracker into a game within a game. It introduces a complete achievement system with over 50 objectives, a visually revamped "Trophy Room", rank classifications (Bronze to Diamond), and "Hardcore" challenges for the most dedicated gatherers. Includes major visual fixes and a notification redesign.
 
 ### New Features
-- **Sala de Trofeos Renodava (`/gt history`)**:
-    - **Interfaz Estandarizada**: Nuevo diseño oscuro/plano consistente con AceConfig.
-    - **Sistema de Puntos**: Visualización de "Puntos Obtenidos / Totales" con colores de progreso.
-    - **Categorización Visual**: Logros agrupados por secciones (Minería, Pesca, Economía, etc.) con encabezados claros.
-    - **Botón de Reset Seguro**: Nueva opción para borrar datos con doble confirmación.
+- **Revamped Trophy Room (`/gt history`)**:
+    - **Standardized UI**: New dark/flat design consistent with AceConfig.
+    - **Points System**: "Points Earned / Total" display with progress colors.
+    - **Visual Categorization**: Achievements grouped by sections (Mining, Fishing, Economy, etc.) with clear headers.
+    - **Secure Reset Button**: New option to clear data with double confirmation.
 
-- **Sistema de Logros Expandido (50+)**:
-    - **Curva de Aprendizaje**: Nuevos logros de inicio (1 y 10 unidades) para todas las profesiones.
-    - **Rangos**: Progresión clara desde "Novato" hasta "Leyenda".
-    - **Especialista Hardcore**: Retos de 200 unidades para materiales de endgame (Torio, Hierro Negro, Flor de Peste).
-    - **Economía**: Logros basados en el valor de venta acumulado ("Millonario").
+- **Expanded Achievement System (50+)**:
+    - **Learning Curve**: New starter achievements (1 and 10 units) for all professions.
+    - **Ranks**: Clear progression from "Novice" to "Legend".
+    - **Hardcore Specialist**: 200-unit challenges for endgame materials (Thorium, Dark Iron, Plaguebloom).
+    - **Economy**: Achievements based on accumulated sell value ("Millionaire").
 
 - **Social & UX**:
-    - **Anuncios de Hermandad**: Opción para compartir automáticamente tus logros en el chat de Guild.
-    - **Notificaciones "Heroicas"**: Nuevo diseño de Toast (alerta de logro) más grande, dorado y animado.
-    - **Acceso Rápido**: `Shift + Click` en el botón del minimapa abre la Sala de Trofeos.
+    - **Guild Announcements**: Option to automatically share your achievements in Guild chat.
+    - **"Heroic" Notifications**: New Toast design (achievement alert), larger, golden, and animated.
+    - **Quick Access**: `Shift + Click` on the minimap button opens the Trophy Room.
 
 ### Bug Fixes & Polish
-- **Iconos**: Corregidos múltiples iconos faltantes o erróneos para el cliente Classic (incluyendo Pesca, Anguilas y Millonario).
-- **Estabilidad**: El reset de base de datos ahora refresca la interfaz instantáneamente sin requerir `/reload`.
-- **Feedback**: Mejorada la descripción de tooltips con valores detallados (Progreso y Puntos).
+- **Icons**: Fixed multiple missing or incorrect icons for the Classic client (including Fishing, Eels, and Millionaire).
+- **Stability**: Database reset now instantly refreshes the interface without requiring `/reload`.
+- **Feedback**: Improved tooltip descriptions with detailed values (Progress and Points).
 
 ## [v1.6.0] - 2026-01-21
 ### ✨ New Features
@@ -101,6 +108,6 @@ Esta versión masiva transforma GatherTracker en un juego dentro del juego. Intr
 
 
 ## [v1.0.0] - 2025-12-18
-- Lanzamiento inicial.
-- Alternancia básica de rastreo (Minerales/Hierbas).
-- Botón de minimapa móvil.
+- Initial release.
+- Basic tracking toggling (Minerals/Herbs).
+- Movable minimap button.

@@ -1,162 +1,134 @@
 # GatherTracker
 
-**Don't compromise. Track EVERYTHING.**
+**Don't just Farm. DOMINATE the Landscape.** 🌍
 
-Are you tired of constantly clicking buttons or spamming macros to switch between Minerals and Herbs? **GatherTracker** handles the heavy lifting for you. This lightweight, "install-and-forget" addon automatically cycles your minimap tracking at smart intervals, ensuring you **never miss a node again** while exploring Azeroth. **Fully compatible with ALL game client languages!** 🌍
+Are you tired of the mindless grind? Does staring at the minimap make you want to sleep? **GatherTracker** turns your gathering professions into an **RPG within an RPG**.
 
-> 🚀 **Active Development**: We are constantly improving! We listen to the community to fix bugs and add new features weekly.
+This isn't just a utility; it's a **Progression System**. We automate the boring stuff (switching between Herbs/Mines, selling trash) so you can focus on the glory. **Track EVERYTHING, earn XP, unlock Medals, and climb the Ranks from Bronze to Legend.**
 
-### Why GatherTracker?
-- **Maximized Efficiency**: Track Mining and Herbalism (or Treasure/Beasts) simultaneously without manual input.
-- **Smart Automation**: It detects your professions, pauses when you fight, and handles your vendor trash.
-- **Loot Awareness**: Know exactly what you've farmed and its Auction House value in real-time.
+> 🚀 **v1.7.6 Gamification Update**: We've overhauled the experience with a new **Trophy Room**, **Points System**, **Rankings**, and **Hardcore Challenges**.
+
+---
+
+### 🎮 Why GatherTracker?
+
+*   **🏆 It's a Game:** Every node you mine or pick adds to your score. Watch your points go up and your rank increase.
+*   **🧠 It's Smart:** It detects your professions, pauses when you fight, stays quiet when you sneak, and handles your vendor trash.
+*   **⚡ It's Efficient:** Tracks Mining and Herbalism (or Treasure/Beasts) simultaneously by cycling faster than humanly possible.
+*   **📢 It's Social:** Unlocked a rare achievement? Broadcast it to your Guild and let them know who the real MVP is.
+
+---
 
 ## Features ✨
 
-*   **⚡ Smart Auto-Switching:** Automatically toggles between two tracking types.
-*   **🧠 Intelligent Automation (New in v1.6):**
-    *   **Context Aware:** Auto-pauses in **Cities/Inns**, **Stealth** (Rogue/Druid), **Instances**, or when targeting enemies.
-    *   **Combat Logic:** Hides in combat for a clean UI, but *optionally* stays visible if you are mounted.
-*   **📊 Session Loot Tracker:**
-    *   Tracks Ores, Herbs, and Gems in real-time.
-    *   **Smart Tooltip:** Shows Equipment **Durability** and **Profession Skill** levels.
-    *   Displays Vendor & Auction House values.
-*   **🎛️ Complete Control:**
-    *   **Sound:** Optional "Click" sound on switch (with Mute toggle).
-    *   **Universal:** Works with ANY game client language.
-    *   **Auto-Sell:** Automatically clear gray trash at vendors.
-29: *   **🏆 Gamification (New in v1.7):**
-30:     *   **Lifetime History:** Tracks your total gathered items forever (persists across reloads).
-31:     *   **Achievements:** Unlock medals and earn "Level Up" sounds as you reach gathering milestones.
-32:     *   **Trophy Room:** View your progress and badges with `/gt history` (Shift+Click on minimap button).
-    *   **Points & Social:** Compete for high scores and announce your achievements to your Guild!
-33:
+### 🏅 The "Trophy Room" (UPDATED v1.7.6)
+*   **Visual Progression:** A stunning, dark-themed UI (Shift+Click minimap button) showcasing your achievements.
+*   **Points System:** Earn points for every milestone. Can you reach 100% completion?
+*   **Ranking Ladder:** Start as a **Novice** and grind your way to **Diamond** and **Legend**.
+*   **Hardcore Challenges:** Think you're a pro? Try collecting **200 Arcane Crystals** or **Black Lotus**.
+*   **Guild Bragging Rights:** Optional setting to announce your achievements to Guild Chat. **Let them hear your victory!**
 
-### 🔍 Supported Tracking Types
-GatherTracker works with all standard tracking spells, plus special ones for specific classes/races:
+### 🤖 Intelligent Automation
+*   **Context Aware:** Auto-pauses in **Cities**, **Inns**, **Stealth** (Rogue/Druid), **Instances**, or when targeting enemies.
+*   **Combat Mode:** Intelligent hiding during battle. Supports "Allow if Mounted" for safe gathering in dangerous zones.
+*   **Auto-Sell:** Automatically creates gold by selling gray trash items when you visit a vendor.
 
-*   ⛏️ **Mining** (Find Minerals)
-*   🌿 **Herbalism** (Find Herbs)
-*   💰 **Treasure** (Dwarves only)
-*   🏹 **Hunter Tracking**:
-    *   🐾 Beasts
-    *   🐉 Dragonkin
-    *   👹 Demons
-    *   👻 Undead
-    *   👣 Giants
-    *   🔥 Elementals
-    *   👤 Humanoids
-    *   🕶️ Hidden
-*   🐻 **Druid Tracking**:
-    *   👤 Humanoids (Cat Form)
+### 📊 Real-Time Analytics
+*   **Session Loot:** Tracks exactly how many Ores, Herbs, and Gems you've found this session.
+*   **Value Tracking:** See the **Vendor** and **Auction House** value of your haul in real-time.
+*   **Smart Tooltip:** Monitor your **Durability** and **Profession Skill** levels at a glance.
+
+### 🌐 Universal Compatibility
+*   **Language Agnostic:** Works perfectly in English and Spanish (UI fully translated).
+*   **Multi-Client Support:** Detects any game client language for Node scanning.
+*   **Zero Config:** Install it, and it automatically detects your professions.
+
+---
 
 ## Usage
 
-1.  Once installed, you will see a button on your screen showing your current tracking icon.
-2.  **Left Click** the button to start toggling.
-3.  Use the **Mouse Wheel** on the button to adjust how fast the tracking switches.
+1.  **Install & Go:** You will see a button on your screen. Left Click to start.
+2.  **Shift + Click:** Opens your **Trophy Room**. Check your achievements!
+3.  **Right Click:** Opens the Options menu configuration.
+4.  **Mouse Wheel:** Adjusts the tracking cycle speed.
 
 ### Chat Commands
+*   `/gtr` or `/gtrack` - Toggle tracker.
+*   `/gtr history` - Open Trophy Room.
+*   `/gtr opt` - Open Options.
+*   `/gtr reset` - Reset position.
 
-*   `/gtr` or `/gtrack` - Toggles the tracker on or off.
-*   `/gtr opt` - Opens the full configuration panel.
-*   `/gtr reset` - Resets the button position to center.
-59: *   `/gtr history` - Opens the Trophy Room (Achievements).
-60:
-
-## Configuration
-
-In the options menu (Right Click on the button or `/gtr opt`), you can:
-*   Select which two resource types you want to track (e.g., Minerals and Herbs, or Treasure and Beasts for Dwarves/Hunters).
-*   Hide the minimap button if you prefer using only hotkeys.
+---
 
 ## Author
-
-Created by **Petazo**.
-
-## License
-
-This project is open source.
+Created by **Petazo**, for the grinder in all of us.
 
 ---
 ---
 
 # GatherTracker (Español)
 
-**No te conformes. Rastrea TODO.**
+**No solo Farmees. DOMINA el Paisaje.** 🌍
 
-¿Cansado de estar pulsando botones o spameando macros para cambiar entre Minerales y Hierbas? **GatherTracker** hace el trabajo pesado por ti. Este addon ligero de tipo "instalar y olvidar" alterna automáticamente tu rastreo en el minimapa en intervalos inteligentes, asegurando que **nunca te pierdas una mena o planta** mientras exploras Azeroth. **¡Totalmente compatible con TODOS los idiomas del juego!** 🌍
+¿Estás cansado de la rutina sin sentido? ¿Mirar el minimapa te da sueño? **GatherTracker** convierte tus profesiones de recolección en un **RPG dentro de un RPG**.
 
-> 🚀 **Desarrollo Activo**: ¡Estamos mejorando constantemente! Escuchamos a la comunidad para corregir errores y añadir nuevas funciones semanalmente.
+Esto no es solo una utilidad; es un **Sistema de Progresión**. Automatizamos lo aburrido (cambiar entre Hierbas/Minas, vender basura) para que puedas concentrarte en la gloria. **Rastrea TODO, gana XP, desbloquea Medallas y sube de Rango desde Bronce hasta Leyenda.**
 
-### ¿Por qué usar GatherTracker?
-- **Máxima Eficiencia**: Rastrea Minería y Herboristería (o Tesoros/Bestias) simultáneamente sin intervención manual.
-- **Automatización Inteligente**: Detecta tus profesiones, se pausa cuando entras en combate y gestiona tu basura en el vendedor.
-- **Control de Loot**: Conoce exactamente qué has farmeado y su valor en Subasta en tiempo real.
+> 🚀 **Actualización de Gamificación v1.7.6**: Hemos renovado la experiencia con una nueva **Sala de Trofeos**, **Sistema de Puntos**, **Rangos** y **Desafíos Hardcore**.
+
+---
+
+### 🎮 ¿Por qué GatherTracker?
+
+*   **🏆 Es un Juego:** Cada nodo que picas o recoges suma a tu puntuación. Mira cómo suben tus puntos y aumenta tu rango.
+*   **🧠 Es Inteligente:** Detecta tus profesiones, pausa cuando peleas, se calla cuando te escondes y gestiona tu basura en el vendedor.
+*   **⚡ Es Eficiente:** Rastrea Minería y Herboristería (o Tesoros/Bestias) simultáneamente ciclando más rápido de lo humanamente posible.
+*   **📢 Es Social:** ¿Desbloqueaste un logro raro? Transmítelo a tu Hermandad y hazles saber quién es el verdadero MVP.
+
+---
 
 ## Características ✨
 
-- **⚡ Alternancia Inteligente**: Cambia automáticamente entre rastreos (ej: Minerales/Hierbas).
-- **🧠 Automatización Inteligente (Nuevo en v1.6)**:
-    - **Contexto**: Se pausa automáticamente en **Ciudades/Posadas**, **Sigilo**, **Mazmorras**, o al apuntar a un **Enemigo**.
-    - **Lógica de Combate**: Se oculta en combate para limpiar la UI, o (opcionalmente) permanece visible si estás montado.
-- **📊 Rastreador de Loot de Sesión**:
-    - Registra Minerales, Hierbas y Gemas en tiempo real.
-    - **Tooltip Mejorado**: Muestra **Durabilidad** del equipo y **Nivel de Profesión**.
-    - Integración de precios de Subasta y Vendedor.
-- **🎛️ Control Total**:
-    - **Sonido**: "Click" opcional al cambiar (con botón de silencio).
-    - **Universal**: Funciona en CUALQUIER idioma del cliente.
-    - **Auto-Venta**: Limpia basura gris en el vendedor automáticamente.
-104: - **🏆 Gamificación (Nuevo en v1.7)**:
-105:     - **Historial de Vida**: Guarda el total de items recolectados para siempre (persiste tras reiniciar).
-106:     - **Logros**: Desbloquea medallas y sonidos épicos al alcanzar hitos de farmeo.
-107:     - **Sala de Trofeos**: Mira tu progreso y medallas con `/gt history` (Shift+Clic en el botón).
-    - **Puntos y Social**: ¡Compite por el puntaje máximo y anuncia tus logros a tu Hermandad!
-108:
+### 🏅 La "Sala de Trofeos" (ACTUALIZADO v1.7.6)
+*   **Progresión Visual:** Una interfaz impresionante y oscura (Shift+Clic en el botón del minimapa) que muestra tus logros.
+*   **Sistema de Puntos:** Gana puntos por cada hito. ¿Puedes llegar al 100% de finalización?
+*   **Escalera de Rangos:** Empieza como **Novato** y ábrete camino hasta **Diamante** y **Leyenda**.
+*   **Desafíos Hardcore:** ¿Crees que eres un profesional? Intenta recolectar **200 Cristales Arcanos** o **Loto Negro**.
+*   **Derecho a Presumir:** Configuración opcional para anunciar tus logros en el chat de Hermandad. **¡Que escuchen tu victoria!**
 
-### 🔍 Rastreos Soportados
-GatherTracker funciona con todos los hechizos estándar, además de los especiales por clase/raza:
+### 🤖 Automatización Inteligente
+*   **Conciencia de Contexto:** Se pausa automáticamente en **Ciudades**, **Posadas**, **Sigilo** (Pícaro/Druida), **Instancias**, o al seleccionar enemigos.
+*   **Modo de Combate:** Ocultamiento inteligente durante la batalla. Soporta "Permitir si Montado" para recolección segura en zonas peligrosas.
+*   **Auto-Venta:** Crea oro automáticamente vendiendo basura gris cuando visitas a un vendedor.
 
-*   ⛏️ **Minería** (Buscar Minerales)
-*   🌿 **Herboristería** (Buscar Hierbas)
-*   💰 **Tesoros** (Solo Enanos)
-*   🏹 **Cazadores**:
-    *   🐾 Bestias
-    *   🐉 Dragones
-    *   👹 Demonios
-    *   👻 No-muertos
-    *   👣 Gigantes
-    *   🔥 Elementales
-    *   👤 Humanoides
-    *   🕶️ Oculto
-*   🐻 **Druidas**:
-    *   👤 Humanoides (Forma Felina)
+### 📊 Análisis en Tiempo Real
+*   **Loot de Sesión:** Rastrea exactamente cuántos Minerales, Hierbas y Gemas has encontrado en esta sesión.
+*   **Rastreo de Valor:** Mira el valor de **Vendedor** y **Casa de Subastas** de tu botín en tiempo real.
+*   **Tooltip Inteligente:** Monitorea tu **Durabilidad** y niveles de **Habilidad de Profesión** de un vistazo.
+
+### � Compatibilidad Universal
+*   **Agnóstico del Idioma:** Funciona perfectamente en clientes en Inglés, Español, Alemán, Francés, Chino... CUALQUIER cliente.
+*   **Cero Configuración:** Instálalo y detectará automáticamente tus profesiones.
+
+---
 
 ## Uso
 
-1.  Una vez instalado, verás un botón en tu pantalla con el icono de tu rastreo actual.
-2.  Haz **Clic Izquierdo** en el botón para iniciar la alternancia.
-3.  Usa la **Rueda del Ratón** sobre el botón para ajustar qué tan rápido cambia el rastreo.
+1.  **Instalar y Listo:** Verás un botón en tu pantalla. Clic Izquierdo para empezar.
+2.  **Shift + Clic:** Abre tu **Sala de Trofeos**. ¡Revisa tus logros!
+3.  **Clic Derecho:** Abre el menú de Opciones.
+4.  **Rueda del Ratón:** Ajusta la velocidad del ciclo de rastreo.
 
-## Comandos
+### Comandos de Chat
+*   `/gtr` o `/gtrack` - Alternar rastreador.
+*   `/gtr history` - Abrir Sala de Trofeos.
+*   `/gtr opt` - Abrir Opciones.
+*   `/gtr reset` - Restablecer posición.
 
-- `/gtr` o `/gtrack`: Activar/Pausar.
-- `/gtr opt`: Abrir configuración.
-- `/gtr reset`: Restablecer posición del botón.
-134: - `/gtr history`: Abrir Sala de Trofeos (Logros).
-135:
-
-## Configuración
-
-En el menú de opciones (Clic Derecho en el botón o `/gtr opt`), puedes:
-*   Seleccionar qué dos tipos de recursos quieres rastrear (ej: Minerales y Hierbas, o Tesoros y Bestias para Enanos/Cazadores).
-*   Ocultar el botón del minimapa si prefieres usar solo atajos.
+---
 
 ## Autor
-
-Creado por **Petazo**.
+Creado por **Petazo**, para el grinder que todos llevamos dentro.
 
 ## Licencia
-
 Este proyecto es de código abierto.

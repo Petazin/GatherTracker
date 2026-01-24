@@ -1,4 +1,5 @@
 GatherTracker = LibStub("AceAddon-3.0"):NewAddon("GatherTracker", "AceTimer-3.0", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0")
+local L = LibStub("AceLocale-3.0"):GetLocale("GatherTracker")
 
 -- ============================================================================
 -- 1. TABLAS DE DATOS
@@ -18,9 +19,9 @@ local availableTrackingTypes = {}
 -- ID UNIVERSAL LIST (Categorized for v1.7.1)
 -- Static Popup Dialog (v1.7.1 Security)
 StaticPopupDialogs["GT_RESET_CONFIRM"] = {
-    text = "¿Estás seguro de que quieres BORRAR permanentemente todo el historial y logros?",
-    button1 = "Sí, borrar",
-    button2 = "Cancelar",
+    text = L["RESET_CONFIRM_TEXT"],
+    button1 = L["RESET_BUTTON_YES"],
+    button2 = L["RESET_BUTTON_NO"],
     OnAccept = function()
         GatherTracker:ResetDatabase()
     end,
@@ -83,68 +84,68 @@ for k,v in pairs(fishingIDs) do validItemIDs[k] = true end
 -- Campos: id, req_type, req_key, threshold, name, desc, icon, category, points
 local achievementsList = {
     -- GENERAL (Total Items)
-    { category="General", id=1, req_type="total", threshold=100, points=5, name="Novato", desc="Recolecta 100 items.", icon="Interface\\Icons\\Inv_misc_bag_10" },
-    { category="General", id=2, req_type="total", threshold=500, points=5, name="Aprendiz", desc="Recolecta 500 items.", icon="Interface\\Icons\\Inv_misc_bag_09" },
-    { category="General", id=3, req_type="total", threshold=1000, points=10, name="Oficial", desc="Recolecta 1,000 items.", icon="Interface\\Icons\\Inv_misc_bag_19" },
-    { category="General", id=4, req_type="total", threshold=2500, points=10, name="Experto", desc="Recolecta 2,500 items.", icon="Interface\\Icons\\Inv_misc_bag_27" },
-    { category="General", id=5, req_type="total", threshold=5000, points=20, name="Maestro", desc="Recolecta 5,000 items.", icon="Interface\\Icons\\Inv_misc_bag_10_red" },
-    { category="General", id=6, req_type="total", threshold=10000, points=50, name="Gran Maestro", desc="Recolecta 10,000 items.", icon="Interface\\Icons\\Inv_misc_bag_10_green" },
-    { category="General", id=7, req_type="total", threshold=25000, points=100, name="Leyenda", desc="Recolecta 25,000 items.", icon="Interface\\Icons\\Inv_misc_bag_10_blue" },
+    { category="CAT_GENERAL", id=1, req_type="total", threshold=100, points=5, name="ACH_NOVATO_NAME", desc="ACH_NOVATO_DESC", icon="Interface\\Icons\\Inv_misc_bag_10" },
+    { category="CAT_GENERAL", id=2, req_type="total", threshold=500, points=5, name="ACH_APRENDIZ_NAME", desc="ACH_APRENDIZ_DESC", icon="Interface\\Icons\\Inv_misc_bag_09" },
+    { category="CAT_GENERAL", id=3, req_type="total", threshold=1000, points=10, name="ACH_OFICIAL_NAME", desc="ACH_OFICIAL_DESC", icon="Interface\\Icons\\Inv_misc_bag_19" },
+    { category="CAT_GENERAL", id=4, req_type="total", threshold=2500, points=10, name="ACH_EXPERTO_NAME", desc="ACH_EXPERTO_DESC", icon="Interface\\Icons\\Inv_misc_bag_27" },
+    { category="CAT_GENERAL", id=5, req_type="total", threshold=5000, points=20, name="ACH_MAESTRO_NAME", desc="ACH_MAESTRO_DESC", icon="Interface\\Icons\\Inv_misc_bag_10_red" },
+    { category="CAT_GENERAL", id=6, req_type="total", threshold=10000, points=50, name="ACH_GRAN_MAESTRO_NAME", desc="ACH_GRAN_MAESTRO_DESC", icon="Interface\\Icons\\Inv_misc_bag_10_green" },
+    { category="CAT_GENERAL", id=7, req_type="total", threshold=25000, points=100, name="ACH_LEYENDA_NAME", desc="ACH_LEYENDA_DESC", icon="Interface\\Icons\\Inv_misc_bag_10_blue" },
 
     -- MINERÍA
-    { category="Minería", id=8, req_type="category_count", req_key="Minería", threshold=1, points=5, name="Primera Piedra", desc="1 Mineral.", icon="Interface\\Icons\\Inv_stone_01" },
-    { category="Minería", id=9, req_type="category_count", req_key="Minería", threshold=10, points=5, name="Sucio", desc="10 Minerales.", icon="Interface\\Icons\\Inv_misc_dust_01" }, -- Fixed: clods -> dust
-    { category="Minería", id=10, req_type="category_count", req_key="Minería", threshold=50, points=5, name="Picapiedra", desc="50 Minerales.", icon="Interface\\Icons\\Inv_pick_01" },
-    { category="Minería", id=11, req_type="category_count", req_key="Minería", threshold=100, points=5, name="Minero de Cobre", desc="100 Minerales.", icon="Interface\\Icons\\Inv_ore_copper_01" },
-    { category="Minería", id=12, req_type="category_count", req_key="Minería", threshold=250, points=10, name="Minero de Hierro", desc="250 Minerales.", icon="Interface\\Icons\\Inv_ore_iron_01" },
-    { category="Minería", id=13, req_type="category_count", req_key="Minería", threshold=500, points=10, name="Minero de Mitril", desc="500 Minerales.", icon="Interface\\Icons\\Inv_ore_mithril_01" }, -- Fixed: 02 -> 01
-    { category="Minería", id=14, req_type="category_count", req_key="Minería", threshold=1000, points=20, name="Minero de Torio", desc="1,000 Minerales.", icon="Interface\\Icons\\Inv_ore_thorium_01" },
-    { category="Minería", id=15, req_type="category_count", req_key="Minería", threshold=2500, points=20, name="Minero Arcano", desc="2,500 Minerales.", icon="Interface\\Icons\\Inv_misc_gem_crystal_01" }, -- Fixed: arcanium -> crystal
-    { category="Minería", id=16, req_type="category_count", req_key="Minería", threshold=5000, points=50, name="Señor de la Roca", desc="5,000 Minerales.", icon="Interface\\Icons\\Trade_mining" },
+    { category="CAT_MINING", id=8, req_type="category_count", req_key="CAT_MINING", threshold=1, points=5, name="ACH_PRIMERA_PIEDRA_NAME", desc="ACH_PRIMERA_PIEDRA_DESC", icon="Interface\\Icons\\Inv_stone_01" },
+    { category="CAT_MINING", id=9, req_type="category_count", req_key="CAT_MINING", threshold=10, points=5, name="ACH_SUCIO_NAME", desc="ACH_SUCIO_DESC", icon="Interface\\Icons\\Inv_misc_dust_01" },
+    { category="CAT_MINING", id=10, req_type="category_count", req_key="CAT_MINING", threshold=50, points=5, name="ACH_PICAPIEDRA_NAME", desc="ACH_PICAPIEDRA_DESC", icon="Interface\\Icons\\Inv_pick_01" },
+    { category="CAT_MINING", id=11, req_type="category_count", req_key="CAT_MINING", threshold=100, points=5, name="ACH_MINERO_COBRE_NAME", desc="ACH_MINERO_COBRE_DESC", icon="Interface\\Icons\\Inv_ore_copper_01" },
+    { category="CAT_MINING", id=12, req_type="category_count", req_key="CAT_MINING", threshold=250, points=10, name="ACH_MINERO_HIERRO_NAME", desc="ACH_MINERO_HIERRO_DESC", icon="Interface\\Icons\\Inv_ore_iron_01" },
+    { category="CAT_MINING", id=13, req_type="category_count", req_key="CAT_MINING", threshold=500, points=10, name="ACH_MINERO_MITRIL_NAME", desc="ACH_MINERO_MITRIL_DESC", icon="Interface\\Icons\\Inv_ore_mithril_01" },
+    { category="CAT_MINING", id=14, req_type="category_count", req_key="CAT_MINING", threshold=1000, points=20, name="ACH_MINERO_TORIO_NAME", desc="ACH_MINERO_TORIO_DESC", icon="Interface\\Icons\\Inv_ore_thorium_01" },
+    { category="CAT_MINING", id=15, req_type="category_count", req_key="CAT_MINING", threshold=2500, points=20, name="ACH_MINERO_ARCANO_NAME", desc="ACH_MINERO_ARCANO_DESC", icon="Interface\\Icons\\Inv_misc_gem_crystal_01" },
+    { category="CAT_MINING", id=16, req_type="category_count", req_key="CAT_MINING", threshold=5000, points=50, name="ACH_SENOR_ROCA_NAME", desc="ACH_SENOR_ROCA_DESC", icon="Interface\\Icons\\Trade_mining" },
 
     -- HERBORISTERÍA
-    { category="Herboristería", id=18, req_type="category_count", req_key="Herboristería", threshold=1, points=5, name="Una Flor", desc="1 Hierba.", icon="Interface\\Icons\\Inv_misc_flower_01" },
-    { category="Herboristería", id=19, req_type="category_count", req_key="Herboristería", threshold=10, points=5, name="Ramo", desc="10 Hierbas.", icon="Interface\\Icons\\Inv_misc_flower_02" },
-    { category="Herboristería", id=20, req_type="category_count", req_key="Herboristería", threshold=50, points=5, name="Jardinero", desc="50 Hierbas.", icon="Interface\\Icons\\Inv_misc_flower_02" },
-    { category="Herboristería", id=21, req_type="category_count", req_key="Herboristería", threshold=100, points=5, name="Florista", desc="100 Hierbas.", icon="Interface\\Icons\\Inv_misc_herb_01" },
-    { category="Herboristería", id=22, req_type="category_count", req_key="Herboristería", threshold=250, points=10, name="Herborista", desc="250 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_sansamroot" },
-    { category="Herboristería", id=23, req_type="category_count", req_key="Herboristería", threshold=500, points=10, name="Botanista", desc="500 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_dreamfoil" },
-    { category="Herboristería", id=24, req_type="category_count", req_key="Herboristería", threshold=1000, points=20, name="Druida Honorario", desc="1,000 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_mountainsilversage" }, -- Fixed: mountain -> mountainsilversage
-    { category="Herboristería", id=25, req_type="category_count", req_key="Herboristería", threshold=2500, points=20, name="Guardián del Bosque", desc="2,500 Hierbas.", icon="Interface\\Icons\\inv_misc_herb_icecap" }, -- Fixed: lotus -> icecap (safe)
+    { category="CAT_HERBALISM", id=18, req_type="category_count", req_key="CAT_HERBALISM", threshold=1, points=5, name="ACH_UNA_FLOR_NAME", desc="ACH_UNA_FLOR_DESC", icon="Interface\\Icons\\Inv_misc_flower_01" },
+    { category="CAT_HERBALISM", id=19, req_type="category_count", req_key="CAT_HERBALISM", threshold=10, points=5, name="ACH_RAMO_NAME", desc="ACH_RAMO_DESC", icon="Interface\\Icons\\Inv_misc_flower_02" },
+    { category="CAT_HERBALISM", id=20, req_type="category_count", req_key="CAT_HERBALISM", threshold=50, points=5, name="ACH_JARDINERO_NAME", desc="ACH_JARDINERO_DESC", icon="Interface\\Icons\\Inv_misc_flower_02" },
+    { category="CAT_HERBALISM", id=21, req_type="category_count", req_key="CAT_HERBALISM", threshold=100, points=5, name="ACH_FLORISTA_NAME", desc="ACH_FLORISTA_DESC", icon="Interface\\Icons\\Inv_misc_herb_01" },
+    { category="CAT_HERBALISM", id=22, req_type="category_count", req_key="CAT_HERBALISM", threshold=250, points=10, name="ACH_HERBORISTA_NAME", desc="ACH_HERBORISTA_DESC", icon="Interface\\Icons\\inv_misc_herb_sansamroot" },
+    { category="CAT_HERBALISM", id=23, req_type="category_count", req_key="CAT_HERBALISM", threshold=500, points=10, name="ACH_BOTANISTA_NAME", desc="ACH_BOTANISTA_DESC", icon="Interface\\Icons\\inv_misc_herb_dreamfoil" },
+    { category="CAT_HERBALISM", id=24, req_type="category_count", req_key="CAT_HERBALISM", threshold=1000, points=20, name="ACH_DRUIDA_NAME", desc="ACH_DRUIDA_DESC", icon="Interface\\Icons\\inv_misc_herb_mountainsilversage" },
+    { category="CAT_HERBALISM", id=25, req_type="category_count", req_key="CAT_HERBALISM", threshold=2500, points=20, name="ACH_GUARDIAN_NAME", desc="ACH_GUARDIAN_DESC", icon="Interface\\Icons\\inv_misc_herb_icecap" },
 
     -- PESCA
-    { category="Pesca", id=28, req_type="category_count", req_key="Pesca", threshold=1, points=5, name="Primer Pez", desc="1 Pez.", icon="Interface\\Icons\\Inv_misc_fish_01" },
-    { category="Pesca", id=29, req_type="category_count", req_key="Pesca", threshold=10, points=5, name="Cena", desc="10 Peces.", icon="Interface\\Icons\\Inv_misc_fish_02" },
-    { category="Pesca", id=30, req_type="category_count", req_key="Pesca", threshold=25, points=5, name="Pescador de Charca", desc="25 Peces.", icon="Interface\\Icons\\Inv_misc_fish_01" },
-    { category="Pesca", id=31, req_type="category_count", req_key="Pesca", threshold=50, points=5, name="Pescador de Río", desc="50 Peces.", icon="Interface\\Icons\\Inv_misc_fish_02" },
-    { category="Pesca", id=32, req_type="category_count", req_key="Pesca", threshold=100, points=10, name="Pescador de Mar", desc="100 Peces.", icon="Interface\\Icons\\Inv_misc_fish_03" },
-    { category="Pesca", id=33, req_type="category_count", req_key="Pesca", threshold=250, points=10, name="Viejo Lobo de Mar", desc="250 Peces.", icon="Interface\\Icons\\Inv_misc_fish_turtle_01" },
-    { category="Pesca", id=34, req_type="category_count", req_key="Pesca", threshold=500, points=20, name="Maestro Pescador", desc="500 Peces.", icon="Interface\\Icons\\Trade_Fishing" },
+    { category="CAT_FISHING", id=28, req_type="category_count", req_key="CAT_FISHING", threshold=1, points=5, name="ACH_PRIMER_PEZ_NAME", desc="ACH_PRIMER_PEZ_DESC", icon="Interface\\Icons\\Inv_misc_fish_01" },
+    { category="CAT_FISHING", id=29, req_type="category_count", req_key="CAT_FISHING", threshold=10, points=5, name="ACH_CENA_NAME", desc="ACH_CENA_DESC", icon="Interface\\Icons\\Inv_misc_fish_02" },
+    { category="CAT_FISHING", id=30, req_type="category_count", req_key="CAT_FISHING", threshold=25, points=5, name="ACH_PESCADOR_CHARCA_NAME", desc="ACH_PESCADOR_CHARCA_DESC", icon="Interface\\Icons\\Inv_misc_fish_01" },
+    { category="CAT_FISHING", id=31, req_type="category_count", req_key="CAT_FISHING", threshold=50, points=5, name="ACH_PESCADOR_RIO_NAME", desc="ACH_PESCADOR_RIO_DESC", icon="Interface\\Icons\\Inv_misc_fish_02" },
+    { category="CAT_FISHING", id=32, req_type="category_count", req_key="CAT_FISHING", threshold=100, points=10, name="ACH_PESCADOR_MAR_NAME", desc="ACH_PESCADOR_MAR_DESC", icon="Interface\\Icons\\Inv_misc_fish_03" },
+    { category="CAT_FISHING", id=33, req_type="category_count", req_key="CAT_FISHING", threshold=250, points=10, name="ACH_LOBO_MAR_NAME", desc="ACH_LOBO_MAR_DESC", icon="Interface\\Icons\\Inv_misc_fish_turtle_01" },
+    { category="CAT_FISHING", id=34, req_type="category_count", req_key="CAT_FISHING", threshold=500, points=20, name="ACH_MAESTRO_PESCADOR_NAME", desc="ACH_MAESTRO_PESCADOR_DESC", icon="Interface\\Icons\\Trade_Fishing" },
 
     -- GEMAS & PIEDRAS
-    { category="Tesoros", id=40, req_type="category_count", req_key="Gemas", threshold=10, points=5, name="Brillante", desc="10 Gemas.", icon="Interface\\Icons\\inv_misc_gem_emerald_02" },
-    { category="Tesoros", id=41, req_type="category_count", req_key="Gemas", threshold=50, points=10, name="Joyero", desc="50 Gemas.", icon="Interface\\Icons\\inv_misc_gem_diamond_01" },
-    { category="Tesoros", id=42, req_type="category_count", req_key="Gemas", threshold=100, points=20, name="Apariciones Raras", desc="100 Gemas.", icon="Interface\\Icons\\inv_misc_gem_opal_01" },
-    { category="Tesoros", id=45, req_type="item_id", req_key=12363, threshold=10, points=20, name="Arcanista", desc="10 Cristales Arcanos.", icon="Interface\\Icons\\Inv_misc_gem_crystal_01" },
+    { category="CAT_TREASURES", id=40, req_type="category_count", req_key="CAT_TREASURES", threshold=10, points=5, name="ACH_BRILLANTE_NAME", desc="ACH_BRILLANTE_DESC", icon="Interface\\Icons\\inv_misc_gem_emerald_02" },
+    { category="CAT_TREASURES", id=41, req_type="category_count", req_key="CAT_TREASURES", threshold=50, points=10, name="ACH_JOYERO_NAME", desc="ACH_JOYERO_DESC", icon="Interface\\Icons\\inv_misc_gem_diamond_01" },
+    { category="CAT_TREASURES", id=42, req_type="category_count", req_key="CAT_TREASURES", threshold=100, points=20, name="ACH_APARICIONES_NAME", desc="ACH_APARICIONES_DESC", icon="Interface\\Icons\\inv_misc_gem_opal_01" },
+    { category="CAT_TREASURES", id=45, req_type="item_id", req_key=12363, threshold=10, points=20, name="ACH_ARCANISTA_NAME", desc="ACH_ARCANISTA_DESC", icon="Interface\\Icons\\Inv_misc_gem_crystal_01" },
 
     -- ECONOMÍA (Valor Estimado Venta NPC)
-    { category="Economía", id=50, req_type="total_value", threshold=100000, points=5, name="Ahorrador", desc="Valor recogido: 10g.", icon="Interface\\Icons\\inv_misc_coin_01" },
-    { category="Economía", id=51, req_type="total_value", threshold=500000, points=10, name="Mercader", desc="Valor recogido: 50g.", icon="Interface\\Icons\\inv_misc_coin_03" },
-    { category="Economía", id=52, req_type="total_value", threshold=1000000, points=10, name="Burgués", desc="Valor recogido: 100g.", icon="Interface\\Icons\\inv_misc_coin_05" },
-    { category="Economía", id=53, req_type="total_value", threshold=5000000, points=20, name="Magnate", desc="Valor recogido: 500g.", icon="Interface\\Icons\\inv_misc_coin_06" },
-    { category="Economía", id=54, req_type="total_value", threshold=10000000, points=50, name="Millonario", desc="Valor recogido: 1,000g.", icon="Interface\\Icons\\Inv_Box_01" },
+    { category="CAT_ECONOMY", id=50, req_type="total_value", threshold=100000, points=5, name="ACH_AHORRADOR_NAME", desc="ACH_AHORRADOR_DESC", icon="Interface\\Icons\\inv_misc_coin_01" },
+    { category="CAT_ECONOMY", id=51, req_type="total_value", threshold=500000, points=10, name="ACH_MERCADER_NAME", desc="ACH_MERCADER_DESC", icon="Interface\\Icons\\inv_misc_coin_03" },
+    { category="CAT_ECONOMY", id=52, req_type="total_value", threshold=1000000, points=10, name="ACH_BURGUES_NAME", desc="ACH_BURGUES_DESC", icon="Interface\\Icons\\inv_misc_coin_05" },
+    { category="CAT_ECONOMY", id=53, req_type="total_value", threshold=5000000, points=20, name="ACH_MAGNATE_NAME", desc="ACH_MAGNATE_DESC", icon="Interface\\Icons\\inv_misc_coin_06" },
+    { category="CAT_ECONOMY", id=54, req_type="total_value", threshold=10000000, points=50, name="ACH_MILLONARIO_NAME", desc="ACH_MILLONARIO_DESC", icon="Interface\\Icons\\Inv_Box_01" },
 
     -- ESPECÍFICOS (Hardcore v1.7.4)
-    { category="Especialista", id=101, req_type="item_id", req_key=2770, threshold=200, points=10, name="Edad de Cobre", desc="200 Mineral de Cobre.", icon="Interface\\Icons\\Inv_ore_copper_01" },
-    { category="Especialista", id=102, req_type="item_id", req_key=2772, threshold=200, points=10, name="Voluntad de Hierro", desc="200 Mineral de Hierro.", icon="Interface\\Icons\\Inv_ore_iron_01" },
-    { category="Especialista", id=103, req_type="item_id", req_key=10620, threshold=200, points=30, name="Poder de Torio", desc="200 Mineral de Torio.", icon="Interface\\Icons\\Inv_ore_thorium_02" },
+    { category="CAT_SPECIALIST", id=101, req_type="item_id", req_key=2770, threshold=200, points=10, name="ACH_EDAD_COBRE_NAME", desc="ACH_EDAD_COBRE_DESC", icon="Interface\\Icons\\Inv_ore_copper_01" },
+    { category="CAT_SPECIALIST", id=102, req_type="item_id", req_key=2772, threshold=200, points=10, name="ACH_VOLUNTAD_HIERRO_NAME", desc="ACH_VOLUNTAD_HIERRO_DESC", icon="Interface\\Icons\\Inv_ore_iron_01" },
+    { category="CAT_SPECIALIST", id=103, req_type="item_id", req_key=10620, threshold=200, points=30, name="ACH_PODER_TORIO_NAME", desc="ACH_PODER_TORIO_DESC", icon="Interface\\Icons\\Inv_ore_thorium_02" },
     
     -- Hardcore (New v1.7.4)
-    { category="Especialista", id=110, req_type="item_id", req_key=11370, threshold=200, points=50, name="Corazón Oscuro", desc="200 Hierro Negro.", icon="Interface\\Icons\\Inv_ore_mithril_01" }, -- Dark Iron usually reuses textures in classic or has specific Inv_ore_darkiron_01? Using mithril as backup or Inv_ingot_01. Let's use Inv_ore_mithril_01 (blackish)
-    { category="Especialista", id=111, req_type="item_id", req_key=13466, threshold=200, points=50, name="Peste Latente", desc="200 Flor de Peste.", icon="Interface\\Icons\\Inv_misc_herb_13" }, -- Plaguebloom
-    { category="Especialista", id=112, req_type="item_id", req_key=13465, threshold=200, points=50, name="Sabio de Montaña", desc="200 Salvia de Montaña.", icon="Interface\\Icons\\inv_misc_herb_mountainsilversage" },
-    { category="Especialista", id=113, req_type="item_id", req_key=13464, threshold=200, points=40, name="Sueño Eterno", desc="200 Hoja de Sueño.", icon="Interface\\Icons\\Inv_misc_herb_12" }, -- Dreamfoil
-    { category="Especialista", id=114, req_type="item_id", req_key=13422, threshold=200, points=50, name="Escama Dura", desc="200 Anguilas Escama de P.", icon="Interface\\Icons\\inv_misc_fish_21" }, -- Stonescale fixed
+    { category="CAT_SPECIALIST", id=110, req_type="item_id", req_key=11370, threshold=200, points=50, name="ACH_CORAZON_OSCURO_NAME", desc="ACH_CORAZON_OSCURO_DESC", icon="Interface\\Icons\\Inv_ore_mithril_01" },
+    { category="CAT_SPECIALIST", id=111, req_type="item_id", req_key=13466, threshold=200, points=50, name="ACH_PESTE_LATENTE_NAME", desc="ACH_PESTE_LATENTE_DESC", icon="Interface\\Icons\\Inv_misc_herb_13" },
+    { category="CAT_SPECIALIST", id=112, req_type="item_id", req_key=13465, threshold=200, points=50, name="ACH_SABIO_MONTANA_NAME", desc="ACH_SABIO_MONTANA_DESC", icon="Interface\\Icons\\inv_misc_herb_mountainsilversage" },
+    { category="CAT_SPECIALIST", id=113, req_type="item_id", req_key=13464, threshold=200, points=40, name="ACH_SUENO_ETERNO_NAME", desc="ACH_SUENO_ETERNO_DESC", icon="Interface\\Icons\\Inv_misc_herb_12" },
+    { category="CAT_SPECIALIST", id=114, req_type="item_id", req_key=13422, threshold=200, points=50, name="ACH_ESCAMA_DURA_NAME", desc="ACH_ESCAMA_DURA_DESC", icon="Interface\\Icons\\inv_misc_fish_21" },
 }
 
 -- ============================================================================
@@ -153,31 +154,31 @@ local achievementsList = {
 local options = {
     name = 'GatherTracker', handler = GatherTracker, type = 'group',
     args = {
-        header = { order = 1, type = "header", name = "Configuración de Rastreo" },
-        type1 = { order = 2, name = "Rastreo Primario", type = "select", values = function() return availableTrackingTypes end, get = 'GetType1', set = 'SetType1' },
-        type2 = { order = 3, name = "Rastreo Secundario", type = "select", values = function() return availableTrackingTypes end, get = 'GetType2', set = 'SetType2' },
-        castInterval = { order = 4, name = "Intervalo (segundos)", type = "range", min = 2, max = 60, step = 1, get = 'GetCastInterval', set = 'SetCastInterval', width = "full" },
-        showFrame = { order = 5, name = "Mostrar Botón Flotante", type = "toggle", get = 'GetShowFrame', set = 'SetShowFrame', width = "full" },
-        muteSound = { order = 6, name = "Silenciar Sonidos", desc = "Desactiva el sonido al cambiar de rastreo.", type = "toggle", get = 'GetMuteSound', set = 'SetMuteSound' },
+        header = { order = 1, type = "header", name = L["OPT_HEADER_TRACKING"] },
+        type1 = { order = 2, name = L["OPT_PRI_TRACKING"], type = "select", values = function() return availableTrackingTypes end, get = 'GetType1', set = 'SetType1' },
+        type2 = { order = 3, name = L["OPT_SEC_TRACKING"], type = "select", values = function() return availableTrackingTypes end, get = 'GetType2', set = 'SetType2' },
+        castInterval = { order = 4, name = L["OPT_INTERVAL"], type = "range", min = 2, max = 60, step = 1, get = 'GetCastInterval', set = 'SetCastInterval', width = "full" },
+        showFrame = { order = 5, name = L["OPT_SHOW_FRAME"], type = "toggle", get = 'GetShowFrame', set = 'SetShowFrame', width = "full" },
+        muteSound = { order = 6, name = L["OPT_MUTE_SOUND"], desc = L["OPT_MUTE_SOUND_DESC"], type = "toggle", get = 'GetMuteSound', set = 'SetMuteSound' },
         
         -- v1.7.3 Social
-        announceGuild = { order = 7, name = "Anunciar Logros a Hermandad", desc = "Envía un mensaje al chat de hermandad cuando desbloqueas un logro.", type = "toggle", get = 'GetAnnounceGuild', set = 'SetAnnounceGuild', width = "full" },
+        announceGuild = { order = 7, name = L["OPT_ANNOUNCE_GUILD"], desc = L["OPT_ANNOUNCE_GUILD_DESC"], type = "toggle", get = 'GetAnnounceGuild', set = 'SetAnnounceGuild', width = "full" },
 
-        headerInfo = { order = 10, type = "header", name = "Información del Tooltip" },
-        showDurability = { order = 11, name = "Mostrar Durabilidad", type = "toggle", get = 'GetShowDurability', set = 'SetShowDurability' },
-        showSkillLevel = { order = 12, name = "Nivel de Profesión", type = "toggle", get = 'GetShowSkillLevel', set = 'SetShowSkillLevel' },
+        headerInfo = { order = 10, type = "header", name = L["OPT_HEADER_TOOLTIP"] },
+        showDurability = { order = 11, name = L["OPT_SHOW_DURABILITY"], type = "toggle", get = 'GetShowDurability', set = 'SetShowDurability' },
+        showSkillLevel = { order = 12, name = L["OPT_SHOW_SKILL"], type = "toggle", get = 'GetShowSkillLevel', set = 'SetShowSkillLevel' },
 
-        headerAuto = { order = 20, type = "header", name = "Automatización" },
-        autoSell = { order = 21, name = "Auto-Vender Grises", desc = "Vende automáticamente objetos de calidad gris al visitar un comerciante.", type = "toggle", get = 'GetAutoSell', set = 'SetAutoSell', width = "full" },
-        combatHide = { order = 22, name = "Ocultar en Combate", desc = "Oculta el botón y pausa el rastreo al entrar en combate.", type = "toggle", get = 'GetCombatHide', set = 'SetCombatHide' },
-        combatHideMounted = { order = 23, name = "Permitir si Montado", desc = "Si estás montado, sigue rastreando incluso en combate.", type = "toggle", get = 'GetCombatHideMounted', set = 'SetCombatHideMounted', disabled = function() return not GatherTracker.db.profile.combatHide end },
-        resumeAfterCombat = { order = 24, name = "Autoreanudar tras Combate", desc = "Si está activado, el rastreo se volverá a iniciar automáticamente al salir de combate.", type = "toggle", get = 'GetResumeAfterCombat', set = 'SetResumeAfterCombat', width = "full" },
+        headerAuto = { order = 20, type = "header", name = L["OPT_HEADER_AUTO"] },
+        autoSell = { order = 21, name = L["OPT_AUTO_SELL"], desc = L["OPT_AUTO_SELL_DESC"], type = "toggle", get = 'GetAutoSell', set = 'SetAutoSell', width = "full" },
+        combatHide = { order = 22, name = L["OPT_COMBAT_HIDE"], desc = L["OPT_COMBAT_HIDE_DESC"], type = "toggle", get = 'GetCombatHide', set = 'SetCombatHide' },
+        combatHideMounted = { order = 23, name = L["OPT_COMBAT_HIDE_MOUNTED"], desc = L["OPT_COMBAT_HIDE_MOUNTED_DESC"], type = "toggle", get = 'GetCombatHideMounted', set = 'SetCombatHideMounted', disabled = function() return not GatherTracker.db.profile.combatHide end },
+        resumeAfterCombat = { order = 24, name = L["OPT_RESUME_AFTER_COMBAT"], desc = L["OPT_RESUME_AFTER_COMBAT_DESC"], type = "toggle", get = 'GetResumeAfterCombat', set = 'SetResumeAfterCombat', width = "full" },
         
-        headerPause = { order = 30, type = "header", name = "Pausar Automáticamente" },
-        pauseInStealth = { order = 31, name = "En Sigilo", type = "toggle", get = 'GetPauseInStealth', set = 'SetPauseInStealth' },
-        pauseInResting = { order = 32, name = "En Zona de Descanso", type = "toggle", get = 'GetPauseInResting', set = 'SetPauseInResting' },
-        pauseTargetEnemy = { order = 33, name = "Al seleccionar Enemigo", type = "toggle", get = 'GetPauseTargetEnemy', set = 'SetPauseTargetEnemy' },
-        pauseInInstance = { order = 34, name = "En Mazmorra/Raid", type = "toggle", get = 'GetPauseInInstance', set = 'SetPauseInInstance' },
+        headerPause = { order = 30, type = "header", name = L["OPT_HEADER_PAUSE"] },
+        pauseInStealth = { order = 31, name = L["OPT_PAUSE_STEALTH"], type = "toggle", get = 'GetPauseInStealth', set = 'SetPauseInStealth' },
+        pauseInResting = { order = 32, name = L["OPT_PAUSE_RESTING"], type = "toggle", get = 'GetPauseInResting', set = 'SetPauseInResting' },
+        pauseTargetEnemy = { order = 33, name = L["OPT_PAUSE_ENEMY"], type = "toggle", get = 'GetPauseTargetEnemy', set = 'SetPauseTargetEnemy' },
+        pauseInInstance = { order = 34, name = L["OPT_PAUSE_INSTANCE"], type = "toggle", get = 'GetPauseInInstance', set = 'SetPauseInInstance' },
 
     }
 }
@@ -292,25 +293,26 @@ function GatherTracker:UpdateTooltip(frame)
     GameTooltip:AddLine("GatherTracker")
     
     if GatherTracker.IS_RUNNING then
-        GameTooltip:AddLine("Estado: |cff00ff00ACTIVO|r", 1, 1, 1)
+        GameTooltip:AddLine(L["STATUS_LABEL"] .. " |cff00ff00" .. L["ACTIVE"] .. "|r", 1, 1, 1)
     else
-        GameTooltip:AddLine("Estado: |cffff0000PAUSADO|r", 1, 1, 1)
+        GameTooltip:AddLine(L["STATUS_LABEL"] .. " |cffff0000" .. L["PAUSED"] .. "|r", 1, 1, 1)
     end
     
     GameTooltip:AddLine(" ")
     -- Mostramos el tiempo actual en amarillo destacado
-    GameTooltip:AddDoubleLine("Intervalo:", "|cffFFFF00" .. GatherTracker:GetCastInterval() .. " seg|r")
+    GameTooltip:AddDoubleLine(L["INTERVAL_LABEL"], "|cffFFFF00" .. GatherTracker:GetCastInterval() .. " seg|r")
     GameTooltip:AddLine(" ")
-    GameTooltip:AddLine("|cffFFFFFFClic Izq:|r Activar/Pausar")
-    GameTooltip:AddLine("|cffFFFFFFRueda:|r Ajustar Tiempo (+/-)")
-    GameTooltip:AddLine("|cffFFFFFFClic Der:|r Menú Opciones")
-    GameTooltip:AddLine("|cffFFFFFFAlt+Arrastrar:|r Mover")
+    GameTooltip:AddLine(L["LEFT_CLICK_HINT"])
+    GameTooltip:AddLine(L["MOUSE_WHEEL_HINT"])
+    GameTooltip:AddLine(L["RIGHT_CLICK_HINT"])
+    GameTooltip:AddLine(L["ALT_DRAG_HINT"])
+    GameTooltip:AddLine(L["SHIFT_CLICK_HINT"])
     GameTooltip:Show()
     
     -- Sección de Historial
     if #GatherTracker.nodeHistory > 0 then
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("Historial Reciente:", 0, 1, 1)
+        GameTooltip:AddLine(L["RECENT_HISTORY"], 0, 1, 1)
         local now = GetTime()
         for i, node in ipairs(GatherTracker.nodeHistory) do
             local diff = now - node.time
@@ -318,7 +320,7 @@ function GatherTracker:UpdateTooltip(frame)
                 local timeStr = ""
                 if diff < 60 then timeStr = math.floor(diff).."s"
                 else timeStr = math.floor(diff/60).."m" end
-                GameTooltip:AddDoubleLine(node.name, "hace " .. timeStr, 1, 1, 1, 0.7, 0.7, 0.7)
+                GameTooltip:AddDoubleLine(node.name, L["AGO"] .. " " .. timeStr, 1, 1, 1, 0.7, 0.7, 0.7)
             end
         end
     end
@@ -422,7 +424,7 @@ function GatherTracker:CreateHistoryUI()
     -- Title
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
     f.title:SetPoint("TOP", 0, -15)
-    f.title:SetText("Sala de Trofeos - GatherTracker v1.7.3")
+    f.title:SetText(L["TROPHY_ROOM_TITLE"])
     
     -- Stats
     f.stats = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -431,13 +433,13 @@ function GatherTracker:CreateHistoryUI()
     -- Points Display (v1.7.3)
     f.points = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
     f.points:SetPoint("TOPRIGHT", -25, -45)
-    f.points:SetText("Puntos: 0")
+    f.points:SetText(L["POINTS_LABEL"] .. " 0")
     
     -- Reset Button (v1.7.1 Safe Reset)
     f.resetBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
     f.resetBtn:SetSize(100, 25)
     f.resetBtn:SetPoint("BOTTOMLEFT", 20, 15)
-    f.resetBtn:SetText("Borrar Datos")
+    f.resetBtn:SetText(L["DELETE_DATA_BTN"])
     f.resetBtn:SetScript("OnClick", function()
         StaticPopup_Show("GT_RESET_CONFIRM")
     end)
@@ -472,7 +474,7 @@ function GatherTracker:CreateHistoryUI()
             y = y - 10
             local header = content:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
             header:SetPoint("TOPLEFT", x + 5, y)
-            header:SetText(thisCat)
+            header:SetText(L[thisCat] or thisCat)
             y = y - 25 -- Espacio bajo header
             lastCat = thisCat
         end
@@ -486,9 +488,9 @@ function GatherTracker:CreateHistoryUI()
             local h = GatherTracker.db.global.history
             local unlocked = h and h.achievements[ach.id]
             
-            GameTooltip:AddLine(ach.name)
-            GameTooltip:AddLine(ach.desc, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Valor:", (ach.points or 0) .. " Ptos", 1, 1, 1, 0, 1, 0) -- v1.7.3 Points in Tooltip
+            GameTooltip:AddLine(L[ach.name])
+            GameTooltip:AddLine(L[ach.desc], 1, 1, 1)
+            GameTooltip:AddDoubleLine(L["VALUE_LABEL"], (ach.points or 0) .. " Ptos", 1, 1, 1, 0, 1, 0) -- v1.7.3 Points in Tooltip
             
             -- Progress Calculation
             local current = 0
@@ -511,15 +513,15 @@ function GatherTracker:CreateHistoryUI()
             local percent = math.min(100, math.floor((current/maxVal)*100))
             
             if ach.req_type == "total_value" then
-                 GameTooltip:AddDoubleLine("Progreso:", GetCoinTextureString(current) .. " / " .. GetCoinTextureString(maxVal), 1,1,1, 1,1,0)
+                 GameTooltip:AddDoubleLine(L["PROGRESS_LABEL"], GetCoinTextureString(current) .. " / " .. GetCoinTextureString(maxVal), 1,1,1, 1,1,0)
             else
-                 GameTooltip:AddDoubleLine("Progreso:", current .. " / " .. maxVal .. " ("..percent.."%)", 1,1,1, 1,1,0)
+                 GameTooltip:AddDoubleLine(L["PROGRESS_LABEL"], current .. " / " .. maxVal .. " ("..percent.."%)", 1,1,1, 1,1,0)
             end
 
             if unlocked then
-                GameTooltip:AddLine("|cff00ff00[DESBLOQUEADO]|r", 1, 1, 1)
+                GameTooltip:AddLine("|cff00ff00".. L["UNLOCKED"] .."|r", 1, 1, 1)
             else
-                GameTooltip:AddLine("|cffff0000[BLOQUEADO]|r", 1, 1, 1)
+                GameTooltip:AddLine("|cffff0000".. L["LOCKED"] .."|r", 1, 1, 1)
             end
             GameTooltip:Show()
         end)
@@ -582,7 +584,7 @@ function GatherTracker:CreateToastFrame()
     -- Texto Título (Grande y Amarillo)
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge") -- Fuente MUY grande
     f.title:SetPoint("TOPLEFT", f.icon, "TOPRIGHT", 15, -10)
-    f.title:SetText("|cffFFFF00¡LOGRO!|r") -- Título corto y directo
+    f.title:SetText("|cffFFFF00" .. L["ACHIEVEMENT_UNLOCKED_TITLE"] .. "|r") -- Título corto y directo
     
     -- Texto Nombre (Grande y Blanco)
     f.name = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
@@ -626,7 +628,7 @@ function GatherTracker:ShowToast(achievementID)
     if not ach then return end
     
     self.toastFrame.icon:SetTexture(ach.icon)
-    self.toastFrame.name:SetText(ach.name)
+    self.toastFrame.name:SetText(L[ach.name])
     
     self.toastFrame:SetAlpha(1) -- Asegurar visibilidad para animación
     self.toastFrame.animGroup:Stop()
@@ -653,7 +655,7 @@ function GatherTracker:UpdateHistoryUI()
         end
     end
     
-    self.historyFrame.stats:SetText("Total Items Recolectados (Vida): |cffFFFFFF" .. (h.totalItems or 0) .. "|r")
+        self.historyFrame.stats:SetText(L["TOTAL_ITEMS_STAT"] .. " |cffFFFFFF" .. (h.totalItems or 0) .. "|r")
     
     -- Update Points Text (v1.7.3)
     if self.historyFrame.points then
@@ -664,7 +666,7 @@ function GatherTracker:UpdateHistoryUI()
         if pct > 0.3 then color = "|cffFFFF00" end -- Amarillo
         if pct > 0.7 then color = "|cff00FF00" end -- Verde
         
-        self.historyFrame.points:SetText("Puntos: " .. color .. unlockedPoints .. "|r / " .. totalPoints)
+        self.historyFrame.points:SetText(L["POINTS_LABEL"] .. " " .. color .. unlockedPoints .. "|r / " .. totalPoints)
     end
     
     for i, ach in ipairs(achievementsList) do
@@ -687,6 +689,7 @@ end
 
 function GatherTracker:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("GatherTrackerDB", defaults, true)
+
     LibStub('AceConfig-3.0'):RegisterOptionsTable('GatherTracker', options)
     self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('GatherTracker', 'GatherTracker')
     
@@ -728,7 +731,7 @@ function GatherTracker:OnInitialize()
     self:RegisterEvent("CHAT_MSG_LOOT", "OnLootMsg")
     
     local version = C_AddOns and C_AddOns.GetAddOnMetadata("GatherTracker", "Version") or GetAddOnMetadata("GatherTracker", "Version")
-    print("|cff00ff00GatherTracker:|r v" .. (version or "Unknown") .. " cargado (TBC).")
+    print("|cff00ff00GatherTracker:|r v" .. (version or "Unknown") .. " " .. L["LOAD_MESSAGE"])
 end
 
 function GatherTracker:OnLootMsg(event, msg)
@@ -818,11 +821,11 @@ function GatherTracker:CheckAchievements()
             self:ShowToast(ach.id)
             
             -- Mensaje de respaldo en chat
-            print("|cff00ff00[GatherTracker]|r Logro desbloqueado: " .. ach.name .. " (+" .. (ach.points or 0) .. " pts)")
+            print("|cff00ff00[GatherTracker]|r " .. L["CHAT_ACH_UNLOCKED"] .. " " .. L[ach.name] .. " (+" .. (ach.points or 0) .. " pts)")
             
             -- v1.7.3 Social: Guild Announcement
             if self.db.profile.announceGuild and IsInGuild() then
-                SendChatMessage("[GatherTracker] He desbloqueado el logro: " .. ach.name .. " ("..(ach.points or 0).." pts)!", "GUILD")
+                SendChatMessage("[GatherTracker] " .. L["CHAT_GUILD_ACH"] .. " " .. L[ach.name] .. " ("..(ach.points or 0).." pts)!", "GUILD")
             end
         end
     end
@@ -856,12 +859,12 @@ end
 
 -- Helper Category (v1.7.1)
 function GatherTracker:GetItemCategory(itemID)
-    if not itemID then return "Otro" end
-    if miningIDs[itemID] then return "Minería" end
-    if herbIDs[itemID] then return "Herboristería" end
-    if fishingIDs[itemID] then return "Pesca" end
-    if gemIDs[itemID] then return "Gemas" end
-    return "Otro"
+    if not itemID then return "CAT_GENERAL" end
+    if miningIDs[itemID] then return "CAT_MINING" end
+    if herbIDs[itemID] then return "CAT_HERBALISM" end
+    if fishingIDs[itemID] then return "CAT_FISHING" end
+    if gemIDs[itemID] then return "CAT_TREASURES" end
+    return "CAT_GENERAL"
 end
 
 -- Helper para durabilidad
@@ -929,13 +932,13 @@ function GatherTracker:UpdateTooltip(frame)
     GameTooltip:AddLine("GatherTracker")
     
     if GatherTracker.IS_RUNNING then
-        GameTooltip:AddLine("Estado: |cff00ff00ACTIVO|r", 1, 1, 1)
+        GameTooltip:AddLine(L["STATUS_LABEL"] .. " |cff00ff00" .. L["ACTIVE"] .. "|r", 1, 1, 1)
     else
-        GameTooltip:AddLine("Estado: |cffff0000PAUSADO|r", 1, 1, 1)
+        GameTooltip:AddLine(L["STATUS_LABEL"] .. " |cffff0000" .. L["PAUSED"] .. "|r", 1, 1, 1)
     end
     
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine("Intervalo:", "|cffFFFF00" .. GatherTracker:GetCastInterval() .. " seg|r")
+    GameTooltip:AddDoubleLine(L["INTERVAL_LABEL"], "|cffFFFF00" .. GatherTracker:GetCastInterval() .. " seg|r")
 
     -- V1.6.0 Info Extra
     if self.db.profile.showDurability then
@@ -943,7 +946,7 @@ function GatherTracker:UpdateTooltip(frame)
         local r, g, b = 0, 1, 0 -- Verde
         if dur < 30 then r, g, b = 1, 0, 0 -- Rojo
         elseif dur < 70 then r, g, b = 1, 1, 0 end -- Amarillo
-        GameTooltip:AddDoubleLine("Durabilidad:", string.format("|cff%02x%02x%02x%d%%|r", r*255, g*255, b*255, dur))
+        GameTooltip:AddDoubleLine(L["TOOLTIP_DURABILITY"], string.format("|cff%02x%02x%02x%d%%|r", r*255, g*255, b*255, dur))
     end
     
     -- Detectar skills una sola vez
@@ -963,10 +966,10 @@ function GatherTracker:UpdateTooltip(frame)
     
     -- Mostrar si tiene loot O si tiene profesiones (para mostrar 'Sin datos')
     if hasLoot or hasGatheringProfs then
-        GameTooltip:AddLine("Sesión de Farm:", 0, 1, 1)
+        GameTooltip:AddLine(L["TOOLTIP_SESSION"], 0, 1, 1)
         
         -- Cabecera con pipe para separar visualmente
-        GameTooltip:AddDoubleLine("Item (Cant)", "Venta  |  AH", 0.7, 0.7, 0.7, 0.7, 0.7, 0.7)
+        GameTooltip:AddDoubleLine(L["TOOLTIP_HEADER_ITEM"], L["TOOLTIP_HEADER_PRICE"], 0.7, 0.7, 0.7, 0.7, 0.7, 0.7)
         
         local sUnits, sVendor, sAH = 0, 0, 0
         local bUnits, bVendor, bAH = 0, 0, 0
@@ -997,26 +1000,26 @@ function GatherTracker:UpdateTooltip(frame)
         end
         
         if not anyItem then
-            GameTooltip:AddLine("Sin datos aún...", 0.5, 0.5, 0.5)
+            GameTooltip:AddLine(L["TOOLTIP_NO_DATA"], 0.5, 0.5, 0.5)
         else
             GameTooltip:AddLine(" ")
             -- Totales
             local sVStr = GetCoinTextureString(sVendor)
             local sAHStr = (sAH > 0) and GetCoinTextureString(sAH) or "N/A"
-            GameTooltip:AddDoubleLine("|cff00ff00TOTAL SESIÓN ("..sUnits.."u)|r", sVStr .. " | " .. sAHStr)
+            GameTooltip:AddDoubleLine("|cff00ff00"..L["TOOLTIP_TOTAL_SESSION"].." ("..sUnits.."u)|r", sVStr .. " | " .. sAHStr)
             
             local bVStr = GetCoinTextureString(bVendor)
             local bAHStr = (bAH > 0) and GetCoinTextureString(bAH) or "N/A"
-            GameTooltip:AddDoubleLine("|cff00ffffTOTAL BOLSA ("..bUnits.."u)|r", bVStr .. " | " .. bAHStr)
+            GameTooltip:AddDoubleLine("|cff00ffff"..L["TOOLTIP_TOTAL_BAG"].." ("..bUnits.."u)|r", bVStr .. " | " .. bAHStr)
         end
     end
     
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(" ")
-    GameTooltip:AddLine("|cffFFFFFFClic Izq:|r Activar/Pausar")
-    GameTooltip:AddLine("|cffFFFFFFShift + Clic:|r Logros / Historial")
-    GameTooltip:AddLine("|cffFFFFFFRueda:|r Ajustar Tiempo")
-    GameTooltip:AddLine("|cffFFFFFFClic Der:|r Opciones")
+    GameTooltip:AddLine(L["LEFT_CLICK_HINT"])
+    GameTooltip:AddLine(L["SHIFT_CLICK_HINT"])
+    GameTooltip:AddLine(L["MOUSE_WHEEL_HINT"])
+    GameTooltip:AddLine(L["RIGHT_CLICK_HINT"])
     GameTooltip:Show()
 end
 
@@ -1067,7 +1070,7 @@ function GatherTracker:OnMerchantShow()
     end
     
     if count > 0 then
-        print("|cff00ff00GatherTracker:|r Vendidos " .. count .. " objetos grises por " .. GetCoinTextureString(money))
+        print(string.format("|cff00ff00GatherTracker:|r " .. L["CHAT_GREYS_SOLD"], count, GetCoinTextureString(money)))
     end
 end
 
@@ -1100,7 +1103,7 @@ end
 -- v1.7.1 Reset Logic
 function GatherTracker:ResetDatabase()
     self.db.global.history = { totalItems = 0, items = {}, achievements = {}, totalValue = 0 }
-    print("|cff00ff00[GatherTracker]|r Base de datos reiniciada correctamente.")
+    print("|cff00ff00[GatherTracker]|r " .. L["CHAT_DB_RESET"])
     
     -- Actualización inmediata (Sin necesidad de reload)
     self:UpdateHistoryUI()
@@ -1176,14 +1179,14 @@ end
 
 function GatherTracker:StartTimer()
     if self.trackingTimer then self:CancelTimer(self.trackingTimer) end
-    print('|cff00ff00GatherTracker:|r Iniciado. Intervalo: ' .. self:GetCastInterval() .. 's');
+    print('|cff00ff00GatherTracker:|r ' .. L["CHAT_STARTED"] .. ' ' .. self:GetCastInterval() .. 's');
     self.trackingTimer = self:ScheduleRepeatingTimer('TimerFeedback', self:GetCastInterval())
     self.IS_RUNNING = true
     self:UpdateGUI()
 end
 
 function GatherTracker:StopTimer()
-    print('|cff00ff00GatherTracker:|r Detenido.');
+    print('|cff00ff00GatherTracker:|r ' .. L["CHAT_STOPPED"]);
     self:CancelTimer(self.trackingTimer);
     self.IS_RUNNING = false
     self:UpdateGUI()
