@@ -30,8 +30,7 @@ L["OPT_AUTO_SELL"] = "Auto-Sell Grays"
 L["OPT_AUTO_SELL_DESC"] = "Automatically sells gray quality items when visiting a vendor."
 L["OPT_COMBAT_HIDE"] = "Hide in Combat"
 L["OPT_COMBAT_HIDE_DESC"] = "Hides the button and pauses tracking when entering combat."
-L["OPT_COMBAT_HIDE_MOUNTED"] = "Allow if Mounted"
-L["OPT_COMBAT_HIDE_MOUNTED_DESC"] = "If mounted, keeps tracking active even in combat."
+
 L["OPT_RESUME_AFTER_COMBAT"] = "Auto-Resume after Combat"
 L["OPT_RESUME_AFTER_COMBAT_DESC"] = "If enabled, tracking will automatically restart when leaving combat."
 

@@ -30,7 +30,7 @@ This isn't just a utility; it's a **Progression System**. We automate the boring
 
 ### 🤖 Intelligent Automation
 *   **Context Aware:** Auto-pauses in **Cities**, **Inns**, **Stealth** (Rogue/Druid), **Instances**, or when targeting enemies.
-*   **Combat Mode:** Intelligent hiding during battle. Supports "Allow if Mounted" for safe gathering in dangerous zones.
+*   **Combat Mode:** Intelligent hiding during battle. Keeps interface clean when you need to focus.
 *   **Auto-Sell:** Automatically creates gold by selling gray trash items when you visit a vendor.
 
 ### 📊 Real-Time Analytics
@@ -98,7 +98,7 @@ Esto no es solo una utilidad; es un **Sistema de Progresión**. Automatizamos lo
 
 ### 🤖 Automatización Inteligente
 *   **Conciencia de Contexto:** Se pausa automáticamente en **Ciudades**, **Posadas**, **Sigilo** (Pícaro/Druida), **Instancias**, o al seleccionar enemigos.
-*   **Modo de Combate:** Ocultamiento inteligente durante la batalla. Soporta "Permitir si Montado" para recolección segura en zonas peligrosas.
+*   **Modo de Combate:** Ocultamiento inteligente durante la batalla. Mantiene la interfaz limpia cuando necesitas concentrarte.
 *   **Auto-Venta:** Crea oro automáticamente vendiendo basura gris cuando visitas a un vendedor.
 
 ### 📊 Análisis en Tiempo Real

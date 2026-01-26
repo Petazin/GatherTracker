@@ -30,8 +30,7 @@ L["OPT_AUTO_SELL"] = "Auto-Vender Grises"
 L["OPT_AUTO_SELL_DESC"] = "Vende automáticamente objetos de calidad gris al visitar un comerciante."
 L["OPT_COMBAT_HIDE"] = "Ocultar en Combate"
 L["OPT_COMBAT_HIDE_DESC"] = "Oculta el botón y pausa el rastreo al entrar en combate."
-L["OPT_COMBAT_HIDE_MOUNTED"] = "Permitir si Montado"
-L["OPT_COMBAT_HIDE_MOUNTED_DESC"] = "Si estás montado, sigue rastreando incluso en combate."
+
 L["OPT_RESUME_AFTER_COMBAT"] = "Autoreanudar tras Combate"
 L["OPT_RESUME_AFTER_COMBAT_DESC"] = "Si está activado, el rastreo se volverá a iniciar automáticamente al salir de combate."
 

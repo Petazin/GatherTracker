@@ -2,6 +2,13 @@
 
 Todas las actualizaciones notables de este proyecto se documentarán en este archivo.
 
+## [v1.8.1] - 2026-01-25
+### Changed
+- **Removed**: "Allow if Mounted" (Combate Montado) option removed due to redundancy.
+- **Cleanup**: Removed duplicated internal code (`UpdateTooltip`) to improve maintenance.
+### Fixed
+- **Tooltip**: Added missing "Alt + Drag" hint to the tooltip interaction list.
+
 ## [v1.8.0] - 2026-01-23
 ### Localization
 - **Multi-Language Support (i18n)**:

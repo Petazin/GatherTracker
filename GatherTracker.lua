@@ -171,7 +171,7 @@ local options = {
         headerAuto = { order = 20, type = "header", name = L["OPT_HEADER_AUTO"] },
         autoSell = { order = 21, name = L["OPT_AUTO_SELL"], desc = L["OPT_AUTO_SELL_DESC"], type = "toggle", get = 'GetAutoSell', set = 'SetAutoSell', width = "full" },
         combatHide = { order = 22, name = L["OPT_COMBAT_HIDE"], desc = L["OPT_COMBAT_HIDE_DESC"], type = "toggle", get = 'GetCombatHide', set = 'SetCombatHide' },
-        combatHideMounted = { order = 23, name = L["OPT_COMBAT_HIDE_MOUNTED"], desc = L["OPT_COMBAT_HIDE_MOUNTED_DESC"], type = "toggle", get = 'GetCombatHideMounted', set = 'SetCombatHideMounted', disabled = function() return not GatherTracker.db.profile.combatHide end },
+
         resumeAfterCombat = { order = 24, name = L["OPT_RESUME_AFTER_COMBAT"], desc = L["OPT_RESUME_AFTER_COMBAT_DESC"], type = "toggle", get = 'GetResumeAfterCombat', set = 'SetResumeAfterCombat', width = "full" },
         
         headerPause = { order = 30, type = "header", name = L["OPT_HEADER_PAUSE"] },
@@ -199,7 +199,7 @@ local defaults = {
         pauseInResting = false,
         pauseTargetEnemy = false,
         pauseInInstance = false,
-        combatHideMounted = false,
+
         announceGuild = false -- v1.7.3
     },
     global = {
@@ -286,45 +286,7 @@ function GatherTracker:CreateGUI()
     self:UpdateGUI()
 end
 
--- Función auxiliar para refrescar el tooltip dinámicamente
-function GatherTracker:UpdateTooltip(frame)
-    GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
-    GameTooltip:ClearLines()
-    GameTooltip:AddLine("GatherTracker")
-    
-    if GatherTracker.IS_RUNNING then
-        GameTooltip:AddLine(L["STATUS_LABEL"] .. " |cff00ff00" .. L["ACTIVE"] .. "|r", 1, 1, 1)
-    else
-        GameTooltip:AddLine(L["STATUS_LABEL"] .. " |cffff0000" .. L["PAUSED"] .. "|r", 1, 1, 1)
-    end
-    
-    GameTooltip:AddLine(" ")
-    -- Mostramos el tiempo actual en amarillo destacado
-    GameTooltip:AddDoubleLine(L["INTERVAL_LABEL"], "|cffFFFF00" .. GatherTracker:GetCastInterval() .. " seg|r")
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(L["LEFT_CLICK_HINT"])
-    GameTooltip:AddLine(L["MOUSE_WHEEL_HINT"])
-    GameTooltip:AddLine(L["RIGHT_CLICK_HINT"])
-    GameTooltip:AddLine(L["ALT_DRAG_HINT"])
-    GameTooltip:AddLine(L["SHIFT_CLICK_HINT"])
-    GameTooltip:Show()
-    
-    -- Sección de Historial
-    if #GatherTracker.nodeHistory > 0 then
-        GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(L["RECENT_HISTORY"], 0, 1, 1)
-        local now = GetTime()
-        for i, node in ipairs(GatherTracker.nodeHistory) do
-            local diff = now - node.time
-            if diff < 120 then -- Mostrar solo últimos 2 min
-                local timeStr = ""
-                if diff < 60 then timeStr = math.floor(diff).."s"
-                else timeStr = math.floor(diff/60).."m" end
-                GameTooltip:AddDoubleLine(node.name, L["AGO"] .. " " .. timeStr, 1, 1, 1, 0.7, 0.7, 0.7)
-            end
-        end
-    end
-end
+
 
 function GatherTracker:RestorePosition()
     if not self.frame then return end
@@ -1016,6 +978,7 @@ function GatherTracker:UpdateTooltip(frame)
     
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(L["ALT_DRAG_HINT"])
     GameTooltip:AddLine(L["LEFT_CLICK_HINT"])
     GameTooltip:AddLine(L["SHIFT_CLICK_HINT"])
     GameTooltip:AddLine(L["MOUSE_WHEEL_HINT"])
@@ -1032,9 +995,7 @@ function GatherTracker:OnCombatEnter()
     self.inCombat = true
     if self.db.profile.combatHide then
         -- V1.6.0: Permitir si montado
-        if self.db.profile.combatHideMounted and IsMounted() then
-             return
-        end
+
         if self.frame then self.frame:Hide() end
         self:StopTimer()
     end
@@ -1119,8 +1080,7 @@ function GatherTracker:SetAutoSell(info, val) self.db.profile.autoSell = val end
 function GatherTracker:GetCombatHide() return self.db.profile.combatHide end
 function GatherTracker:SetCombatHide(info, val) self.db.profile.combatHide = val end
 
-function GatherTracker:GetCombatHideMounted() return self.db.profile.combatHideMounted end
-function GatherTracker:SetCombatHideMounted(info, val) self.db.profile.combatHideMounted = val end
+
 
 function GatherTracker:GetResumeAfterCombat() return self.db.profile.resumeAfterCombat end
 function GatherTracker:SetResumeAfterCombat(info, val) self.db.profile.resumeAfterCombat = val end
