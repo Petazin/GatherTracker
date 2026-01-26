@@ -40,6 +40,13 @@ L["OPT_PAUSE_RESTING"] = "En Zona de Descanso"
 L["OPT_PAUSE_ENEMY"] = "Al seleccionar Enemigo"
 L["OPT_PAUSE_INSTANCE"] = "En Mazmorra/Raid"
 
+-- Utility Mode (v1.9.0)
+L["STATUS_CRITICAL_REPAIR"] = "REPARAR"
+L["STATUS_BAG_FULL"] = "LLENO"
+L["LABEL_DURABILITY"] = "Durabilidad:"
+L["LABEL_BAGS"] = "Bolsas:"
+L["LABEL_JUNK"] = "Basura:"
+
 -- Tooltip & UI
 L["STATUS_LABEL"] = "Estado:"
 L["ACTIVE"] = "ACTIVO"

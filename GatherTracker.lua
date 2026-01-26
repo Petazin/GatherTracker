@@ -332,21 +332,44 @@ function GatherTracker:UpdateGUI()
 
     if self.db.profile.showFrame then self.frame:Show() else self.frame:Hide() return end
 
-    local currentTexture = self:GetActiveTrackingTexture()
-    if currentTexture then
-        self.frame.icon:SetTexture(currentTexture)
-        self.frame.icon:SetDesaturated(false)
-    else
-        self.frame.icon:SetTexture(134400) -- Interrogación
-        self.frame.icon:SetDesaturated(true)
+    -- v1.9.0: Prioridad Global de Alertas (Sobrescribe todo)
+    local status = self:GetPlayerStatus()
+    local alertIcon = nil
+    
+    if status == "CRITICAL_REPAIR" then
+         alertIcon = 136241 -- Interface\\Icons\\Trade_BlackSmithing
+    elseif status == "BAG_FULL" then
+         alertIcon = 133633 -- Interface\\Icons\\Inv_misc_bag_08
     end
 
-    if self.IS_RUNNING then
-        self.frame.border:SetVertexColor(0, 1, 0)
-        self.frame.cooldown:SetCooldown(GetTime(), self:GetCastInterval())
-    else
+    if alertIcon then
+        -- MODO ALERTA: Siempre visible y a color
+        self.frame.icon:SetTexture(alertIcon)
+        self.frame.icon:SetDesaturated(false) 
+        -- Borde Rojo intermitente o estático para denotar urgencia
         self.frame.border:SetVertexColor(1, 0, 0)
-        self.frame.icon:SetDesaturated(true)
+    else
+        -- MODO NORMAL
+        local currentTexture = self:GetActiveTrackingTexture()
+        if currentTexture then
+            self.frame.icon:SetTexture(currentTexture)
+            self.frame.icon:SetDesaturated(false)
+        else
+            self.frame.icon:SetTexture(136243) -- Trade_Engineering (Llave Inglesa)
+            self.frame.icon:SetDesaturated(true)
+        end
+
+        if self.IS_RUNNING then
+            self.frame.border:SetVertexColor(0, 1, 0)
+            self.frame.cooldown:SetCooldown(GetTime(), self:GetCastInterval())
+        else
+            self.frame.border:SetVertexColor(1, 0, 0)
+            -- Solo desaturar si no hay textura válida o si está pausado explícitamente y queremos indicarlo
+            -- Pero si hay textura de tracking, mejor dejarla visible (o desaturada según gusto)
+            -- El usuario pidió que NO se vieran grises los iconos de no-recolector, pero aquí estamos en modo normal.
+            -- Mantendremos la lógica original para modo normal: Pausado = Desaturado (Gris)
+            if currentTexture then self.frame.icon:SetDesaturated(true) end
+        end
     end
 end
 
@@ -664,6 +687,9 @@ function GatherTracker:OnInitialize()
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnCombatEnter")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnCombatLeave")
     self:RegisterEvent("MERCHANT_SHOW", "OnMerchantShow")
+    -- v1.9.0 Utility Triggers
+    self:RegisterEvent("BAG_UPDATE", "UpdateGUI") 
+    self:RegisterEvent("UPDATE_INVENTORY_DURABILITY", "UpdateGUI")
     -- self:RegisterEvent("SKILL_LINES_CHANGED", "CheckProfessions") -- Obsolte, now fully dynamic on tracking update
     
     if not self.db.profile.castInterval then self.db.profile.castInterval = 2 end
@@ -843,6 +869,24 @@ function GatherTracker:GetAverageDurability()
     return (cur / max) * 100
 end
 
+-- v1.9.0 Utility Mode Status
+function GatherTracker:GetPlayerStatus()
+    -- Check Durability
+    local durability = self:GetAverageDurability()
+    if durability < 30 then return "CRITICAL_REPAIR" end
+    
+    -- Check Bags
+    local freeSlots = 0
+    for i = 0, 4 do
+        -- C_Container for Retail/WLK, GetContainerNumFreeSlots for Classic Era fallback if needed
+        local slots = C_Container and C_Container.GetContainerNumFreeSlots(i) or GetContainerNumFreeSlots(i)
+        freeSlots = freeSlots + (slots or 0)
+    end
+    if freeSlots < 2 then return "BAG_FULL" end
+    
+    return "NORMAL"
+end
+
 -- Helper para skill level (Hybrid: Modern APIs + Legacy Scan)
 function GatherTracker:GetAllGatheringSkills()
     local skills = {}
@@ -909,6 +953,55 @@ function GatherTracker:UpdateTooltip(frame)
         if dur < 30 then r, g, b = 1, 0, 0 -- Rojo
         elseif dur < 70 then r, g, b = 1, 1, 0 end -- Amarillo
         GameTooltip:AddDoubleLine(L["TOOLTIP_DURABILITY"], string.format("|cff%02x%02x%02x%d%%|r", r*255, g*255, b*255, dur))
+    end
+    
+    -- v1.9.0 Utility HUD (Always show if Status != NORMAL or not running)
+    local status = self:GetPlayerStatus()
+    if not self.IS_RUNNING or status ~= "NORMAL" then
+         if status ~= "NORMAL" then
+            GameTooltip:AddDoubleLine(L["STATUS_LABEL"], "|cffff0000"..(L["STATUS_"..status] or status).."|r")
+         end
+         
+         -- Bags HUD
+         local freeSlots = 0
+         local totalSlots = 0
+         for i = 0, 4 do
+            local f = C_Container and C_Container.GetContainerNumFreeSlots(i) or GetContainerNumFreeSlots(i)
+            local t = C_Container and C_Container.GetContainerNumSlots(i) or GetContainerNumSlots(i)
+            freeSlots = freeSlots + (f or 0)
+            totalSlots = totalSlots + (t or 0)
+         end
+         
+         local bagColor = "|cff00ff00"
+         if freeSlots < 2 then bagColor = "|cffff0000" elseif freeSlots < 5 then bagColor = "|cffffff00" end
+         GameTooltip:AddDoubleLine(L["LABEL_BAGS"], bagColor .. freeSlots .. "|r / " .. totalSlots)
+         
+         -- Junk HUD
+         local junkValue = 0
+         for bag = 0, 4 do
+             local numSlots = C_Container and C_Container.GetContainerNumSlots(bag) or GetContainerNumSlots(bag)
+             for slot = 1, numSlots do
+                 local info
+                 if C_Container and C_Container.GetContainerItemInfo then
+                    info = C_Container.GetContainerItemInfo(bag, slot)
+                 elseif GetContainerItemInfo then
+                    local icon, itemCount, locked, quality, readable, lootable, link = GetContainerItemInfo(bag, slot)
+                    if link then info = { hyperlink = link, stackCount = itemCount } end
+                 end
+                 
+                 if info and info.hyperlink then
+                     local _, _, quality, _, _, _, _, _, _, _, sellPrice = GetItemInfo(info.hyperlink)
+                     if quality == 0 and sellPrice and sellPrice > 0 then
+                          junkValue = junkValue + (sellPrice * (info.stackCount or 1))
+                     end
+                 end
+             end
+         end
+         if junkValue > 0 then
+              GameTooltip:AddDoubleLine(L["LABEL_JUNK"], GetCoinTextureString(junkValue))
+         end
+         
+         GameTooltip:AddLine(" ")
     end
     
     -- Detectar skills una sola vez

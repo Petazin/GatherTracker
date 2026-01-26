@@ -1,134 +1,92 @@
 # GatherTracker
 
-**Don't just Farm. DOMINATE the Landscape.** 🌍
+**Stop Grinding. Start Dominating.** 🌍
 
-Are you tired of the mindless grind? Does staring at the minimap make you want to sleep? **GatherTracker** turns your gathering professions into an **RPG within an RPG**.
+Mining and Herbalism shouldn't feel like a second job. **GatherTracker** is the ultimate adrenaline shot for your gathering professions, turning the mindless minimap stare into a streamlined, automated, and rewarding **RPG experience**. We solve the "I have two professions but can only track one" problem by cycling them faster than humanly possible, ensuring you never miss a node again.
 
-This isn't just a utility; it's a **Progression System**. We automate the boring stuff (switching between Herbs/Mines, selling trash) so you can focus on the glory. **Track EVERYTHING, earn XP, unlock Medals, and climb the Ranks from Bronze to Legend.**
+**Why Choose GatherTracker?**
+Because efficiency is king and gamification is addictive. While others are manually switching trackers or cluttering their UI with complex addons, GatherTracker works silently in the background like a pro. It detects what you can track, handles the switching logic intelligently (pausing when you fight, sneak, or rest), and rewards you with a "Trophy Room" that tracks your lifetime loot, ranks, and achievements. It's not just a tool; it's a reason to go out and farm.
 
-> 🚀 **v1.7.6 Gamification Update**: We've overhauled the experience with a new **Trophy Room**, **Points System**, **Rankings**, and **Hardcore Challenges**.
+### Features
+*   **Smart Auto-Switching:** Cycles between Mining, Herbalism, and other tracking skills automatically.
+*   **Utility Mode:** Monitors your Durability (Repair Alert) and Bag Space when you aren't gathering.
+*   **Trophy Room:** A dedicated UI to track your lifetime stats, achievements, and earnings.
+*   **Context Aware:** Automatically pauses during Combat, Stealth, Resting, or inside Dungeons.
+*   **Loot Tracker:** Real-time session stats for Ores, Herbs, Gems, and their Auction House value.
+*   **Auto-Sell:** Automatically turns your gray trash items into gold when visiting a vendor.
+*   **Sound Control:** Option to mute the annoying "swish" sound of tracking switching.
+*   **Universal Support:** Works on any client language and creates specific profiles per character.
 
----
+### Supported Tracking
+GatherTracker automatically detects and supports **ANY** minimap tracking ability your character possesses:
+*   **Professions:** Find Minerals (Mining), Find Herbs (Herbalism), Find Fish (Fishing).
+*   **Racial:** Find Treasure (Dwarves).
+*   **Class Abilities:**
+    *   **Hunter:** Track Beasts, Humanoids, Undead, Hidden, Giants, Dragonkin, Elementals, Demons.
+    *   **Paladin:** Sense Undead.
+    *   **Druid:** Track Humanoids (Cat Form).
+    *   **Warlock:** Sense Demons.
 
-### 🎮 Why GatherTracker?
+### Usage
+1.  **Install & Log in:** A button will appear on your screen.
+2.  **Left Click:** Toggle the Tracker ON/OFF.
+3.  **Right Click:** Open the Configuration Menu.
+4.  **Shift + Click:** Open the **Trophy Room** (Stats & Achievements).
+5.  **Alt + Drag:** Move the button anywhere on your screen.
 
-*   **🏆 It's a Game:** Every node you mine or pick adds to your score. Watch your points go up and your rank increase.
-*   **🧠 It's Smart:** It detects your professions, pauses when you fight, stays quiet when you sneak, and handles your vendor trash.
-*   **⚡ It's Efficient:** Tracks Mining and Herbalism (or Treasure/Beasts) simultaneously by cycling faster than humanly possible.
-*   **📢 It's Social:** Unlocked a rare achievement? Broadcast it to your Guild and let them know who the real MVP is.
-
----
-
-## Features ✨
-
-### 🏅 The "Trophy Room" (UPDATED v1.7.6)
-*   **Visual Progression:** A stunning, dark-themed UI (Shift+Click minimap button) showcasing your achievements.
-*   **Points System:** Earn points for every milestone. Can you reach 100% completion?
-*   **Ranking Ladder:** Start as a **Novice** and grind your way to **Diamond** and **Legend**.
-*   **Hardcore Challenges:** Think you're a pro? Try collecting **200 Arcane Crystals** or **Black Lotus**.
-*   **Guild Bragging Rights:** Optional setting to announce your achievements to Guild Chat. **Let them hear your victory!**
-
-### 🤖 Intelligent Automation
-*   **Context Aware:** Auto-pauses in **Cities**, **Inns**, **Stealth** (Rogue/Druid), **Instances**, or when targeting enemies.
-*   **Combat Mode:** Intelligent hiding during battle. Keeps interface clean when you need to focus.
-*   **Auto-Sell:** Automatically creates gold by selling gray trash items when you visit a vendor.
-
-### 📊 Real-Time Analytics
-*   **Session Loot:** Tracks exactly how many Ores, Herbs, and Gems you've found this session.
-*   **Value Tracking:** See the **Vendor** and **Auction House** value of your haul in real-time.
-*   **Smart Tooltip:** Monitor your **Durability** and **Profession Skill** levels at a glance.
-
-### 🌐 Universal Compatibility
-*   **Language Agnostic:** Works perfectly in English and Spanish (UI fully translated).
-*   **Multi-Client Support:** Detects any game client language for Node scanning.
-*   **Zero Config:** Install it, and it automatically detects your professions.
-
----
-
-## Usage
-
-1.  **Install & Go:** You will see a button on your screen. Left Click to start.
-2.  **Shift + Click:** Opens your **Trophy Room**. Check your achievements!
-3.  **Right Click:** Opens the Options menu configuration.
-4.  **Mouse Wheel:** Adjusts the tracking cycle speed.
-
-### Chat Commands
-*   `/gtr` or `/gtrack` - Toggle tracker.
-*   `/gtr history` - Open Trophy Room.
+**Chat Commands:**
+*   `/gtr` - Toggle tracking on/off.
+*   `/gtr history` - Open the Trophy Room.
 *   `/gtr opt` - Open Options.
-*   `/gtr reset` - Reset position.
+*   `/gtr reset` - Reset database/positions.
 
----
-
-## Author
-Created by **Petazo**, for the grinder in all of us.
+### Author
+Created by **Petazo**.
 
 ---
 ---
 
 # GatherTracker (Español)
 
-**No solo Farmees. DOMINA el Paisaje.** 🌍
+**Deja de Farmear. Empieza a DOMINAR.** 🌍
 
-¿Estás cansado de la rutina sin sentido? ¿Mirar el minimapa te da sueño? **GatherTracker** convierte tus profesiones de recolección en un **RPG dentro de un RPG**.
+La Minería y la Herboristería no deberían sentirse como un segundo trabajo. **GatherTracker** es la inyección de adrenalina definitiva para tus profesiones, convirtiendo la mirada perdida al minimapa en una **experiencia RPG** fluida, automatizada y gratificante. Solucionamos el problema de "tengo dos profesiones pero solo puedo rastrear una" ciclándolas más rápido de lo humanamente posible, asegurando que nunca más te pierdas un nodo.
 
-Esto no es solo una utilidad; es un **Sistema de Progresión**. Automatizamos lo aburrido (cambiar entre Hierbas/Minas, vender basura) para que puedas concentrarte en la gloria. **Rastrea TODO, gana XP, desbloquea Medallas y sube de Rango desde Bronce hasta Leyenda.**
+**¿Por qué elegir GatherTracker?**
+Porque la eficiencia es el rey y la gamificación es adictiva. Mientras otros cambian rastreos manualmente o llenan su interfaz con addons complejos, GatherTracker trabaja silenciosamente en el fondo como un profesional. Detecta lo que puedes rastrear, maneja la lógica de cambio inteligentemente (pausando cuando peleas, entras en sigilo o descansas) y te recompensa con una "Sala de Trofeos" que registra tu botín de por vida, rangos y logros. No es solo una herramienta; es una razón para salir a farmear.
 
-> 🚀 **Actualización de Gamificación v1.7.6**: Hemos renovado la experiencia con una nueva **Sala de Trofeos**, **Sistema de Puntos**, **Rangos** y **Desafíos Hardcore**.
+### Características
+*   **Auto-Cambio Inteligente:** Cicla entre Minería, Herboristería y otras habilidades automáticamente.
+*   **Modo Utilidad:** Monitorea tu Durabilidad (Alerta de Reparar) y Espacio en Bolsas cuando no estás recolectando.
+*   **Sala de Trofeos:** Una interfaz dedicada para ver tus estadísticas, logros y ganancias de por vida.
+*   **Conciencia de Contexto:** Se pausa automáticamente en Combate, Sigilo, Descanso o Mazmorras.
+*   **Rastreador de Botín:** Estadísticas de sesión en tiempo real para Minerales, Hierbas, Gemas y su valor en Subasta.
+*   **Auto-Venta:** Convierte automáticamente tu basura gris en oro al visitar a un vendedor.
+*   **Control de Sonido:** Opción para silenciar el molesto sonido de cambio de rastreo.
+*   **Soporte Universal:** Funciona en cualquier idioma de cliente y crea perfiles por personaje.
 
----
+### Rastreos Soportados
+GatherTracker detecta y soporta automáticamente **CUALQUIER** habilidad de rastreo de minimapa que tu personaje posea:
+*   **Profesiones:** Buscar Minerales (Minería), Buscar Hierbas (Herboristería), Buscar Pesca.
+*   **Racial:** Buscar Tesoros (Enanos).
+*   **Habilidades de Clase:**
+    *   **Cazador:** Rastrear Bestias, Humanoides, No-muertos, Ocultos, Gigantes, Dragones, Elementales, Demonios.
+    *   **Paladín:** Sentir No-muertos.
+    *   **Druida:** Rastrear Humanoides (Forma Felina).
+    *   **Brujo:** Sentir Demonios.
 
-### 🎮 ¿Por qué GatherTracker?
+### Uso
+1.  **Instalar y Entrar:** Aparecerá un botón en tu pantalla.
+2.  **Clic Izquierdo:** Activar/Desactivar el Rastreador.
+3.  **Clic Derecho:** Abrir el Menú de Configuración.
+4.  **Shift + Clic:** Abrir la **Sala de Trofeos** (Estadísticas y Logros).
+5.  **Alt + Arrastrar:** Mover el botón a cualquier lugar.
 
-*   **🏆 Es un Juego:** Cada nodo que picas o recoges suma a tu puntuación. Mira cómo suben tus puntos y aumenta tu rango.
-*   **🧠 Es Inteligente:** Detecta tus profesiones, pausa cuando peleas, se calla cuando te escondes y gestiona tu basura en el vendedor.
-*   **⚡ Es Eficiente:** Rastrea Minería y Herboristería (o Tesoros/Bestias) simultáneamente ciclando más rápido de lo humanamente posible.
-*   **📢 Es Social:** ¿Desbloqueaste un logro raro? Transmítelo a tu Hermandad y hazles saber quién es el verdadero MVP.
-
----
-
-## Características ✨
-
-### 🏅 La "Sala de Trofeos" (ACTUALIZADO v1.7.6)
-*   **Progresión Visual:** Una interfaz impresionante y oscura (Shift+Clic en el botón del minimapa) que muestra tus logros.
-*   **Sistema de Puntos:** Gana puntos por cada hito. ¿Puedes llegar al 100% de finalización?
-*   **Escalera de Rangos:** Empieza como **Novato** y ábrete camino hasta **Diamante** y **Leyenda**.
-*   **Desafíos Hardcore:** ¿Crees que eres un profesional? Intenta recolectar **200 Cristales Arcanos** o **Loto Negro**.
-*   **Derecho a Presumir:** Configuración opcional para anunciar tus logros en el chat de Hermandad. **¡Que escuchen tu victoria!**
-
-### 🤖 Automatización Inteligente
-*   **Conciencia de Contexto:** Se pausa automáticamente en **Ciudades**, **Posadas**, **Sigilo** (Pícaro/Druida), **Instancias**, o al seleccionar enemigos.
-*   **Modo de Combate:** Ocultamiento inteligente durante la batalla. Mantiene la interfaz limpia cuando necesitas concentrarte.
-*   **Auto-Venta:** Crea oro automáticamente vendiendo basura gris cuando visitas a un vendedor.
-
-### 📊 Análisis en Tiempo Real
-*   **Loot de Sesión:** Rastrea exactamente cuántos Minerales, Hierbas y Gemas has encontrado en esta sesión.
-*   **Rastreo de Valor:** Mira el valor de **Vendedor** y **Casa de Subastas** de tu botín en tiempo real.
-*   **Tooltip Inteligente:** Monitorea tu **Durabilidad** y niveles de **Habilidad de Profesión** de un vistazo.
-
-### � Compatibilidad Universal
-*   **Agnóstico del Idioma:** Funciona perfectamente en clientes en Inglés, Español, Alemán, Francés, Chino... CUALQUIER cliente.
-*   **Cero Configuración:** Instálalo y detectará automáticamente tus profesiones.
-
----
-
-## Uso
-
-1.  **Instalar y Listo:** Verás un botón en tu pantalla. Clic Izquierdo para empezar.
-2.  **Shift + Clic:** Abre tu **Sala de Trofeos**. ¡Revisa tus logros!
-3.  **Clic Derecho:** Abre el menú de Opciones.
-4.  **Rueda del Ratón:** Ajusta la velocidad del ciclo de rastreo.
-
-### Comandos de Chat
-*   `/gtr` o `/gtrack` - Alternar rastreador.
+**Comandos de Chat:**
+*   `/gtr` - Alternar rastreo on/off.
 *   `/gtr history` - Abrir Sala de Trofeos.
 *   `/gtr opt` - Abrir Opciones.
-*   `/gtr reset` - Restablecer posición.
+*   `/gtr reset` - Reiniciar base de datos/posiciones.
 
----
-
-## Autor
-Creado por **Petazo**, para el grinder que todos llevamos dentro.
-
-## Licencia
-Este proyecto es de código abierto.
+### Autor
+Creado por **Petazo**.

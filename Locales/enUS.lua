@@ -40,6 +40,13 @@ L["OPT_PAUSE_RESTING"] = "In Resting Area"
 L["OPT_PAUSE_ENEMY"] = "On Enemy Target"
 L["OPT_PAUSE_INSTANCE"] = "In Dungeon/Raid"
 
+-- Utility Mode (v1.9.0)
+L["STATUS_CRITICAL_REPAIR"] = "REPAIR"
+L["STATUS_BAG_FULL"] = "FULL"
+L["LABEL_DURABILITY"] = "Durability:"
+L["LABEL_BAGS"] = "Bags:"
+L["LABEL_JUNK"] = "Junk:"
+
 -- Tooltip & UI
 L["STATUS_LABEL"] = "Status:"
 L["ACTIVE"] = "ACTIVE"
