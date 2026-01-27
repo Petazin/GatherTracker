@@ -1,9 +1,9 @@
+local addonName, addonTable = ...
 GatherTracker = LibStub("AceAddon-3.0"):NewAddon("GatherTracker", "AceTimer-3.0", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0")
+addonTable.GatherTracker = GatherTracker
+
 local L = LibStub("AceLocale-3.0"):GetLocale("GatherTracker")
 
--- ============================================================================
--- 1. TABLAS DE DATOS
--- ============================================================================
 -- ============================================================================
 -- 1. TABLAS DE DATOS
 -- ============================================================================
@@ -24,6 +24,82 @@ StaticPopupDialogs["GT_RESET_CONFIRM"] = {
     button2 = L["RESET_BUTTON_NO"],
     OnAccept = function()
         GatherTracker:ResetDatabase()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+StaticPopupDialogs["GT_ADD_ITEM"] = {
+    text = L["POPUP_ADD_TEXT"],
+    button1 = ACCEPT,
+    button2 = CANCEL,
+    hasEditBox = true,
+    maxLetters = 100,
+    OnAccept = function(self)
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        local text = editBox and editBox:GetText() or ""
+        GatherTracker:ProcessAddCommand(text)
+    end,
+    EditBoxOnEnterPressed = function(self)
+        local text = self:GetText()
+        GatherTracker:ProcessAddCommand(text)
+        self:GetParent():Hide()
+    end,
+    OnShow = function(self)
+        -- Fix: StaticPopup_Show returns the frame, but sometimes OnShow receives just the frame
+        -- In recent WoW versions, self.editBox might not be set in time?
+        -- Safe approach:
+        if self.editBox then
+            self.editBox:SetFocus()
+        else
+            -- Try finding it by name if available, or just ignore focus to prevent crash
+            local name = self:GetName()
+            if name then
+                local editBox = _G[name.."EditBox"]
+                if editBox then editBox:SetFocus() end
+            end
+        end
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+StaticPopupDialogs["GT_CLEAR_SHOP_CONFIRM"] = {
+    text = L["CLEAR_SHOPPING_CONFIRM"],
+    button1 = YES,
+    button2 = NO,
+    OnAccept = function()
+        GatherTracker:ClearShoppingList()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+StaticPopupDialogs["GT_SAVE_PRESET"] = {
+    text = "Save current Shopping List as Preset.\nEnter name:",
+    button1 = SAVE,
+    button2 = CANCEL,
+    hasEditBox = true,
+    maxLetters = 30,
+    OnAccept = function(self)
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        local text = editBox and editBox:GetText() or ""
+        GatherTracker:SaveCurrentListAsPreset(text)
+    end,
+    EditBoxOnEnterPressed = function(self)
+        local text = self:GetText()
+        GatherTracker:SaveCurrentListAsPreset(text)
+        self:GetParent():Hide()
+    end,
+    OnShow = function(self)
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        if editBox then editBox:SetFocus() end
     end,
     timeout = 0,
     whileDead = true,
@@ -200,7 +276,17 @@ local defaults = {
         pauseTargetEnemy = false,
         pauseInInstance = false,
 
-        announceGuild = false -- v1.7.3
+        announceGuild = false, -- v1.7.3
+        
+        -- v1.9.1 Smart Lists
+        shoppingList = {},
+        -- v2.0.0 Detached UI
+        shoppingFramePos = { point = "CENTER", x = 100, y = 0 },
+        shoppingFrameSize = { width = 250, height = 300 },
+        
+        -- v2.2 Custom Presets
+        customPresets = {},
+        shoppingListCollapsed = false
     },
     global = {
         history = {
@@ -256,11 +342,23 @@ function GatherTracker:CreateGUI()
         if button == "LeftButton" then
             if IsShiftKeyDown() then
                 GatherTracker:CreateHistoryUI()
+            -- v2.0.0 Alt Action: Toggle Shopping List
+            elseif IsAltKeyDown() then
+                if GatherTracker.shoppingFrame then
+                    if GatherTracker.shoppingFrame:IsShown() then
+                        GatherTracker.shoppingFrame:Hide()
+                    else
+                        GatherTracker:UpdateShoppingListUI() -- Forzar update/show
+                    end
+                else
+                    GatherTracker:UpdateShoppingListUI()
+                end
             else
                 GatherTracker:ToggleTracking()
             end
         elseif button == "RightButton" then
-            LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
+             -- v1.8.1 Opciones
+             LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
         end
     end)
 
@@ -369,6 +467,73 @@ function GatherTracker:UpdateGUI()
             -- El usuario pidió que NO se vieran grises los iconos de no-recolector, pero aquí estamos en modo normal.
             -- Mantendremos la lógica original para modo normal: Pausado = Desaturado (Gris)
             if currentTexture then self.frame.icon:SetDesaturated(true) end
+        end
+    end
+    
+    -- Update Smart Lists HUD (v1.9.1)
+    self:UpdateShoppingListUI()
+end
+
+-- ============================================================================
+-- 3.3 PROFESSION HOOKS (v1.9.1)
+-- ============================================================================
+
+function GatherTracker:InitProfessionHooks()
+    -- Hook TradeSkillFrame (Blacksmithing, Cooking, etc.)
+    self:SecureHook("TradeSkillFrame_Update", "OnTradeSkillUpdate")
+    -- Hook CraftFrame (Enchanting)
+    -- self:SecureHook("CraftFrame_Update", "OnCraftUpdate") -- TBC often uses CraftFrame for enchanting
+    
+    -- Create the ADD button if not exists (Lazy Load)
+    if not self.tradeSkillAddBtn then
+        self.tradeSkillAddBtn = CreateFrame("Button", "GT_TradeSkillAddBtn", TradeSkillDetailScrollChildFrame or TradeSkillDetailFrame, "UIPanelButtonTemplate")
+        self.tradeSkillAddBtn:SetSize(30, 22)
+        -- Posicionar al lado del botón "Create" (Crear) o en la lista de materiales
+        -- En Classic/TBC TradeSkillDetailScrollChildFrame contiene la info.
+        self.tradeSkillAddBtn:SetPoint("TOPRIGHT", TradeSkillDetailScrollChildFrame, "TOPRIGHT", -5, -5)
+        self.tradeSkillAddBtn:SetText("+")
+        self.tradeSkillAddBtn:SetScript("OnClick", function()
+            local index = GetTradeSkillSelectionIndex()
+            if index and index > 0 then
+                GatherTracker:AddRecipeFromTradeSkill(index)
+            end
+        end)
+        self.tradeSkillAddBtn:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(L["BTN_ADD_TO_LIST"] or "Add logic to Tracker")
+            GameTooltip:Show()
+        end)
+        self.tradeSkillAddBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    end
+end
+
+function GatherTracker:OnTradeSkillUpdate()
+    if not TradeSkillFrame or not TradeSkillFrame:IsShown() then return end
+    
+    local index = GetTradeSkillSelectionIndex()
+    if index and index > 5 and self.tradeSkillAddBtn then
+        -- Show button only if a valid recipe is selected
+        self.tradeSkillAddBtn:Show()
+    end
+end
+
+function GatherTracker:AddRecipeFromTradeSkill(index)
+    local link = GetTradeSkillItemLink(index)
+    local numReagents = GetTradeSkillNumReagents(index)
+    
+    local parentName = GetItemInfo(link) or "Recipe"
+    
+    self:Print(L["ADDING_RECIPE"] or "Adding materials for: " .. parentName)
+    
+    for i = 1, numReagents do
+        local reagentName, reagentTexture, reagentCount, playerReagentCount = GetTradeSkillReagentInfo(index, i)
+        local reagentLink = GetTradeSkillReagentItemLink(index, i)
+        
+        if reagentLink then
+             local itemID = GetItemInfoInstant(reagentLink)
+             if itemID then
+                 self:AddToShoppingList(itemID, reagentCount, true, parentName)
+             end
         end
     end
 end
@@ -661,10 +826,414 @@ function GatherTracker:UpdateHistoryUI()
         if unlocked then
             SetItemButtonDesaturated(btn, false)
             btn.icon:SetVertexColor(1, 1, 1)
-        else
-            SetItemButtonDesaturated(btn, true)
             btn.icon:SetVertexColor(0.2, 0.2, 0.2)
         end
+    end
+end
+
+-- 3.2 SHOPPING LIST MANAGER (v1.9.1)
+-- ============================================================================
+
+function GatherTracker:AddToShoppingList(itemID, amountTarget, isRecipe, parentName)
+    if not itemID or not amountTarget then return end
+    
+    local name, _, _, _, _, _, _, _, _, icon = GetItemInfo(itemID)
+    if not name then 
+        name = "Item " .. itemID
+    end
+
+    -- Create a unique key to prevent merging manual and preset items
+    local storageKey = tostring(itemID)
+    if parentName and parentName ~= "" then
+        storageKey = itemID .. ":" .. parentName
+    end
+
+    local list = self.db.profile.shoppingList
+    if not list[storageKey] then
+        list[storageKey] = {
+            itemID = itemID, -- Keep numeric ID for API calls
+            targetCount = 0,
+            currentCount = 0,
+            name = name,
+            icon = icon,
+            isRecipe = isRecipe or false,
+            parentRecipe = parentName
+        }
+    end
+    
+    -- Sumar a la meta existente (acumulativo por fuente)
+    list[storageKey].targetCount = list[storageKey].targetCount + amountTarget
+    
+    -- Actualizar conteo actual inmediatamente
+    self:UpdateShoppingItemCount(storageKey)
+    
+    self:Print(string.format(L["ADDED_TO_LIST"] or "Added %s x%d to Shopping List.", name, amountTarget))
+    self:UpdateGUI()
+end
+
+function GatherTracker:RemoveFromShoppingList(storageKey)
+    if self.db.profile.shoppingList[storageKey] then
+        self.db.profile.shoppingList[storageKey] = nil
+        self:UpdateGUI()
+    end
+end
+
+function GatherTracker:ClearShoppingList()
+    wipe(self.db.profile.shoppingList)
+    self:UpdateGUI()
+    self:Print(L["LIST_CLEARED"] or "Shopping List Cleared.")
+end
+
+function GatherTracker:UpdateShoppingItemCount(storageKey)
+    local entry = self.db.profile.shoppingList[storageKey]
+    if not entry then return end
+    
+    -- Use entry.itemID instead of the composite key
+    local itemID = entry.itemID or tonumber(string.match(storageKey, "^(%d+)"))
+    if not itemID then return end
+    
+    local countBag = GetItemCount(itemID) 
+    entry.currentCount = countBag
+end
+
+function GatherTracker:ScanBagsForTracking()
+    -- Actualizar TODOS los items de la lista
+    for id, _ in pairs(self.db.profile.shoppingList) do
+        self:UpdateShoppingItemCount(id)
+    end
+    self:UpdateGUI()
+end
+
+-- ============================================================================
+-- 3.4 SHOPPING LIST HUD (v1.9.1)
+-- ============================================================================
+
+function GatherTracker:CreateShoppingListUI()
+    if self.shoppingFrame then return end
+
+    -- Nuevo Frame Resizable (v2.1.0)
+    local f = CreateFrame("Frame", "GatherTrackerShoppingFrame", UIParent, "BackdropTemplate")
+    f:SetMovable(true)
+    f:SetResizable(true) -- v2.1
+    
+    -- Compatibility Resize Bounds (Retail vs Classic)
+    if f.SetResizeBounds then
+        f:SetResizeBounds(220, 150)
+    else
+        f:SetMinResize(220, 150)
+    end
+    
+    f:EnableMouse(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetClampedToScreen(true)
+    
+    -- Aspecto estilo "Ventana Oscura"
+    f:SetBackdrop({
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 12,
+        insets = { left = 3, right = 3, top = 3, bottom = 3 }
+    })
+    f:SetBackdropColor(0.05, 0.05, 0.05, 0.9)
+    f:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
+
+    -- Scripts de Movimiento
+    f:SetScript("OnDragStart", function(self)
+        if not GatherTracker.db.profile.lockFrame then 
+             self:StartMoving() 
+        end
+    end)
+    f:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        local point, _, relativePoint, xOfs, yOfs = self:GetPoint()
+        GatherTracker.db.profile.shoppingFramePos = { point = point, x = xOfs, y = yOfs }
+    end)
+    
+    -- Restaurar Posición y Tamaño
+    local pos = self.db.profile.shoppingFramePos
+    if pos then
+        f:ClearAllPoints()
+        f:SetPoint(pos.point, UIParent, pos.point, pos.x, pos.y)
+    else
+        f:SetPoint("CENTER", 100, 0)
+    end
+    
+    local size = self.db.profile.shoppingFrameSize
+    if size then
+        f:SetSize(size.width, size.height)
+    else
+        f:SetSize(250, 300)
+    end
+    
+    -- GRIP de Redimensionado (Esquina inferior derecha)
+    local grip = CreateFrame("Button", nil, f)
+    grip:SetPoint("BOTTOMRIGHT", -2, 2)
+    grip:SetSize(16, 16)
+    grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    
+    grip:SetScript("OnMouseDown", function() f:StartSizing("BOTTOMRIGHT") end)
+    grip:SetScript("OnMouseUp", function() 
+        f:StopMovingOrSizing()
+        GatherTracker.db.profile.shoppingFrameSize = { width = f:GetWidth(), height = f:GetHeight() }
+        -- Refrescar scroll
+        GatherTracker:UpdateShoppingListUI()
+    end)
+    f.grip = grip
+    
+    -- CABECERA (Header)
+    f.header = CreateFrame("Frame", nil, f)
+    f.header:SetPoint("TOPLEFT", 5, -5)
+    f.header:SetPoint("TOPRIGHT", -5, -5)
+    f.header:SetHeight(20)
+    
+    f.header.title = f.header:CreateFontString(nil, "OVERLAY", "GameFontNormal") -- Un poco más grande
+    f.header.title:SetPoint("LEFT", 5, 0)
+    f.header.title:SetText("Shopping List")
+    
+    -- Botón Minimizar [_]
+    local btnMin = CreateFrame("Button", nil, f.header, "UIPanelButtonTemplate")
+    btnMin:SetSize(20, 20)
+    btnMin:SetPoint("RIGHT", -5, 0)
+    btnMin:SetText("_")
+    btnMin:SetScript("OnClick", function()
+        GatherTracker.db.profile.shoppingListCollapsed = not GatherTracker.db.profile.shoppingListCollapsed
+        GatherTracker:UpdateShoppingListUI()
+    end)
+    f.btnMin = btnMin
+    
+    -- Botón PRESETS [Archivador] (v2.2)
+    -- A la izquierda del minimizar
+    local btnLoad = CreateFrame("Button", nil, f.header, "UIPanelButtonTemplate")
+    btnLoad:SetSize(20, 20)
+    btnLoad:SetPoint("RIGHT", btnMin, "LEFT", -2, 0)
+    -- Icono de carpeta o texto "L"
+    btnLoad:SetNormalTexture("Interface\\Buttons\\UI-SquareButton-Up")
+    btnLoad:SetPushedTexture("Interface\\Buttons\\UI-SquareButton-Down")
+    
+    local icon = btnLoad:CreateTexture(nil, "ARTWORK")
+    icon:SetSize(12, 12)
+    icon:SetPoint("CENTER")
+    icon:SetTexture("Interface\\Icons\\Inv_misc_book_09") -- Icono libro/carpeta
+    btnLoad.icon = icon
+    
+    btnLoad:SetScript("OnClick", function(self)
+        GatherTracker:ShowPresetsMenu(self)
+    end)
+    btnLoad:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:AddLine(L["BTN_LOAD_PRESET"] or "Load Preset List")
+        GameTooltip:Show()
+    end)
+    btnLoad:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f.btnLoad = btnLoad
+    
+    -- PIE (Footer) con Botones Grandes
+    f.footer = CreateFrame("Frame", nil, f)
+    f.footer:SetPoint("BOTTOMLEFT", 5, 5)
+    f.footer:SetPoint("BOTTOMRIGHT", -5, 5)
+    f.footer:SetHeight(30)
+    
+    -- Botón AÑADIR (Estilo Blizzard Grande)
+    local btnAdd = CreateFrame("Button", nil, f.footer, "UIPanelButtonTemplate")
+    btnAdd:SetSize(80, 22)
+    btnAdd:SetPoint("LEFT", 5, 0)
+    btnAdd:SetText(L["BTN_ADD_ITEM_SHORT"] or "Añadir")
+    btnAdd:SetScript("OnClick", function() GatherTracker:ShowBulkImportUI() end)
+    f.btnAdd = btnAdd
+    
+    -- Botón LIMPIAR (Estilo Blizzard Grande)
+    local btnClear = CreateFrame("Button", nil, f.footer, "UIPanelButtonTemplate")
+    btnClear:SetSize(80, 22)
+    btnClear:SetPoint("RIGHT", -20, 0) -- Dejar sitio al Grip
+    btnClear:SetText(L["BTN_CLEAR_LIST_SHORT"] or "Limpiar")
+    btnClear:SetScript("OnClick", function()
+        -- Si está vacío no hace nada
+        if next(GatherTracker.db.profile.shoppingList) == nil then return end
+        
+        -- Si Shift presionado, borrar sin preguntar (Power User)
+        if IsShiftKeyDown() then
+            GatherTracker:ClearShoppingList()
+        else
+            StaticPopup_Show("GT_CLEAR_SHOP_CONFIRM")
+        end
+    end)
+    f.btnClear = btnClear
+
+    -- SCROLL FRAME (Contenido)
+    local sf = CreateFrame("ScrollFrame", "GTShoppingListScroll", f, "UIPanelScrollFrameTemplate")
+    sf:SetPoint("TOPLEFT", 8, -30) -- Debajo header
+    sf:SetPoint("BOTTOMRIGHT", -26, 35) -- Encima footer, espacio para scrollbar
+    
+    local content = CreateFrame("Frame", nil, sf)
+    content:SetSize(220, 100) -- Ancho inicial, se ajustará
+    sf:SetScrollChild(content)
+    f.content = content
+    f.scrollFrame = sf
+    
+    -- Estilizar ScrollBar para que sea oscura (opcional, por ahora default blizzard está bien)
+    
+    f.groupFrames = {} 
+    f.itemFrames = {}
+    
+    self.shoppingFrame = f
+end
+
+function GatherTracker:UpdateShoppingListUI()
+    if not self.db.profile.shoppingList then return end
+    
+    -- Lazy Create
+    if not self.shoppingFrame then self:CreateShoppingListUI() end
+    
+    local list = self.db.profile.shoppingList
+    
+    -- Ocultar todo frame content previo
+    for _, f in pairs(self.shoppingFrame.groupFrames) do f:Hide() end
+    for _, f in pairs(self.shoppingFrame.itemFrames) do f:Hide() end
+    
+    local collapsed = self.db.profile.shoppingListCollapsed
+    
+    -- Si vacío, mostrar marco pero vacío (botones activados)
+    if next(list) == nil then
+        self.shoppingFrame:Show()
+        if collapsed then
+            self.shoppingFrame:SetHeight(30)
+            self.shoppingFrame.scrollFrame:Hide()
+            self.shoppingFrame.footer:Hide()
+            self.shoppingFrame.grip:Hide()
+            self.shoppingFrame.btnMin:SetText("+")
+        else
+            -- Restaurar altura usuario
+            local size = self.db.profile.shoppingFrameSize or {width=250, height=300}
+            self.shoppingFrame:SetSize(size.width, size.height)
+            self.shoppingFrame.scrollFrame:Show()
+            self.shoppingFrame.footer:Show()
+            self.shoppingFrame.grip:Show()
+            self.shoppingFrame.btnMin:SetText("_")
+        end
+        return
+    end
+    
+    -- 1. AGRUPACIÓN LÓGICA
+    local groups = {} 
+    local manualItems = {}
+    
+    for id, data in pairs(list) do
+        local parent = data.parentRecipe
+        if parent and parent ~= "" then
+            if not groups[parent] then groups[parent] = {} end
+            table.insert(groups[parent], { id = id, data = data })
+        else
+            table.insert(manualItems, { id = id, data = data })
+        end
+    end
+    
+    -- 2. RENDERIZADO
+    self.shoppingFrame:Show()
+    
+    if collapsed then
+        self.shoppingFrame:SetHeight(30)
+        self.shoppingFrame.scrollFrame:Hide()
+        self.shoppingFrame.footer:Hide()
+        self.shoppingFrame.grip:Hide()
+        self.shoppingFrame.btnMin:SetText("+")
+        return
+    else
+        local size = self.db.profile.shoppingFrameSize or {width=250, height=300}
+        self.shoppingFrame:SetSize(size.width, size.height)
+        self.shoppingFrame.scrollFrame:Show()
+        self.shoppingFrame.footer:Show()
+        self.shoppingFrame.grip:Show()
+        self.shoppingFrame.btnMin:SetText("_")
+    end
+
+    local yOffset = 0
+    local contentWidth = self.shoppingFrame.content:GetWidth()
+    
+    -- Helper Row
+    local function DrawRow(itemInfo, isChild)
+        local idx = #self.shoppingFrame.itemFrames + 1
+        local row = self.shoppingFrame.itemFrames[idx]
+        if not row then
+            row = CreateFrame("Frame", nil, self.shoppingFrame.content)
+            row:SetSize(contentWidth, 20) -- Aumentado a 20 (v2.1.1)
+            
+            row.icon = row:CreateTexture(nil, "ARTWORK")
+            row.icon:SetSize(16, 16) -- Icono un poco más grande
+            row.icon:SetPoint("LEFT", 2, 0)
+            
+            -- Usar GameFontHighlight (aprox 12pt) en lugar de Small
+            row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight") 
+            row.text:SetPoint("LEFT", row.icon, "RIGHT", 5, 0)
+            row.text:SetPoint("RIGHT", -20, 0)
+            row.text:SetJustifyH("LEFT")
+            
+            local del = CreateFrame("Button", nil, row, "UIPanelCloseButton")
+            del:SetSize(16, 16) -- Botón borrar acorde
+            del:SetPoint("RIGHT", 0, 0)
+            del:SetScript("OnClick", function(s) 
+                GatherTracker:RemoveFromShoppingList(s:GetParent().storageKey)
+            end)
+            row.delBtn = del
+            
+            self.shoppingFrame.itemFrames[idx] = row
+        end
+        
+        row.storageKey = itemInfo.id -- This is actually the storageKey (composite)
+        row:ClearAllPoints()
+        
+        local xOff = isChild and 15 or 0 
+        row:SetPoint("TOPLEFT", xOff, -yOffset)
+        row:SetWidth(contentWidth - xOff)
+        row:Show()
+        
+        local d = itemInfo.data
+        row.icon:SetTexture(d.icon or GetItemIcon(d.itemID))
+        
+        local color = "|cffFFFFFF"
+        if d.currentCount >= d.targetCount then color = "|cff00ff00" end
+        row.text:SetText(d.name .. ": " .. color .. d.currentCount .. "/" .. d.targetCount .. "|r")
+        
+        yOffset = yOffset + 20 -- Gap aumentado
+    end
+    
+    -- Helper Header
+    local function DrawHeader(title)
+        local idx = #self.shoppingFrame.groupFrames + 1
+        local h = self.shoppingFrame.groupFrames[idx]
+        if not h then
+            -- Header también más visible
+            h = self.shoppingFrame.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            h:SetJustifyH("LEFT")
+            self.shoppingFrame.groupFrames[idx] = h
+        end
+        h:ClearAllPoints()
+        h:SetPoint("TOPLEFT", 0, -yOffset)
+        h:SetText(title)
+        h:Show()
+        yOffset = yOffset + 16
+    end
+
+    -- Recetas
+    for parentName, items in pairs(groups) do
+        DrawHeader(parentName)
+        for _, item in ipairs(items) do DrawRow(item, true) end
+        yOffset = yOffset + 5
+    end
+    
+    -- Manuales
+    if #manualItems > 0 then
+        if next(groups) then DrawHeader(L["GROUP_MANUAL"] or "Otros") end
+        for _, item in ipairs(manualItems) do DrawRow(item, false) end
+    end
+    
+    -- Ajustar altura de contenido para scroll
+    self.shoppingFrame.content:SetHeight(yOffset + 10)
+    
+    -- Combate
+    if self.inCombat and self.db.profile.combatHide then
+        self.shoppingFrame:Hide()
     end
 end
 
@@ -681,14 +1250,22 @@ function GatherTracker:OnInitialize()
     self:RegisterChatCommand('gt', 'ChatCommand')
     self:RegisterChatCommand('gtr', 'ChatCommand')
     self:RegisterChatCommand('gtrack', 'ChatCommand')
+
+    -- Inicializar Variables de Sesión (Antes de GUI)
+    self.lootSession = {} 
+    GatherTracker.IS_RUNNING = false
+    
+    -- Inicializar Hooks de API
+    self:RawHook("HandleModifiedItemClick", "OnHandleModifiedItemClick", true)
     
     -- Eventos
     self:RegisterEvent("MINIMAP_UPDATE_TRACKING")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnCombatEnter")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnCombatLeave")
     self:RegisterEvent("MERCHANT_SHOW", "OnMerchantShow")
+    self:RegisterEvent("ADDON_LOADED", "OnAddonLoaded") -- Checks for TradeSkillUI load
     -- v1.9.0 Utility Triggers
-    self:RegisterEvent("BAG_UPDATE", "UpdateGUI") 
+    self:RegisterEvent("BAG_UPDATE", "ScanBagsForTracking") 
     self:RegisterEvent("UPDATE_INVENTORY_DURABILITY", "UpdateGUI")
     -- self:RegisterEvent("SKILL_LINES_CHANGED", "CheckProfessions") -- Obsolte, now fully dynamic on tracking update
     
@@ -708,9 +1285,7 @@ function GatherTracker:OnInitialize()
         end
     end
 
-    GatherTracker.IS_RUNNING = false
     self:CreateGUI()
-    self.lootSession = {} -- Tabla de sesión: [itemID] = { count, name, link }
     
     -- Inicializar estado de combate
     self.inCombat = InCombatLockdown()
@@ -720,6 +1295,12 @@ function GatherTracker:OnInitialize()
     
     local version = C_AddOns and C_AddOns.GetAddOnMetadata("GatherTracker", "Version") or GetAddOnMetadata("GatherTracker", "Version")
     print("|cff00ff00GatherTracker:|r v" .. (version or "Unknown") .. " " .. L["LOAD_MESSAGE"])
+end
+
+function GatherTracker:OnAddonLoaded(event, addonName)
+    if addonName == "Blizzard_TradeSkillUI" then
+        self:InitProfessionHooks()
+    end
 end
 
 function GatherTracker:OnLootMsg(event, msg)
@@ -1074,6 +1655,7 @@ function GatherTracker:UpdateTooltip(frame)
     GameTooltip:AddLine(L["ALT_DRAG_HINT"])
     GameTooltip:AddLine(L["LEFT_CLICK_HINT"])
     GameTooltip:AddLine(L["SHIFT_CLICK_HINT"])
+    GameTooltip:AddLine(L["ALT_SHOPPING_HINT"] or "|cffFFFFFFAlt + Click:|r Toggle Shopping List")
     GameTooltip:AddLine(L["MOUSE_WHEEL_HINT"])
     GameTooltip:AddLine(L["RIGHT_CLICK_HINT"])
     GameTooltip:Show()
@@ -1207,16 +1789,103 @@ function GatherTracker:ChatCommand(input)
     local command = input and input:trim()
     if not command or command == "" then
         self:ToggleTracking()
-    elseif command == "opt" or command == "options" then
+        return
+    end
+
+    -- Split command and args (v1.9.1)
+    -- "add [Link] x5" -> cmd="add", args="[Link] x5"
+    local cmd, args = strsplit(" ", command, 2)
+    cmd = cmd and cmd:lower()
+
+    if cmd == "opt" or cmd == "options" then
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
-    elseif command == "history" or command == "logros" then
+    elseif cmd == "history" or cmd == "logros" then
         self:CreateHistoryUI()
-    elseif command == "resetdb" then
+    elseif cmd == "resetdb" then
         -- Redirigir al flujo seguro
         StaticPopup_Show("GT_RESET_CONFIRM")
+    elseif cmd == "add" then
+        if args then
+            self:ProcessAddCommand(args)
+        else
+            self:Print("Usage: /gt add [Item Link] (xAmount)")
+        end
+    elseif cmd == "clear" then
+        self:ClearShoppingList()
     else
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
     end
+end
+
+function GatherTracker:ProcessAddCommand(input, silent)
+    if not input or input == "" then return false end
+    
+    local itemID
+    local quantity = 1
+    
+    -- 1. Intentar detectar Link: |Hitem:12345|h
+    local link = string.match(input, "|Hitem:(%d+).-|h")
+    
+    -- 2. Intentar parsear cantidad (ej: "Mena x20", "Mena x 20", "Mena 20", "20x Mena")
+    -- Caso A: Cantidad al final (soporta ' x5', ' x 5', ' 20', ' 20x')
+    local qtyMatch = string.match(input, "[%s]+x?%s*(%d+)%s*x?$")
+    if qtyMatch then 
+        quantity = tonumber(qtyMatch)
+        input = string.gsub(input, "[%s]+x?%s*%d+%s*x?$", ""):trim()
+    else
+        -- Caso B: Cantidad al principio (soporta '20x Mena', '20 Mena')
+        qtyMatch = string.match(input, "^(%d+)%s*x?%s+")
+        if qtyMatch then
+            quantity = tonumber(qtyMatch)
+            input = string.gsub(input, "^%d+%s*x?%s+", ""):trim()
+        end
+    end
+
+    if link then
+        itemID = tonumber(link)
+    else
+        -- 3. Si es solo números, asumir ID
+        if tonumber(input) then
+            itemID = tonumber(input)
+        else
+            -- 3.5 Búsqueda inteligente...
+            local inputLower = input:lower()
+            
+            -- Prioridad 1: Diccionario interno (Bypassa problemas de cache)
+            if self.ItemLookup and self.ItemLookup[inputLower] then
+                itemID = self.ItemLookup[inputLower]
+            end
+
+            -- Prioridad 2: Shopping List existente
+            if not itemID and self.db.profile.shoppingList then
+                for sID, data in pairs(self.db.profile.shoppingList) do
+                    if data.name and data.name:lower() == inputLower then
+                        itemID = sID
+                        break
+                    end
+                end
+            end
+            
+            if not itemID then
+                -- Prioridad 3: Nombre texto (Solo si está en cache)
+                local _, idLink = GetItemInfo(input)
+                if idLink then
+                    itemID = GetItemInfoInstant(idLink)
+                else
+                    if not silent then
+                        self:Print(string.format(L["ITEM_NOT_FOUND"] or "Item '%s' not found.", input))
+                    end
+                    return false
+                end
+            end
+        end
+    end
+    
+    if itemID then
+        self:AddToShoppingList(itemID, quantity)
+        return true
+    end
+    return false
 end
 
 function GatherTracker:ToggleTracking()
@@ -1377,4 +2046,267 @@ function GatherTracker:GetShowFrame() return self.db.profile.showFrame end
 function GatherTracker:SetShowFrame(info, val) 
     self.db.profile.showFrame = val 
     self:UpdateGUI() 
+end
+
+-- Hook para permitir pegar links en el StaticPopup (v1.9.2)
+-- Reemplazamos HandleModifiedItemClick para interceptar el Shift+Click antes de que busque el chat
+function GatherTracker:OnHandleModifiedItemClick(link)
+    local frameName = StaticPopup_Visible("GT_ADD_ITEM")
+    if frameName then
+        local dialog = _G[frameName]
+        local editBox = dialog.editBox or _G[frameName.."EditBox"]
+        -- Si nuestro popup está visible, inyectamos el link ahí directo
+        if editBox and editBox:IsVisible() then
+            -- Añadir espacio si ya hay texto (UX)
+            local current = editBox:GetText()
+            if current and current ~= "" and not string.match(current, " $") then
+                editBox:Insert(" ")
+            end
+            editBox:Insert(link)
+            return -- Detenemos la propagación (no abrir chat)
+        end
+    end
+    -- Si no es nuestro popup, dejamos pasar al original
+    return self.hooks.HandleModifiedItemClick(link)
+end
+
+-- v2.2 Presets Logic (UIDropDown Manual Implementation)
+function GatherTracker:ShowPresetsMenu(anchor)
+    if not self.Presets then return end
+    
+    local frame = _G["GTPresetsMenu"] or CreateFrame("Frame", "GTPresetsMenu", UIParent, "UIDropDownMenuTemplate")
+    
+    local function InitMenu(self, level)
+        level = level or 1
+        local info = UIDropDownMenu_CreateInfo()
+        
+        if level == 1 then
+            -- Título
+            info.text = L["BTN_LOAD_PRESET"] or "Load Preset"
+            info.isTitle = true
+            info.notCheckable = true
+            UIDropDownMenu_AddButton(info, level)
+            
+            -- Categorías Default
+            for i, cat in ipairs(GatherTracker.Presets) do
+                info = UIDropDownMenu_CreateInfo()
+                info.text = cat.name
+                info.hasArrow = true
+                info.value = i 
+                info.notCheckable = true
+                UIDropDownMenu_AddButton(info, level)
+            end
+
+            -- Separador
+            UIDropDownMenu_AddSeparator(level)
+
+            -- Custom Lists
+            info = UIDropDownMenu_CreateInfo()
+            info.text = "My Custom Lists"
+            info.hasArrow = true
+            info.value = "CUSTOM"
+            info.notCheckable = true
+            UIDropDownMenu_AddButton(info, level)
+            
+            -- Save Current
+            if next(GatherTracker.db.profile.shoppingList) ~= nil then
+                info = UIDropDownMenu_CreateInfo()
+                info.text = "Save Current List..."
+                info.notCheckable = true
+                info.func = function() 
+                    StaticPopup_Show("GT_SAVE_PRESET")
+                    CloseDropDownMenus()
+                end 
+                UIDropDownMenu_AddButton(info, level)
+            end
+            
+            -- Cancelar
+            info = UIDropDownMenu_CreateInfo()
+            info.text = L["CANCEL"] or "Cancel"
+            info.notCheckable = true
+            info.func = function() CloseDropDownMenus() end
+            UIDropDownMenu_AddButton(info, level)
+            
+        elseif level == 2 then
+            -- Submenú
+            local catIndex = UIDROPDOWNMENU_MENU_VALUE
+            if catIndex then
+                local cat = GatherTracker.Presets[catIndex]
+                if cat and cat.sub then
+                    for _, presetData in ipairs(cat.sub) do
+                        info = UIDropDownMenu_CreateInfo()
+                        info.text = presetData.name
+                        info.notCheckable = true
+                        
+                        -- Usar closure para capturar presetData de forma segura
+                        local p = presetData
+                        info.func = function() 
+                            GatherTracker:LoadPreset(p)
+                            CloseDropDownMenus()
+                        end
+                        
+                        UIDropDownMenu_AddButton(info, level)
+                    end
+                end
+            end
+            
+            -- Submenú Custom
+            if UIDROPDOWNMENU_MENU_VALUE == "CUSTOM" then
+                 local custom = GatherTracker.db.profile.customPresets
+                 if custom then
+                    for name, items in pairs(custom) do
+                        info = UIDropDownMenu_CreateInfo()
+                        info.text = name
+                        info.notCheckable = true
+                        info.tooltipTitle = "Shift+Click to Delete"
+                        info.tooltipOnButton = true
+                        
+                        local pName = name
+                        local pItems = items
+                        
+                        info.func = function()
+                            if IsShiftKeyDown() then
+                                GatherTracker.db.profile.customPresets[pName] = nil
+                                CloseDropDownMenus()
+                                GatherTracker:Print("Preset deleted: " .. pName)
+                            else
+                                GatherTracker:LoadPreset({ name = pName, items = pItems })
+                                CloseDropDownMenus()
+                            end
+                        end
+                        UIDropDownMenu_AddButton(info, level)
+                    end
+                 end
+            end
+        end
+    end
+    
+    UIDropDownMenu_Initialize(frame, InitMenu, "MENU")
+    ToggleDropDownMenu(1, nil, frame, anchor, 20, 0)
+end
+
+function GatherTracker:ShowBulkImportUI()
+    if not self.bulkFrame then
+        local f = CreateFrame("Frame", "GTBulkImportFrame", UIParent, "BackdropTemplate")
+        f:SetSize(350, 420)
+        f:SetPoint("CENTER")
+        f:SetFrameStrata("DIALOG")
+        f:SetMovable(true)
+        f:EnableMouse(true)
+        f:RegisterForDrag("LeftButton")
+        f:SetScript("OnDragStart", f.StartMoving)
+        f:SetScript("OnDragStop", f.StopMovingOrSizing)
+        
+        f:SetBackdrop({
+            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 16,
+            insets = { left = 4, right = 4, top = 4, bottom = 4 }
+        })
+        f:SetBackdropColor(0, 0, 0, 0.95)
+        
+        -- Header Background (matching Shopping List style)
+        local header = f:CreateTexture(nil, "BACKGROUND")
+        header:SetSize(342, 30)
+        header:SetPoint("TOP", 0, -4)
+        header:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+        header:SetVertexColor(0.1, 0.1, 0.1, 0.8)
+        
+        -- Title
+        local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        title:SetPoint("TOP", 0, -10)
+        title:SetText(L["BULK_ADD_TITLE"] or "Bulk Import")
+        
+        -- Instruction Text
+        local desc = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        desc:SetPoint("TOP", title, "BOTTOM", 0, -15)
+        desc:SetWidth(300)
+        desc:SetJustifyH("LEFT")
+        desc:SetText(L["BULK_ADD_DESC"] or "Enter items (one per line):\nFormat: Item Name xQuantity")
+        
+        -- ScrollFrame for Multi-line EditBox
+        local sf = CreateFrame("ScrollFrame", "GTBulkScroll", f, "UIPanelScrollFrameTemplate")
+        sf:SetPoint("TOPLEFT", 20, -100)
+        sf:SetPoint("BOTTOMRIGHT", -35, 60)
+        
+        -- Background for text area
+        local bgEdit = f:CreateTexture(nil, "BACKGROUND")
+        bgEdit:SetPoint("TOPLEFT", sf, -5, 5)
+        bgEdit:SetPoint("BOTTOMRIGHT", sf, 5, -5)
+        bgEdit:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+        bgEdit:SetVertexColor(0.05, 0.05, 0.05, 0.5)
+
+        local eb = CreateFrame("EditBox", nil, sf)
+        eb:SetMultiLine(true)
+        eb:SetMaxLetters(5000)
+        eb:SetFontObject("GameFontHighlight")
+        eb:SetWidth(280)
+        eb:SetAutoFocus(true)
+        eb:SetScript("OnEscapePressed", function() f:Hide() end)
+        sf:SetScrollChild(eb)
+        f.editBox = eb
+        
+        -- Botones (Estilo Blizzard)
+        local btnImport = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+        btnImport:SetSize(120, 25)
+        btnImport:SetPoint("BOTTOMLEFT", 40, 20)
+        btnImport:SetText(L["BTN_IMPORT"] or "Importar")
+        btnImport:SetScript("OnClick", function()
+            local text = eb:GetText()
+            local lines = {strsplit("\n", text)}
+            local count = 0
+            for _, line in ipairs(lines) do
+                line = line:trim()
+                if line ~= "" then
+                    if GatherTracker:ProcessAddCommand(line, true) then
+                        count = count + 1
+                    end
+                end
+            end
+            GatherTracker:Print(string.format(L["IMPORT_FINISHED"] or "Import finished. %d items processed.", count))
+            eb:SetText("")
+            f:Hide()
+        end)
+        
+        local btnCancel = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+        btnCancel:SetSize(120, 25)
+        btnCancel:SetPoint("BOTTOMRIGHT", -40, 20)
+        btnCancel:SetText(L["CANCEL"] or "Cancelar")
+        btnCancel:SetScript("OnClick", function() f:Hide() end)
+        
+        self.bulkFrame = f
+    end
+    self.bulkFrame:Show()
+    self.bulkFrame.editBox:SetText("")
+    self.bulkFrame.editBox:SetFocus()
+end
+
+function GatherTracker:LoadPreset(preset)
+    if not preset or not preset.items then return end
+    
+    self:Print((L["LOADING_PRESET"] or "Loading preset: ") .. preset.name)
+    
+    for _, item in ipairs(preset.items) do
+        -- isRecipe = true, parentName = preset.name para agrupar en UI
+        self:AddToShoppingList(item.id, item.count, true, preset.name)
+    end
+end
+
+function GatherTracker:SaveCurrentListAsPreset(name)
+    if not name or name == "" then return end
+    if not self.db.profile.shoppingList or next(self.db.profile.shoppingList) == nil then
+        self:Print("Cannot save empty list.")
+        return
+    end
+    
+    -- Serializar lista actual
+    local items = {}
+    for id, data in pairs(self.db.profile.shoppingList) do
+        table.insert(items, { id = id, count = data.targetCount })
+    end
+    
+    if not self.db.profile.customPresets then self.db.profile.customPresets = {} end
+    self.db.profile.customPresets[name] = items
+    
+    self:Print("List saved as preset: " .. name)
 end

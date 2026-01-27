@@ -5,3 +5,4 @@ task.md
 .gemini/
 .idea/
 *.log
+.agent/

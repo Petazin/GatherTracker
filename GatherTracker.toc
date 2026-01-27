@@ -1,6 +1,6 @@
 ## Title: GatherTracker
 ## Author: Petazo
-## Version: 1.9.0
+## Version: 2.3.0
 ## Interface: 20505
 ## SavedVariables: GatherTrackerDB, GatherTrackerGlobalDB
 ## OptionalDeps: Ace3
@@ -10,3 +10,4 @@ Embeds.xml
 Locales\enUS.lua
 Locales\esES.lua
 GatherTracker.lua
+Presets.lua

@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [v2.3.0] - 2026-01-27
+### ✨ Expanded Presets (Vanilla/Classic)
+*   **Comprehensive Library**: Added over 20 new preset lists covering Engineering, Alchemy, Blacksmithing (Lv 1-300), First Aid, Cooking, and Rogue utilities.
+*   **Farming Routes**: Specific lists for efficient farming runs (e.g., "Mithril Run", "Plaguebloom Farm").
+
+### 🛠 Custom Lists
+*   **Create Your Own**: You can now save your current Shopping List as a custom preset!
+    *   Click the **Book Icon** [📖] -> **"Save Current List..."**, give it a name, and it's saved forever.
+*   **Manage Lists**: Load your custom lists from the new **"My Custom Lists"** menu.
+*   **Delete**: Simple `Shift + Click` on a custom list to delete it.
+
+### 📥 Bulk Import
+*   **Enhanced Entry**: Added a new multi-line input window for batching items. 
+*   **Flexible Parsing**: Supports multiple formats: `Item Name xQuantity`, `Quantity Item Name`, `Item Name Quantity`. 
+*   **Zero Conflict**: Logic prevents manual items from merging with preset-sourced items, keeping your list organized by origin.
+
+### 🐛 Bug Fixes
+*   **Syntax**: Fixed a missing comma in the default configuration table that caused initialization failure.
+*   **Popups**: Created a dedicated confirmation popup for the "Clear List" button to prevent accidental achievement resets.
+*   **UI Alignment**: Fixed item icon retrieval logic and button positioning in the Shopping List.
+
+## [v2.2.0] - 2026-01-26
+### ✨ Major Features (Smart Lists v2)
+*   **Detached Shopping List**: The list is now a standalone window, independent of the main button.
+*   **Resizable Interface**: You can now resize the Shopping List window by dragging the bottom-right corner.
+*   **Enhanced Styling**: Updated buttons and fonts to match the standard Blizzard UI look and feel.
+*   **Preset System**: Added a new "Load Preset" button [📖] that allows you to quickly load starter kits for professions (Engineering, Alchemy, etc.).
+
+### 🐛 Bug Fixes
+*   **Localization**: Fixed missing text keys for the new Preset system in both English and Spanish.
+*   **Compatibility**: Improved window resizing logic to support multiple WoW client versions including TBC/Classic.
+*   **Stability**: Fixed a loading order issue where Presets would not initialize correctly.
+
+## [v1.9.2] - 2026-01-26
+### ✨ User Experience (UX)
+*   **Visual Controls**: Added `[+]` (Add) and `[x]` (Delete) buttons directly to the Shopping List HUD.
+*   **Link Pasting**: You can now `Shift+Click` items into the "Add Item" popup.
+*   **Smart Search**: writing an item name (e.g., "Copper Ore") will check your existing list for a match, even if not in global cache.
+*   **Empty State**: The "Add" button remains visible even when the list is empty.
+
+## [v1.9.1] - 2026-01-26
+### ✨ New Features (Smart Lists)
+*   **Shopping List**: Create a list of items to track (Materials/Recipes).
+*   **Profession Integration**: Add recipes directly from Crafting/TradeSkill windows.
+*   **Active HUD**: Track progress of required items on screen (e.g., `Iron Ore: 5/20`).
+*   **Smart Commands**: Use `/gt add [Link] xAmount` to quickly add items.
+
 ## [v1.9.0] - 2026-01-26
 ### ✨ New Features (Smart Utility)
 *   **Utility Mode**:
