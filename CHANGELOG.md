@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 
+## [v2.3.1] - 2026-01-27
+### 🛠 UI Persistence
+*   **Sticky Visibility**: Fixed an issue where the Shopping List HUD would automatically show up after a tracking swap even if hidden. The HUD now respects your manual toggle state (`Alt + Click`).
+
 ## [v2.3.0] - 2026-01-27
 ### ✨ Expanded Presets (Vanilla/Classic)
 *   **Comprehensive Library**: Added over 20 new preset lists covering Engineering, Alchemy, Blacksmithing (Lv 1-300), First Aid, Cooking, and Rogue utilities.

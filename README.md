@@ -34,7 +34,8 @@ GatherTracker automatically detects and supports **ANY** minimap tracking abilit
 2.  **Left Click:** Toggle the Tracker ON/OFF. 🖱️
 3.  **Right Click:** Open the Configuration Menu. ⚙️
 4.  **Shift + Click:** Open the **Trophy Room** (Stats & Achievements). 🏅
-5.  **Alt + Drag:** Move the button anywhere on your screen. 📍
+5.  **Alt + Click:** Show/Hide the **Shopping List HUD**. 📝
+6.  **Alt + Drag:** Move the button anywhere on your screen. 📍
 
 **Chat Commands:**
 *   `/gtr` - Toggle tracking on/off. ⚡
@@ -84,7 +85,8 @@ GatherTracker detecta y soporta automáticamente **CUALQUIER** habilidad de rast
 2.  **Clic Izquierdo:** Activar/Desactivar el Rastreador. 🖱️
 3.  **Clic Derecho:** Abrir el Menú de Configuración. ⚙️
 4.  **Shift + Clic:** Abrir la **Sala de Trofeos** (Estadísticas y Logros). 🏅
-5.  **Alt + Arrastrar:** Mover el botón a cualquier lugar. 📍
+5.  **Alt + Clic:** Mostrar/Ocultar el **Listado de Compras**. 📝
+6.  **Alt + Arrastrar:** Mover el botón a cualquier lugar. 📍
 
 **Comandos de Chat:**
 *   `/gtr` - Alternar rastreo on/off. ⚡

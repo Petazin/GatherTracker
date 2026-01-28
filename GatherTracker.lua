@@ -286,7 +286,8 @@ local defaults = {
         
         -- v2.2 Custom Presets
         customPresets = {},
-        shoppingListCollapsed = false
+        shoppingListCollapsed = false,
+        showShoppingHUD = true
     },
     global = {
         history = {
@@ -344,15 +345,8 @@ function GatherTracker:CreateGUI()
                 GatherTracker:CreateHistoryUI()
             -- v2.0.0 Alt Action: Toggle Shopping List
             elseif IsAltKeyDown() then
-                if GatherTracker.shoppingFrame then
-                    if GatherTracker.shoppingFrame:IsShown() then
-                        GatherTracker.shoppingFrame:Hide()
-                    else
-                        GatherTracker:UpdateShoppingListUI() -- Forzar update/show
-                    end
-                else
-                    GatherTracker:UpdateShoppingListUI()
-                end
+                GatherTracker.db.profile.showShoppingHUD = not GatherTracker.db.profile.showShoppingHUD
+                GatherTracker:UpdateShoppingListUI()
             else
                 GatherTracker:ToggleTracking()
             end
@@ -1083,6 +1077,12 @@ end
 function GatherTracker:UpdateShoppingListUI()
     if not self.db.profile.shoppingList then return end
     
+    -- v2.2.1: Respetar si el usuario lo ocultó manualmente
+    if not self.db.profile.showShoppingHUD then
+        if self.shoppingFrame then self.shoppingFrame:Hide() end
+        return
+    end
+
     -- Lazy Create
     if not self.shoppingFrame then self:CreateShoppingListUI() end
     
@@ -2090,7 +2090,7 @@ function GatherTracker:ShowPresetsMenu(anchor)
             -- Categorías Default
             for i, cat in ipairs(GatherTracker.Presets) do
                 info = UIDropDownMenu_CreateInfo()
-                info.text = cat.name
+                info.text = L[cat.id] or cat.name
                 info.hasArrow = true
                 info.value = i 
                 info.notCheckable = true
@@ -2102,7 +2102,7 @@ function GatherTracker:ShowPresetsMenu(anchor)
 
             -- Custom Lists
             info = UIDropDownMenu_CreateInfo()
-            info.text = "My Custom Lists"
+            info.text = L["PRESET_MY_CUSTOM"] or "My Custom Lists"
             info.hasArrow = true
             info.value = "CUSTOM"
             info.notCheckable = true

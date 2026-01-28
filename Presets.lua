@@ -4,6 +4,7 @@ local GatherTracker = addonTable.GatherTracker or _G["GatherTracker"]
 GatherTracker.Presets = {
     {
         name = "Profesiones: Ingeniería (1-300)",
+        id = "PRESET_CAT_ENG",
         sub = {
             {
                 name = "Apprentice (1-75)",
@@ -46,6 +47,7 @@ GatherTracker.Presets = {
     },
     {
         name = "Alquimia: Ingredientes (Para Farmear)",
+        id = "PRESET_CAT_ALCH_FARM",
         sub = {
             {
                 name = "Pack: 20x Elixir de Mangosta",
@@ -94,6 +96,7 @@ GatherTracker.Presets = {
     },
     {
         name = "Alquimia: Consumibles (Raid/PvP)",
+        id = "PRESET_CAT_ALCH_CONSUM",
         sub = {
             {
                 name = "Melee Prep (Physical)",
@@ -135,6 +138,7 @@ GatherTracker.Presets = {
     },
     {
         name = "Profesiones: Alquimia (1-300)",
+        id = "PRESET_CAT_ALCH_GRL",
         sub = {
             {
                 name = "Apprentice (1-60)",
@@ -177,6 +181,7 @@ GatherTracker.Presets = {
     },
     {
         name = "Profesiones: Herrería (1-300)",
+        id = "PRESET_CAT_SMITH",
         sub = {
             {
                 name = "Apprentice (1-75)",
@@ -214,6 +219,7 @@ GatherTracker.Presets = {
     },
     {
         name = "Kits de Farm (Rutas)",
+        id = "PRESET_CAT_FARMS",
         sub = {
             {
                 name = "Starter: Cobre & Estaño",
@@ -253,6 +259,7 @@ GatherTracker.Presets = {
     },
     {
         name = "Aventurero / Utiles",
+        id = "PRESET_CAT_UTIL",
         sub = {
             {
                 name = "Primeros Auxilios (1-300)",
