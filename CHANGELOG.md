@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [v2.3.2] - 2026-01-28
+### ✨ Smart Utility (Non-Gatherers)
+*   **Durability Display**: repurposed the tracker button for characters without gathering professions.
+    *   **Visuals**: Displays a Chest Plate icon with your average armor durability percentage overlaid.
+    *   **Color Coded**: Text changes color based on health (Green > 70%, Yellow > 30%, Red < 30%).
+    *   **Alerts**: Border turns red if durability is critical (< 30%).
+    *   **Logic**: Fishing is ignored for this check (players with only Fishing will see Durability Mode).
+
 ## [v2.3.1] - 2026-01-27
 ### 🛠 UI Persistence
 *   **Sticky Visibility**: Fixed an issue where the Shopping List HUD would automatically show up after a tracking swap even if hidden. The HUD now respects your manual toggle state (`Alt + Click`).

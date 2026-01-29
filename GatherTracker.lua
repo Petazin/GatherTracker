@@ -324,6 +324,12 @@ function GatherTracker:CreateGUI()
     f.border:SetTexture("Interface\\Buttons\\UI-Quickslot2")
     f.border:SetAllPoints()
     f.border:SetVertexColor(1, 0, 0)
+    
+    -- v2.3.0 Text Overlay for Durability
+    f.textOver = f:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+    f.textOver:SetPoint("CENTER", 0, 0)
+    f.textOver:SetShadowOffset(1, -1)
+
 
     f.cooldown = CreateFrame("Cooldown", nil, f, "CooldownFrameTemplate")
     f.cooldown:SetAllPoints()
@@ -443,24 +449,62 @@ function GatherTracker:UpdateGUI()
     else
         -- MODO NORMAL
         local currentTexture = self:GetActiveTrackingTexture()
-        if currentTexture then
-            self.frame.icon:SetTexture(currentTexture)
-            self.frame.icon:SetDesaturated(false)
-        else
-            self.frame.icon:SetTexture(136243) -- Trade_Engineering (Llave Inglesa)
-            self.frame.icon:SetDesaturated(true)
+        local skills = self:GetAllGatheringSkills()
+        
+        -- v2.3.0: Si no tiene profesiones de recolección (Excluyendo Pesca), mostrar Durabilidad
+        local hasPrimaryGathering = false
+        for _, skill in ipairs(skills) do
+            local n = skill.name
+            if n == "Mining" or n == "Minería" or 
+               n == "Herbalism" or n == "Herboristería" or 
+               n == "Skinning" or n == "Desuello" then
+                hasPrimaryGathering = true
+                break
+            end
         end
 
-        if self.IS_RUNNING then
-            self.frame.border:SetVertexColor(0, 1, 0)
-            self.frame.cooldown:SetCooldown(GetTime(), self:GetCastInterval())
+        if not hasPrimaryGathering then
+             local dur = self:GetAverageDurability()
+             -- Icono de Armadura Genérico
+             self.frame.icon:SetTexture("Interface\\Icons\\INV_Chest_Plate01")
+             self.frame.icon:SetDesaturated(false)
+             
+             -- Color Coding del Texto
+             local color = "|cffFF0000" -- Rojo < 30%
+             if dur >= 70 then color = "|cff00FF00" -- Verde
+             elseif dur >= 30 then color = "|cffFFFF00" end -- Amarillo
+             
+             self.frame.textOver:SetText(color .. math.floor(dur) .. "%|r")
+             self.frame.textOver:Show()
+             
+             -- Borde según estado de durabilidad también para consistencia
+             if dur < 30 then
+                 self.frame.border:SetVertexColor(1, 0, 0) -- Rojo Alerta
+             else
+                 self.frame.border:SetVertexColor(0.5, 0.5, 0.5) -- Gris neutral
+             end
         else
-            self.frame.border:SetVertexColor(1, 0, 0)
-            -- Solo desaturar si no hay textura válida o si está pausado explícitamente y queremos indicarlo
-            -- Pero si hay textura de tracking, mejor dejarla visible (o desaturada según gusto)
-            -- El usuario pidió que NO se vieran grises los iconos de no-recolector, pero aquí estamos en modo normal.
-            -- Mantendremos la lógica original para modo normal: Pausado = Desaturado (Gris)
-            if currentTexture then self.frame.icon:SetDesaturated(true) end
+            self.frame.textOver:Hide() -- Ocultar texto en modo normal
+            
+            if currentTexture then
+                self.frame.icon:SetTexture(currentTexture)
+                self.frame.icon:SetDesaturated(false)
+            else
+                self.frame.icon:SetTexture(136243) -- Trade_Engineering (Llave Inglesa)
+                self.frame.icon:SetDesaturated(true)
+            end
+
+            if self.IS_RUNNING then
+                self.frame.border:SetVertexColor(0, 1, 0)
+                self.frame.cooldown:SetCooldown(GetTime(), self:GetCastInterval())
+            else
+                self.frame.border:SetVertexColor(1, 0, 0)
+                -- Solo desaturar si no hay textura válida o si está pausado explícitamente y queremos indicarlo
+                -- Pero si hay textura de tracking, mejor dejarla visible (o desaturada según gusto)
+                -- El usuario pidió que NO se vieran grises los iconos de no-recolector, pero aquí estamos en modo normal.
+                -- Mantendremos la lógica original para modo normal: Pausado = Desaturado (Gris)
+                if currentTexture then self.frame.icon:SetDesaturated(true) end
+            end
         end
     end
     

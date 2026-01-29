@@ -1,6 +1,6 @@
 ## Title: GatherTracker
 ## Author: Petazo
-## Version: 2.3.1
+## Version: 2.3.2
 ## Interface: 20505
 ## SavedVariables: GatherTrackerDB, GatherTrackerGlobalDB
 ## OptionalDeps: Ace3
