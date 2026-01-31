@@ -42,6 +42,7 @@ L["OPT_PAUSE_INSTANCE"] = "En Mazmorra/Raid"
 
 -- Smart Lists (v1.9.1)
 L["ADDED_TO_LIST"] = "Añadido %s x%d a la Lista de Compra."
+L["ALERT_COMPLETED"] = "¡completado!"
 L["LIST_CLEARED"] = "Lista de Compra vaciada."
 L["BTN_ADD_TO_LIST"] = "Rastrear Materiales"
 L["ADDING_RECIPE"] = "Añadiendo materiales para: %s"

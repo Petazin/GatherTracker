@@ -42,6 +42,7 @@ L["OPT_PAUSE_INSTANCE"] = "In Dungeon/Raid"
 
 -- Smart Lists (v1.9.1)
 L["ADDED_TO_LIST"] = "Added %s x%d to Shopping List."
+L["ALERT_COMPLETED"] = "completed!"
 L["LIST_CLEARED"] = "Shopping List Cleared."
 L["BTN_ADD_TO_LIST"] = "Add Materials to Tracker"
 L["ADDING_RECIPE"] = "Adding materials for: %s"

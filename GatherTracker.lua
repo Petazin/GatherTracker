@@ -227,7 +227,7 @@ local achievementsList = {
 -- ============================================================================
 -- 2. CONFIGURACIÓN DEL MENÚ
 -- ============================================================================
-local options = {
+local options = { -- GatherTracker:options
     name = 'GatherTracker', handler = GatherTracker, type = 'group',
     args = {
         header = { order = 1, type = "header", name = L["OPT_HEADER_TRACKING"] },
@@ -895,7 +895,8 @@ function GatherTracker:AddToShoppingList(itemID, amountTarget, isRecipe, parentN
             name = name,
             icon = icon,
             isRecipe = isRecipe or false,
-            parentRecipe = parentName
+            parentRecipe = parentName,
+            alerted = false -- v2.4.0
         }
     end
     
@@ -905,7 +906,11 @@ function GatherTracker:AddToShoppingList(itemID, amountTarget, isRecipe, parentN
     -- Actualizar conteo actual inmediatamente
     self:UpdateShoppingItemCount(storageKey)
     
-    self:Print(string.format(L["ADDED_TO_LIST"] or "Added %s x%d to Shopping List.", name, amountTarget))
+    -- self:Print(string.format(L["ADDED_TO_LIST"] or "Added %s x%d to Shopping List.", name, amountTarget))
+    -- No longer printing here to let ProcessAddCommand or other UI handlers handle the feedback if needed,
+    -- but actually AddToShoppingList is called from TradeSkillUI too.
+    -- Better to keep a single clean print in AddToShoppingList.
+    print(string.format("|cff00ff00[GatherTracker]|r " .. (L["ADDED_TO_LIST"] or "Añadido %s x%d"), name, amountTarget))
     self:UpdateGUI()
 end
 
@@ -932,6 +937,17 @@ function GatherTracker:UpdateShoppingItemCount(storageKey)
     
     local countBag = GetItemCount(itemID) 
     entry.currentCount = countBag
+
+    -- v2.4.0 Completion Alert
+    if entry.targetCount > 0 and entry.currentCount >= entry.targetCount and not entry.alerted then
+        entry.alerted = true
+        print(string.format("|cff00ff00[GatherTracker]|r |cffFFFF00%s |r%s |cff00ff00(%d/%d)|r", 
+            entry.name, L["ALERT_COMPLETED"] or "recolectado!", entry.currentCount, entry.targetCount))
+        PlaySound(888) -- Quest Objective Complete
+    elseif entry.currentCount < entry.targetCount then
+        -- Reset alerted if we consume items (optional but good for repeatability)
+        entry.alerted = false
+    end
 end
 
 function GatherTracker:ScanBagsForTracking()
@@ -1348,28 +1364,45 @@ function GatherTracker:OnAddonLoaded(event, addonName)
 end
 
 function GatherTracker:OnLootMsg(event, msg)
-    -- Patrones simples para detectar loot (Español e Inglés)
-    -- ES: "Recibes botín: [Mena de hierro]x2." o "Recibes botín: [Mena de hierro]."
-    -- EN: "You receive loot: [Iron Ore]x2."
+    -- Patrones globales de Blizzard (Compatibilidad Multi-idioma)
+    -- LOOT_ITEM_SELF = "You receive loot: %s."
+    -- LOOT_ITEM_SELF_MULTIPLE = "You receive loot: %sx%d."
+    -- LOOT_ITEM_PUSHED_SELF = "You receive item: %s." (Esto es para Trade/Mail/Quest)
     
+    -- Queremos EXCLUIR los que sean "PUSHED" (recibido pero no despojado)
+    -- Pero la forma más segura es verificar que CUMPLA el patrón de despojo.
+    
+    local isLoot = false
     local link = string.match(msg, "|Hitem:.-|h")
     if not link then return end
+
+    -- Convertir patrones de Blizzard en patrones de búsqueda Lua
+    -- Pasamos de "Recibes botín: %s." a "Recibes botín: .-"
+    local p1 = string.gsub(LOOT_ITEM_SELF, "%%s", ".-")
+    local p2 = string.gsub(LOOT_ITEM_SELF_MULTIPLE, "%%s", ".-")
+    p2 = string.gsub(p2, "%%d", "%%d+")
     
-    -- Verificar si es un item que nos interesa (está en validNodes o es un Trade Good relevante)
+    -- Escapar caracteres especiales del patrón de Blizzard (como puntos o paréntesis)
+    p1 = string.gsub(p1, "([%.%(%)])", "%%%1")
+    p2 = string.gsub(p2, "([%.%(%)])", "%%%1")
+
+    if string.match(msg, p1) or string.match(msg, p2) then
+        isLoot = true
+    end
+
+    if not isLoot then return end -- Si es trade, mail o "pushed", ignoramos para logros
+
+    -- Verificar si es un item que nos interesa
     local itemID = GetItemInfoInstant(link)
     if not itemID then return end
-
-    -- FIX UNIVERSAL: Comprobar ID en lugar de nombre para soporte multi-idioma
     if not validItemIDs[itemID] then return end 
     
-    local name = GetItemInfo(link) -- Nombre localized para mostrar en tooltip
+    local name = GetItemInfo(link)
 
     -- Extraer cantidad
     local count = 1
     local quantityMatch = string.match(msg, "x(%d+)%.")
     if quantityMatch then count = tonumber(quantityMatch) end
-    
-
     
     -- Guardar en sesión
     if not self.lootSession[itemID] then
@@ -1377,7 +1410,7 @@ function GatherTracker:OnLootMsg(event, msg)
     end
     self.lootSession[itemID].count = self.lootSession[itemID].count + count
     
-    -- Actualizar Historial Global (v1.7.0)
+    -- Actualizar Historial Global (Logros)
     self:UpdateHistory(itemID, count)
 end
 
@@ -1927,6 +1960,7 @@ function GatherTracker:ProcessAddCommand(input, silent)
     
     if itemID then
         self:AddToShoppingList(itemID, quantity)
+        -- Redundant print removed here as AddToShoppingList handles it.
         return true
     end
     return false

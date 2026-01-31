@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.4.1] - 2026-01-30
+### 🐛 Bug Fixes
+*   **Achievement Filter**: Achievements now only count items obtained through looting (mining nodes, herbs, etc.).
+    *   **Strict Logic**: Items received via Trade, Mail, or Quest Rewards are now correctly ignored for achievement progress.
+    *   **Localization Support**: Uses native Blizzard loot patterns to ensure accuracy across all languages.
+
+## [2.4.0] - 2026-01-30
+### ✨ Completion Alerts
+*   **Smart Feedback**: Added visual and auditory alerts when a Shopping List item goal is reached.
+    *   **Sound**: Plays a satisfying "Quest Objective Complete" sound.
+    *   **Chat**: Displays a clear completion message in your primary chat window.
+*   **Persistent Tracking**: Alert status is saved per item and resets if your bag count drops below the target (e.g., if you use the materials).
+
+### 🛠 Quick Add Improvements
+*   **Enhanced Feedback**: The `/gt add` command now provides immediate confirmation in the chat after adding an item.
+*   **Robust Parsing**: Improved item detection for various chat link and text formats.
+
 ## [v2.3.2] - 2026-01-28
 ### ✨ Smart Utility (Non-Gatherers)
 *   **Durability Display**: repurposed the tracker button for characters without gathering professions.

@@ -16,6 +16,7 @@ Mining and Herbalism shouldn't feel like a second job. **GatherTracker** is the 
 *   **Context Aware:** Automatically pauses during Combat, Stealth, Resting, or inside Dungeons. 🧠🛡️
 *   **Loot Tracker:** Real-time session stats for Ores, Herbs, Gems, and their Auction House value. 💎📈
 *   **Auto-Sell:** Automatically turns your gray trash items into gold when visiting a vendor. 💰🧹
+*   **Smart Completion Alerts:** Get visual and auditory feedback when you reach your gathering goals. 🔔✅
 *   **Sound Control:** Option to mute the annoying "swish" sound of tracking switching. 🔇👂
 *   **Universal Support:** Works on any client language and creates specific profiles per character. 🌍👤
 
@@ -42,6 +43,7 @@ GatherTracker automatically detects and supports **ANY** minimap tracking abilit
 *   `/gtr history` - Open the Trophy Room. 📜
 *   `/gtr opt` - Open Options. ⚙️
 *   `/gtr reset` - Reset database/positions. ♻️
+*   `/gtr add [Link] xAmount` - Quickly add items to your list. 📥
 
 ### Author ✍️
 Created by **Petazo**. 🍕
@@ -67,6 +69,7 @@ La Minería y la Herboristería no deberían sentirse como un segundo trabajo. *
 *   **Conciencia de Contexto:** Se pausa automáticamente en Combate, Sigilo, Descanso o Mazmorras. 🧠🛡️
 *   **Rastreador de Botín:** Estadísticas de sesión en tiempo real para Minerales, Hierbas, Gemas y su valor en Subasta. 💎📈
 *   **Auto-Venta:** Convierte automáticamente tu basura gris en oro al visitar a un vendedor. 💰🧹
+*   **Alertas de Completado Inteligentes:** Recibe avisos visuales y sonoros al alcanzar tus metas de recolección. 🔔✅
 *   **Control de Sonido:** Opción para silenciar el molesto sonido de cambio de rastreo. 🔇👂
 *   **Soporte Universal:** Funciona en cualquier idioma de cliente y crea perfiles por personaje. 🌍👤
 
@@ -93,6 +96,7 @@ GatherTracker detecta y soporta automáticamente **CUALQUIER** habilidad de rast
 *   `/gtr history` - Abrir Sala de Trofeos. 📜
 *   `/gtr opt` - Abrir Opciones. ⚙️
 *   `/gtr reset` - Reiniciar base de datos/posiciones. ♻️
+*   `/gtr add [Enlace] xCantidad` - Añadir items rápidamente a tu lista. 📥
 
 ### Autor ✍️
 Creado por **Petazo**. 🍕
