@@ -240,6 +240,9 @@ local options = { -- GatherTracker:options
         -- v1.7.3 Social
         announceGuild = { order = 7, name = L["OPT_ANNOUNCE_GUILD"], desc = L["OPT_ANNOUNCE_GUILD_DESC"], type = "toggle", get = 'GetAnnounceGuild', set = 'SetAnnounceGuild', width = "full" },
 
+        headerMinimap = { order = 8, type = "header", name = L["OPT_HEADER_MINIMAP"] },
+        showMinimapIcon = { order = 9, name = L["OPT_SHOW_MINIMAP_ICON"], desc = L["OPT_SHOW_MINIMAP_ICON_DESC"], type = "toggle", get = 'GetShowMinimapIcon', set = 'SetShowMinimapIcon', width = "full" },
+
         headerInfo = { order = 10, type = "header", name = L["OPT_HEADER_TOOLTIP"] },
         showDurability = { order = 11, name = L["OPT_SHOW_DURABILITY"], type = "toggle", get = 'GetShowDurability', set = 'SetShowDurability' },
         showSkillLevel = { order = 12, name = L["OPT_SHOW_SKILL"], type = "toggle", get = 'GetShowSkillLevel', set = 'SetShowSkillLevel' },
@@ -1861,6 +1864,27 @@ function GatherTracker:SetPauseInInstance(info, val) self.db.profile.pauseInInst
 
 function GatherTracker:GetAnnounceGuild() return self.db.profile.announceGuild end
 function GatherTracker:SetAnnounceGuild(info, val) self.db.profile.announceGuild = val end
+
+function GatherTracker:GetShowMinimapIcon(info)
+    if GatherTrackerDBIcon and GatherTrackerDBIcon.hide then
+        return false
+    end
+    return true
+end
+
+function GatherTracker:SetShowMinimapIcon(info, value)
+    -- Force update source of truth
+    if not GatherTrackerDBIcon then GatherTrackerDBIcon = {} end
+    GatherTrackerDBIcon.hide = not value
+    
+    if self.LDBIcon then
+        if value then
+            self.LDBIcon:Show("GatherTracker")
+        else
+            self.LDBIcon:Hide("GatherTracker")
+        end
+    end
+end
 
 function GatherTracker:ChatCommand(input)
     local command = input and input:trim()

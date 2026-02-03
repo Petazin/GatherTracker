@@ -40,6 +40,10 @@ L["OPT_PAUSE_RESTING"] = "In Resting Area"
 L["OPT_PAUSE_ENEMY"] = "On Enemy Target"
 L["OPT_PAUSE_INSTANCE"] = "In Dungeon/Raid"
 
+L["OPT_HEADER_MINIMAP"] = "Minimap Icon"
+L["OPT_SHOW_MINIMAP_ICON"] = "Show Minimap Icon"
+L["OPT_SHOW_MINIMAP_ICON_DESC"] = "Toggles the display of the GatherTracker icon on the minimap."
+
 -- Smart Lists (v1.9.1)
 L["ADDED_TO_LIST"] = "Added %s x%d to Shopping List."
 L["ALERT_COMPLETED"] = "completed!"

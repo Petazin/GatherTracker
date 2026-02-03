@@ -1,8 +1,8 @@
 ## Title: GatherTracker
 ## Author: Petazo
-## Version: 2.4.1
+## Version: 2.4.5
 ## Interface: 20505
-## SavedVariables: GatherTrackerDB, GatherTrackerGlobalDB
+## SavedVariables: GatherTrackerDB, GatherTrackerGlobalDB, GatherTrackerDBIcon
 ## OptionalDeps: Ace3
 ## Notes: A tracking switch addon, with the ability to pause while not moving.
 
@@ -11,3 +11,4 @@ Locales\enUS.lua
 Locales\esES.lua
 GatherTracker.lua
 Presets.lua
+LDB.lua
