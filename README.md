@@ -10,6 +10,7 @@ Mining and Herbalism shouldn't feel like a second job. **GatherTracker** is the 
 ## Features ✨
 
 * **Smart Auto-Switching:** Cycles between Mining, Herbalism, and other tracking skills automatically. 🔄
+* **Titan Panel & LDB Support:** Fully integrated with LibDataBroker for info-bar displays and standalone Minimap Icon. 🔘📊
 * **Shopping List:** Track specific materials or recipes with a detached, resizable window and presets. 📝🔍
 * **Custom Presets & Bulk Import:** Create your own farming kits and import materials in batch from any text source. 📥📦
 * **Utility Mode:** Monitors your Durability (Repair Alert) and Bag Space when you aren't gathering. 🛠️🎒
@@ -70,6 +71,7 @@ La Minería y la Herboristería no deberían sentirse como un segundo trabajo. *
 ### Características ✨
 
 * **Auto-Cambio Inteligente:** Cicla entre Minería, Herboristería y otras habilidades automáticamente. 🔄
+* **Soporte Titan Panel & LDB:** Integración total con LibDataBroker e icono de minimapa independiente. 🔘📊
 * **Lista de Compra:** Rastrea materiales o recetas en una ventana independiente, redimensionable y con presets. 📝🔍
 * **Presets Personalizados e Importación Masiva:** Crea tus propios kits de farmeo e importa materiales en lote desde cualquier fuente de texto. 📥📦
 * **Modo Utilidad:** Monitorea tu Durabilidad (Alerta de Reparar) y Espacio en Bolsas cuando no estás recolectando. 🛠️🎒

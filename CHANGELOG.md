@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.6] - 2026-02-02
+
+### ✨ Combat Tracking
+
+* **Optional Combat Pause**: Added a new setting to enable or disable tracking switching while in combat.
+  * **Independent Logic**: "Pause in Combat" and "Hide in Combat" are now separate options.
+  * **Smart Safeguard**: Tracking changes only occur in combat if you are NOT casting or channeling, to prevent interrupting your spells.
+
 ## [2.4.5] - 2026-02-02
 
 ### ✨ Minimap & LDB

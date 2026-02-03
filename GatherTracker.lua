@@ -250,6 +250,7 @@ local options = { -- GatherTracker:options
         headerAuto = { order = 20, type = "header", name = L["OPT_HEADER_AUTO"] },
         autoSell = { order = 21, name = L["OPT_AUTO_SELL"], desc = L["OPT_AUTO_SELL_DESC"], type = "toggle", get = 'GetAutoSell', set = 'SetAutoSell', width = "full" },
         combatHide = { order = 22, name = L["OPT_COMBAT_HIDE"], desc = L["OPT_COMBAT_HIDE_DESC"], type = "toggle", get = 'GetCombatHide', set = 'SetCombatHide' },
+        pauseInCombat = { order = 23, name = "Pausar en Combate", desc = "Detiene el cambio de rastreo al entrar en combate.", type = "toggle", get = 'GetPauseInCombat', set = 'SetPauseInCombat' },
 
         resumeAfterCombat = { order = 24, name = L["OPT_RESUME_AFTER_COMBAT"], desc = L["OPT_RESUME_AFTER_COMBAT_DESC"], type = "toggle", get = 'GetResumeAfterCombat', set = 'SetResumeAfterCombat', width = "full" },
         
@@ -268,6 +269,7 @@ local defaults = {
         showFrame = true,
         autoSell = false,
         combatHide = true,
+        pauseInCombat = true,
         resumeAfterCombat = false, 
         pos = { point = "CENTER", x = 0, y = 0 },
         -- v1.6.0
@@ -1749,9 +1751,10 @@ end
 function GatherTracker:OnCombatEnter()
     self.inCombat = true
     if self.db.profile.combatHide then
-        -- V1.6.0: Permitir si montado
-
         if self.frame then self.frame:Hide() end
+    end
+    
+    if self.db.profile.pauseInCombat then
         self:StopTimer()
     end
 end
@@ -1834,6 +1837,9 @@ function GatherTracker:SetAutoSell(info, val) self.db.profile.autoSell = val end
 
 function GatherTracker:GetCombatHide() return self.db.profile.combatHide end
 function GatherTracker:SetCombatHide(info, val) self.db.profile.combatHide = val end
+
+function GatherTracker:GetPauseInCombat() return self.db.profile.pauseInCombat end
+function GatherTracker:SetPauseInCombat(info, val) self.db.profile.pauseInCombat = val end
 
 
 
@@ -2079,9 +2085,8 @@ local function IsEnemyTarget()
 end
 
 function GatherTracker:TimerFeedback()
-    -- Checks Base: En combate siempre pausamos el cambio para evitar errores de API/GCD.
-    -- (Si combatHideMounted está activo, el frame seguirá visible pero estático).
-    if UnitAffectingCombat("player") or UnitChannelInfo("player") or UnitCastingInfo("player") or UnitIsDeadOrGhost("player") then
+    -- Checks Base: En combate solo pausamos si la opción está activa.
+    if (self.db.profile.pauseInCombat and UnitAffectingCombat("player")) or UnitChannelInfo("player") or UnitCastingInfo("player") or UnitIsDeadOrGhost("player") then
         return 
     end
     
