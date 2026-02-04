@@ -74,6 +74,48 @@ L["PRESET_CAT_FARMS"] = "Kits de Farm (Rutas)"
 L["PRESET_CAT_UTIL"] = "Aventurero / Utiles"
 L["PRESET_MY_CUSTOM"] = "Mis Listas Personalizadas"
 
+-- Presets Sub-items
+L["PRESET_ENG_APPRENTICE"] = "Aprendiz (1-75)"
+L["PRESET_ENG_JOURNEYMAN"] = "Oficial (75-150)"
+L["PRESET_ENG_EXPERT"] = "Experto (150-225)"
+L["PRESET_ENG_ARTISAN"] = "Artesano (225-300)"
+
+L["PRESET_ALCH_FARM_MONGOOSE"] = "Pack: 20x Elixir de Mangosta"
+L["PRESET_ALCH_FARM_ARCANE"] = "Pack: 20x Poder Arcano Mayor"
+L["PRESET_ALCH_FARM_FIREPOWER"] = "Pack: 20x Poder de Fuego Superior"
+L["PRESET_ALCH_FARM_HEAL_MANA"] = "Pack: 20x Sanación/Maná Mayor"
+L["PRESET_ALCH_FARM_TITAN"] = "Pack: 1x Frasco de Titán"
+
+L["PRESET_ALCH_CONSUM_MELEE"] = "Prep. Melee (Físico)"
+L["PRESET_ALCH_CONSUM_CASTER"] = "Prep. Caster (Mágico)"
+L["PRESET_ALCH_CONSUM_TANK"] = "Prep. Tanque (Supervivencia)"
+L["PRESET_ALCH_CONSUM_PROT"] = "Protecciones (Resistencias)"
+
+L["PRESET_ALCH_GRL_APPRENTICE"] = "Aprendiz (1-60)"
+L["PRESET_ALCH_GRL_JOURNEYMAN"] = "Oficial (60-150)"
+L["PRESET_ALCH_GRL_EXPERT"] = "Experto (150-225)"
+L["PRESET_ALCH_GRL_ARTISAN"] = "Artesano (225-300)"
+
+L["PRESET_SMITH_APPRENTICE"] = "Aprendiz (1-75)"
+L["PRESET_SMITH_JOURNEYMAN"] = "Oficial (75-125)"
+L["PRESET_SMITH_EXPERT"] = "Experto (125-225)"
+L["PRESET_SMITH_ARTISAN"] = "Artesano (225-300)"
+
+L["PRESET_FARM_STARTER"] = "Inicio: Cobre y Estaño"
+L["PRESET_FARM_MID"] = "Medio: Hierro y Mitril"
+L["PRESET_FARM_HIGH_THORIUM"] = "Alto: Torio y Arcano"
+L["PRESET_FARM_HIGH_HERBS"] = "Alto: Flor de Peste y Hoja de Sueño"
+
+L["PRESET_UTIL_FIRSTAID"] = "Primeros Auxilios (1-300)"
+L["PRESET_UTIL_COOKING"] = "Cocina: Supervivencia"
+L["PRESET_UTIL_ROGUE"] = "Pícaro: Venenos y Té"
+
+-- UI Strings (Saved Presets)
+L["POPUP_SAVE_PRESET"] = "Guardar Lista de Compra actual como Preset.\nIntroduce nombre:"
+L["MENU_SAVE_CURRENT"] = "Guardar Lista Actual..."
+L["ERR_EMPTY_LIST_SAVE"] = "No se puede guardar una lista vacía."
+L["MSG_PRESET_SAVED"] = "Lista guardada como preset: "
+
 -- Utility Mode (v1.9.0)
 L["STATUS_CRITICAL_REPAIR"] = "REPARAR"
 L["STATUS_BAG_FULL"] = "LLENO"

@@ -2218,7 +2218,7 @@ function GatherTracker:ShowPresetsMenu(anchor)
             -- Save Current
             if next(GatherTracker.db.profile.shoppingList) ~= nil then
                 info = UIDropDownMenu_CreateInfo()
-                info.text = "Save Current List..."
+                info.text = L["MENU_SAVE_CURRENT"]
                 info.notCheckable = true
                 info.func = function() 
                     StaticPopup_Show("GT_SAVE_PRESET")
@@ -2242,7 +2242,7 @@ function GatherTracker:ShowPresetsMenu(anchor)
                 if cat and cat.sub then
                     for _, presetData in ipairs(cat.sub) do
                         info = UIDropDownMenu_CreateInfo()
-                        info.text = presetData.name
+                        info.text = (presetData.id and L[presetData.id]) or presetData.name
                         info.notCheckable = true
                         
                         -- Usar closure para capturar presetData de forma segura
@@ -2402,7 +2402,7 @@ end
 function GatherTracker:SaveCurrentListAsPreset(name)
     if not name or name == "" then return end
     if not self.db.profile.shoppingList or next(self.db.profile.shoppingList) == nil then
-        self:Print("Cannot save empty list.")
+        self:Print(L["ERR_EMPTY_LIST_SAVE"])
         return
     end
     
@@ -2415,5 +2415,33 @@ function GatherTracker:SaveCurrentListAsPreset(name)
     if not self.db.profile.customPresets then self.db.profile.customPresets = {} end
     self.db.profile.customPresets[name] = items
     
-    self:Print("List saved as preset: " .. name)
+    self:Print(L["MSG_PRESET_SAVED"] .. name)
 end
+
+-- Localized StaticPopups (v2.5.0)
+StaticPopupDialogs["GT_SAVE_PRESET"] = {
+    text = L["POPUP_SAVE_PRESET"],
+    button1 = ACCEPT,
+    button2 = CANCEL,
+    hasEditBox = true,
+    OnAccept = function(self)
+        local text = self.editBox:GetText()
+        GatherTracker:SaveCurrentListAsPreset(text)
+    end,
+    EditBoxOnEnterPressed = function(self)
+        local text = self:GetParent().editBox:GetText()
+        GatherTracker:SaveCurrentListAsPreset(text)
+        self:GetParent():Hide()
+    end,
+    OnShow = function(self)
+        self.editBox:SetFocus()
+    end,
+    OnHide = function(self)
+        ChatEdit_FocusActiveWindow()
+        self.editBox:SetText("")
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}

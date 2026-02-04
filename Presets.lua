@@ -8,6 +8,7 @@ GatherTracker.Presets = {
         sub = {
             {
                 name = "Apprentice (1-75)",
+                id = "PRESET_ENG_APPRENTICE",
                 items = {
                     { id = 2770, count = 60 }, -- Mena de cobre
                     { id = 2835, count = 40 }, -- Piedra tosca
@@ -15,6 +16,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Journeyman (75-150)",
+                id = "PRESET_ENG_JOURNEYMAN",
                 items = {
                     { id = 2770, count = 20 }, -- Mena de cobre
                     { id = 2771, count = 40 }, -- Mena de estaño
@@ -24,6 +26,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Expert (150-225)",
+                id = "PRESET_ENG_EXPERT",
                 items = {
                     { id = 2772, count = 80 }, -- Mena de hierro
                     { id = 2776, count = 20 }, -- Mena de oro
@@ -35,6 +38,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Artisan (225-300)",
+                id = "PRESET_ENG_ARTISAN",
                 items = {
                     { id = 3858, count = 150 }, -- Mena de mitril
                     { id = 10620, count = 100 }, -- Mena de torio
@@ -51,6 +55,7 @@ GatherTracker.Presets = {
         sub = {
             {
                 name = "Pack: 20x Elixir de Mangosta",
+                id = "PRESET_ALCH_FARM_MONGOOSE",
                 items = {
                     { id = 13465, count = 40 }, -- Salvia de montaña
                     { id = 13466, count = 40 }, -- Flor de peste
@@ -59,6 +64,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Pack: 20x Poder Arcano Mayor",
+                id = "PRESET_ALCH_FARM_ARCANE",
                 items = {
                     { id = 13464, count = 60 }, -- Hoja de sueño
                     { id = 8831,  count = 20 }, -- Loto cárdeno
@@ -67,6 +73,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Pack: 20x Poder de Fuego Superior",
+                id = "PRESET_ALCH_FARM_FIREPOWER",
                 items = {
                     { id = 4625,  count = 60 }, -- Carolina
                     { id = 13464, count = 20 }, -- Hoja de sueño
@@ -75,6 +82,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Pack: 20x Sanación/Maná Mayor",
+                id = "PRESET_ALCH_FARM_HEAL_MANA",
                 items = {
                     { id = 13463, count = 40 }, -- Sansam dorado
                     { id = 13465, count = 20 }, -- Salvia de montaña (para sanación)
@@ -85,6 +93,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Pack: 1x Frasco de Titán",
+                id = "PRESET_ALCH_FARM_TITAN",
                 items = {
                     { id = 13468, count = 1 },  -- Loto negro
                     { id = 13465, count = 30 }, -- Salvia de montaña
@@ -100,6 +109,7 @@ GatherTracker.Presets = {
         sub = {
             {
                 name = "Melee Prep (Physical)",
+                id = "PRESET_ALCH_CONSUM_MELEE",
                 items = {
                     { id = 13451, count = 20 }, -- Elixir de mangosta (Mongoose)
                     { id = 9206, count = 20 },  -- Elixir de gigantes (Giants)
@@ -109,6 +119,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Caster Prep (Magic)",
+                id = "PRESET_ALCH_CONSUM_CASTER",
                 items = {
                     { id = 13454, count = 20 }, -- Elixir de poder arcano superior
                     { id = 13444, count = 40 }, -- Poción de maná mayor
@@ -118,6 +129,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Tank Prep (Survival)",
+                id = "PRESET_ALCH_CONSUM_TANK",
                 items = {
                     { id = 8951, count = 20 },  -- Elixir de defensa superior
                     { id = 13452, count = 20 }, -- Elixir de agilidad superior
@@ -127,6 +139,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Protecciones (Resistances)",
+                id = "PRESET_ALCH_CONSUM_PROT",
                 items = {
                     { id = 6048, count = 20 },  -- Prot. Fuego
                     { id = 6052, count = 20 },  -- Prot. Naturaleza
@@ -142,6 +155,7 @@ GatherTracker.Presets = {
         sub = {
             {
                 name = "Apprentice (1-60)",
+                id = "PRESET_ALCH_GRL_APPRENTICE",
                 items = {
                     { id = 2447, count = 60 }, -- Flor de paz
                     { id = 765,  count = 60 }, -- Hojaplata
@@ -150,6 +164,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Journeyman (60-150)",
+                id = "PRESET_ALCH_GRL_JOURNEYMAN",
                 items = {
                     { id = 2449, count = 40 }, -- Raíz de tierra
                     { id = 785,  count = 40 }, -- Marregal
@@ -159,6 +174,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Expert (150-225)",
+                id = "PRESET_ALCH_GRL_EXPERT",
                 items = {
                     { id = 3820, count = 20 }, -- Sangrerregia
                     { id = 3355, count = 20 }, -- Vidarraíz
@@ -169,6 +185,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Artisan (225-300)",
+                id = "PRESET_ALCH_GRL_ARTISAN",
                 items = {
                     { id = 8831, count = 40 }, -- Sansam dorado
                     { id = 8839, count = 20 }, -- Clavelespectro
@@ -185,6 +202,7 @@ GatherTracker.Presets = {
         sub = {
             {
                 name = "Apprentice (1-75)",
+                id = "PRESET_SMITH_APPRENTICE",
                 items = {
                     { id = 2770, count = 80 }, -- Mena de cobre
                     { id = 2835, count = 20 }, -- Piedra tosca
@@ -192,6 +210,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Journeyman (75-125)",
+                id = "PRESET_SMITH_JOURNEYMAN",
                 items = {
                     { id = 2770, count = 100 }, -- Mena de cobre (Bronze)
                     { id = 2771, count = 100 }, -- Mena de estaño
@@ -200,6 +219,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Expert (125-225)",
+                id = "PRESET_SMITH_EXPERT",
                 items = {
                     { id = 2772, count = 120 }, -- Mena de hierro
                     { id = 2776, count = 20 }, -- Mena de oro
@@ -209,6 +229,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Artisan (225-300)",
+                id = "PRESET_SMITH_ARTISAN",
                 items = {
                     { id = 3858, count = 200 }, -- Mena de mitril
                     { id = 10620, count = 300 }, -- Mena de torio
@@ -223,6 +244,7 @@ GatherTracker.Presets = {
         sub = {
             {
                 name = "Starter: Cobre & Estaño",
+                id = "PRESET_FARM_STARTER",
                 items = {
                     { id = 2770, count = 100 }, -- Cobre
                     { id = 2771, count = 50  }, -- Estaño
@@ -232,6 +254,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Mid: Hierro & Mitril",
+                id = "PRESET_FARM_MID",
                 items = {
                     { id = 2772, count = 100 }, -- Hierro
                     { id = 3858, count = 100 }, -- Mitril
@@ -241,6 +264,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "High: Torio & Arcano",
+                id = "PRESET_FARM_HIGH_THORIUM",
                 items = {
                     { id = 10620, count = 200 }, -- Torio
                     { id = 12363, count = 10 }, -- Cristal Arcano
@@ -249,6 +273,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "High: Plaguebloom & Dreamfoil",
+                id = "PRESET_FARM_HIGH_HERBS",
                 items = {
                     { id = 13466, count = 50 }, -- Flor de peste
                     { id = 13464, count = 50 }, -- Hoja de sueño
@@ -263,6 +288,7 @@ GatherTracker.Presets = {
         sub = {
             {
                 name = "Primeros Auxilios (1-300)",
+                id = "PRESET_UTIL_FIRSTAID",
                 items = {
                     { id = 2589, count = 100 }, -- Lino
                     { id = 2592, count = 100 }, -- Lana
@@ -273,6 +299,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Cocina: Supervivencia",
+                id = "PRESET_UTIL_COOKING",
                 items = {
                     { id = 769,  count = 20 }, -- Carne de jabalí
                     { id = 2672, count = 20 }, -- Carne de lobo
@@ -282,6 +309,7 @@ GatherTracker.Presets = {
             },
             {
                 name = "Pícaro: Venenos y Té",
+                id = "PRESET_UTIL_ROGUE",
                 items = {
                     { id = 2453, count = 20 }, -- Cardo veloz
                     { id = 3818, count = 10 }, -- Hojasangre

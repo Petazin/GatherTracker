@@ -74,6 +74,48 @@ L["PRESET_CAT_FARMS"] = "Farm Kits (Routes)"
 L["PRESET_CAT_UTIL"] = "Adventurer / Utilities"
 L["PRESET_MY_CUSTOM"] = "My Custom Lists"
 
+-- Presets Sub-items
+L["PRESET_ENG_APPRENTICE"] = "Apprentice (1-75)"
+L["PRESET_ENG_JOURNEYMAN"] = "Journeyman (75-150)"
+L["PRESET_ENG_EXPERT"] = "Expert (150-225)"
+L["PRESET_ENG_ARTISAN"] = "Artisan (225-300)"
+
+L["PRESET_ALCH_FARM_MONGOOSE"] = "Pack: 20x Elixir of the Mongoose"
+L["PRESET_ALCH_FARM_ARCANE"] = "Pack: 20x Greater Arcane Elixir"
+L["PRESET_ALCH_FARM_FIREPOWER"] = "Pack: 20x Elixir of Greater Firepower"
+L["PRESET_ALCH_FARM_HEAL_MANA"] = "Pack: 20x Major Healing/Mana"
+L["PRESET_ALCH_FARM_TITAN"] = "Pack: 1x Flask of the Titans"
+
+L["PRESET_ALCH_CONSUM_MELEE"] = "Melee Prep (Physical)"
+L["PRESET_ALCH_CONSUM_CASTER"] = "Caster Prep (Magic)"
+L["PRESET_ALCH_CONSUM_TANK"] = "Tank Prep (Survival)"
+L["PRESET_ALCH_CONSUM_PROT"] = "Protections (Resistances)"
+
+L["PRESET_ALCH_GRL_APPRENTICE"] = "Apprentice (1-60)"
+L["PRESET_ALCH_GRL_JOURNEYMAN"] = "Journeyman (60-150)"
+L["PRESET_ALCH_GRL_EXPERT"] = "Expert (150-225)"
+L["PRESET_ALCH_GRL_ARTISAN"] = "Artisan (225-300)"
+
+L["PRESET_SMITH_APPRENTICE"] = "Apprentice (1-75)"
+L["PRESET_SMITH_JOURNEYMAN"] = "Journeyman (75-125)"
+L["PRESET_SMITH_EXPERT"] = "Expert (125-225)"
+L["PRESET_SMITH_ARTISAN"] = "Artisan (225-300)"
+
+L["PRESET_FARM_STARTER"] = "Starter: Copper & Tin"
+L["PRESET_FARM_MID"] = "Mid: Iron & Mithril"
+L["PRESET_FARM_HIGH_THORIUM"] = "High: Thorium & Arcane"
+L["PRESET_FARM_HIGH_HERBS"] = "High: Plaguebloom & Dreamfoil"
+
+L["PRESET_UTIL_FIRSTAID"] = "First Aid (1-300)"
+L["PRESET_UTIL_COOKING"] = "Cooking: Survival"
+L["PRESET_UTIL_ROGUE"] = "Rogue: Poisons & Tea"
+
+-- UI Strings (Saved Presets)
+L["POPUP_SAVE_PRESET"] = "Save current Shopping List as Preset.\nEnter name:"
+L["MENU_SAVE_CURRENT"] = "Save Current List..."
+L["ERR_EMPTY_LIST_SAVE"] = "Cannot save empty list."
+L["MSG_PRESET_SAVED"] = "List saved as preset: "
+
 -- Utility Mode (v1.9.0)
 L["STATUS_CRITICAL_REPAIR"] = "REPAIR"
 L["STATUS_BAG_FULL"] = "FULL"

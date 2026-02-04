@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.5.0] - 2026-02-04
+
+### ✨ Features & Improvements
+
+* **Localization Refactor**: Fixed hardcoded preset names and UI messages for full English/Spanish support.
+* **Shopping List HUD**: Improved resizing behavior and added a dedicated preset management menu.
+
 ## [2.4.6] - 2026-02-02
 
 ### ✨ Combat Tracking
