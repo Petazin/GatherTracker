@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.5.1] - 2026-02-07
+
+### 🐛 Bug Fixes
+
+* **Combat Messages**: Fixed an issue where "Detenido." messages would appear upon entering combat even if the tracker was not active.
+
 ## [v2.5.0] - 2026-02-04
 
 ### ✨ Features & Improvements

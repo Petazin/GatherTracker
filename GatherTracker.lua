@@ -1754,8 +1754,12 @@ function GatherTracker:OnCombatEnter()
         if self.frame then self.frame:Hide() end
     end
     
-    if self.db.profile.pauseInCombat then
+    -- v1.8.1 Fix: Solo detener si está activado
+    if self.db.profile.pauseInCombat and self.IS_RUNNING then
+        self.wasRunningBeforeCombat = true
         self:StopTimer()
+    else
+        self.wasRunningBeforeCombat = false
     end
 end
 
@@ -1764,7 +1768,8 @@ function GatherTracker:OnCombatLeave()
     if self.db.profile.showFrame then
         if self.frame then self.frame:Show() end
     end
-    if self.db.profile.resumeAfterCombat then
+    -- v1.8.1 Fix: Solo reanudar si estaba activo antes del combate
+    if self.db.profile.resumeAfterCombat and self.wasRunningBeforeCombat then
         self:StartTimer()
     end
 end
