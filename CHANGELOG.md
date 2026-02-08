@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.5.5] - 2026-02-08
+
+### ✨ Hybrid Recipe Import
+
+* **Smart Recipe Parsing**: You can now paste a **Recipe Link** (e.g. `[Esquema: botas cohete Xtremo]`) into the Bulk Import window (`/gt add`) to automatically add all its materials.
+* **Hybrid Database**: Integrating a **Static ID System** for complex recipes (Engineering, Blacksmithing) to ensure 100% accuracy even if the items are not in your local cache.
+* **Tooltip Scanning**: Robust fallback system that reads the tooltip text to find reagents for any recipe not in the static DB.
+
+### 🛠 Improvements
+
+* **Smart Shift+Click**: Shift-clicking items into the Bulk Import window now intelligently adds a newline, making it easier to create lists.
+* **Async Name Resolution**: Fixed a bug where some items would appear as "Unknown" in the Shopping List until the cache updated.
+
+### 🐛 Bug Fixes
+
+* **Localization**: Improved parsing logic to support English, Spanish, and German client headers.
+* **Crash Fix**: Resolved a Lua error when parsing recipes with empty tooltips.
+
+## [v2.5.2] - 2026-02-07
+
+### ✨ TBC Expansion Support
+
+* **Full Gathering Data**: Added all Outland Ores (Fel Iron, Adamantite, Khorium, Eternium) and Herbs (Felweed, Dreaming Glory, Mana Thistle, etc.) to the tracker.
+* **TBC Gems & Fish**: Included primary Gems and Outland Fish (Furious Crawdad, Zangarian Sporefish).
+* **TBC Achievements**: Added new achievements for Outland gathering.
+* **Updated Presets**: Added TBC-specific presets for Engineering, Alchemy, and Blacksmithing (300-375).
+
 ## [v2.5.1] - 2026-02-07
 
 ### 🐛 Bug Fixes

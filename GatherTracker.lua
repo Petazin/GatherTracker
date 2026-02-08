@@ -113,7 +113,7 @@ local miningIDs = {
     [3858] = true, [7911] = true, [10620] = true, [11370] = true, [12363] = true,
     -- TBC Ores
     [23424] = true, [23425] = true, [23426] = true, [23427] = true,
-    -- Stones
+    -- Stones & Others
     [2835] = true, [2836] = true, [2838] = true, [7912] = true, [12365] = true,
 }
 
@@ -126,8 +126,8 @@ local herbIDs = {
     [8845] = true, [8846] = true, [13463] = true, [13464] = true, [13465] = true,
     [13466] = true, [13467] = true, [13468] = true,
     -- TBC Herbs
-    [22785] = true, [22786] = true, [22787] = true, [22789] = true, [22790] = true,
-    [22791] = true, [22792] = true, [22793] = true, [22794] = true
+    [22785] = true, [22786] = true, [22787] = true, [22788] = true, [22789] = true,
+    [22790] = true, [22791] = true, [22792] = true, [22793] = true, [22794] = true
 }
 
 local gemIDs = {
@@ -136,8 +136,9 @@ local gemIDs = {
     [5489] = true, [3864] = true, [7909] = true, [12799] = true, [7910] = true, 
     [7907] = true, [12800] = true, 
     -- TBC Gems
-    [23077] = true, [23076] = true, [23073] = true, [23071] = true,
-    [23072] = true, [23074] = true, [25867] = true, [25868] = true,
+    [23077] = true, [23079] = true, [23081] = true, [23082] = true,
+    [23080] = true, [23078] = true, [23095] = true, [23097] = true,
+    [23099] = true, [23101] = true, [23103] = true, [23105] = true,
 }
 
 local fishingIDs = {
@@ -145,8 +146,8 @@ local fishingIDs = {
     [6290] = true, [6289] = true, [6522] = true, [6308] = true, [6317] = true,
     [6358] = true, [6359] = true, [13422] = true,
     -- TBC Fish
-    [27422] = true, [27425] = true, [27429] = true, [27430] = true, [27431] = true,
-    [27432] = true
+    [27422] = true, [27425] = true, [27435] = true, [27432] = true, [27434] = true,
+    [27433] = true, [27437] = true, [27438] = true, [27439] = true
 }
 
 local validItemIDs = {}
@@ -222,6 +223,13 @@ local achievementsList = {
     { category="CAT_SPECIALIST", id=112, req_type="item_id", req_key=13465, threshold=200, points=50, name="ACH_SABIO_MONTANA_NAME", desc="ACH_SABIO_MONTANA_DESC", icon="Interface\\Icons\\inv_misc_herb_mountainsilversage" },
     { category="CAT_SPECIALIST", id=113, req_type="item_id", req_key=13464, threshold=200, points=40, name="ACH_SUENO_ETERNO_NAME", desc="ACH_SUENO_ETERNO_DESC", icon="Interface\\Icons\\Inv_misc_herb_12" },
     { category="CAT_SPECIALIST", id=114, req_type="item_id", req_key=13422, threshold=200, points=50, name="ACH_ESCAMA_DURA_NAME", desc="ACH_ESCAMA_DURA_DESC", icon="Interface\\Icons\\inv_misc_fish_21" },
+
+    -- Outland Specialist (New v2.5.2)
+    { category="CAT_SPECIALIST", id=120, req_type="item_id", req_key=23424, threshold=200, points=20, name="ACH_HIERRO_VIL_NAME", desc="ACH_HIERRO_VIL_DESC", icon="Interface\\Icons\\Inv_ore_feliron" },
+    { category="CAT_SPECIALIST", id=121, req_type="item_id", req_key=23425, threshold=200, points=30, name="ACH_ADAMANTITA_NAME", desc="ACH_ADAMANTITA_DESC", icon="Interface\\Icons\\Inv_ore_adamantite" },
+    { category="CAT_SPECIALIST", id=122, req_type="item_id", req_key=22785, threshold=200, points=20, name="ACH_HIERBA_SUCIA_NAME", desc="ACH_HIERBA_SUCIA_DESC", icon="Interface\\Icons\\Inv_misc_herb_felweed" },
+    { category="CAT_SPECIALIST", id=123, req_type="item_id", req_key=22789, threshold=200, points=40, name="ACH_TEROCONO_NAME", desc="ACH_TEROCONO_DESC", icon="Interface\\Icons\\Inv_misc_herb_terocone" },
+    { category="CAT_SPECIALIST", id=124, req_type="item_id", req_key=27437, threshold=50, points=50, name="ACH_TENAZAS_NAME", desc="ACH_TENAZAS_DESC", icon="Interface\\Icons\\inv_misc_fish_22" },
 }
 
 -- ============================================================================
@@ -1315,6 +1323,7 @@ function GatherTracker:OnInitialize()
     self:RegisterChatCommand('gt', 'ChatCommand')
     self:RegisterChatCommand('gtr', 'ChatCommand')
     self:RegisterChatCommand('gtrack', 'ChatCommand')
+    self:RegisterChatCommand('gtdb', 'TestDB') -- Commands for testing DB structure
 
     -- Inicializar Variables de Sesión (Antes de GUI)
     self.lootSession = {} 
@@ -1322,6 +1331,12 @@ function GatherTracker:OnInitialize()
     
     -- Inicializar Hooks de API
     self:RawHook("HandleModifiedItemClick", "OnHandleModifiedItemClick", true)
+    
+    -- v2.5.4 Universal Smart Entry (AtlasLoot, etc.)
+    -- We use RawHook to intercept completely if our window is open
+    if self.RawHook and not self:IsHooked("ChatEdit_InsertLink") then
+        self:RawHook("ChatEdit_InsertLink", "OnChatEditInsertLink", true)
+    end
     
     -- Eventos
     self:RegisterEvent("MINIMAP_UPDATE_TRACKING")
@@ -1338,6 +1353,9 @@ function GatherTracker:OnInitialize()
     
     self:ScanTrackingSpells() -- Escaneo inicial
     
+    -- v2.5.3 Fix: Async Item Name Resolution
+    self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+
     -- Establecer valores por defecto inteligentes si están vacíos
     if (not self.db.profile.type1 or self.db.profile.type1 == "") and next(availableTrackingTypes) then
         for name, _ in pairs(availableTrackingTypes) do
@@ -1361,6 +1379,31 @@ function GatherTracker:OnInitialize()
     local version = C_AddOns and C_AddOns.GetAddOnMetadata("GatherTracker", "Version") or GetAddOnMetadata("GatherTracker", "Version")
     print("|cff00ff00GatherTracker:|r v" .. (version or "Unknown") .. " " .. L["LOAD_MESSAGE"])
 end
+
+function GatherTracker:GET_ITEM_INFO_RECEIVED(event, itemID, success)
+    if not success or not itemID then return end
+    
+    -- Check if this item is in our shopping list
+    -- The list might use composite keys "id:parentName", so we check itemID property
+    local needsUpdate = false
+    local list = self.db.profile.shoppingList
+    
+    for key, entry in pairs(list) do
+        if entry.itemID == itemID then
+            local name = GetItemInfo(itemID)
+            if name and name ~= entry.name then
+                entry.name = name
+                needsUpdate = true
+                -- print("Updated name for " .. itemID .. " to " .. name)
+            end
+        end
+    end
+    
+    if needsUpdate then
+        self:UpdateShoppingListUI()
+    end
+end
+
 
 function GatherTracker:OnAddonLoaded(event, addonName)
     if addonName == "Blizzard_TradeSkillUI" then
@@ -1935,8 +1978,36 @@ function GatherTracker:ProcessAddCommand(input, silent)
     local itemID
     local quantity = 1
     
-    -- 1. Intentar detectar Link: |Hitem:12345|h
+    -- v2.5.5 Check for Spell/Recipe/Enchant Links FIRST
+    -- |cffffd000|Htrade:195094:45:45:30:7FFFFFFF:712B292C2D2F28707C74235E445F333C3E43:2:24:24:14:14|h[Alchemy]|h|r
+    -- |cffffd000|Hspell:28591|h[Flask of Pure Death]|h|r
+    
+    local spellID = string.match(input, "Hspell:(%d+)")
+    local tradeID = string.match(input, "Htrade:(%d+)")
+    
+    if spellID or tradeID then
+        -- Recipe Decomposition Strategy
+        self:AddRecipeByLink(input)
+        return true
+    end
+
+    -- 1. Intentar detectar Item Link: |Hitem:12345|h
     local link = string.match(input, "|Hitem:(%d+).-|h")
+    
+    -- Special Case: Linked Item might be a Recipe Item (e.g. Scroll)
+    if link then
+        local _, _, _, _, _, classType, subClassType = GetItemInfo(link)
+        -- Class 9 = Recipe
+        if classType and (classType == "Recipe" or classType == "Receta" or classType == "Formula" or classType == "Fórmula" or classType == "Consumible" or classType == "Consumable") then
+             -- DEBUG: Found Recipe Item
+             print("GatherTracker DEBUG: Recipe Item found: " .. (link or "nil"))
+             self:AddRecipeByLink(input)
+             return true
+        else
+             -- DEBUG: Not a recipe item?
+             print(string.format("GatherTracker DEBUG: Item: %s, Type: %s, SubType: %s", link, tostring(classType), tostring(subClassType)))
+        end
+    end
     
     -- 2. Intentar parsear cantidad (ej: "Mena x20", "Mena x 20", "Mena 20", "20x Mena")
     -- Caso A: Cantidad al final (soporta ' x5', ' x 5', ' 20', ' 20x')
@@ -1999,6 +2070,205 @@ function GatherTracker:ProcessAddCommand(input, silent)
         return true
     end
     return false
+end
+
+-- v2.5.5 Recipe Decomposition (Tooltip Scanning)
+-- v2.5.5 Recipe Decomposition (Tooltip Scanning)
+function GatherTracker:AddRecipeByLink(link)
+    if not link then return end
+    
+    -- 1. Create Scanner if not exists
+    if not self.scanTooltip then
+        self.scanTooltip = CreateFrame("GameTooltip", "GatherTrackerScanTooltip", nil, "GameTooltipTemplate")
+        self.scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+    end
+    
+    -- 2. Set Hyperlink
+    self.scanTooltip:ClearLines()
+    local success = pcall(function() self.scanTooltip:SetHyperlink(link) end)
+    if not success then return end
+    
+    -- 3. Get Parent Name
+    local regionName = _G["GatherTrackerScanTooltipTextLeft1"]
+    local parentName = (regionName and regionName:GetText()) or "Unknown Recipe"
+    
+    -- 3.5 Check Static Recipe DB (New Hybrid System)
+    -- If we have data for this ID, use it directly!
+    local recipeID
+    local linkType, linkID = string.match(link, "|H(%a+):(%d+)")
+    if linkType and linkID then
+        recipeID = tonumber(linkID)
+    end
+    
+    if recipeID and addonTable.RecipeDB and addonTable.RecipeDB[recipeID] then
+        -- FOUND IN DB! Skip scanning.
+        local reagents = addonTable.RecipeDB[recipeID]
+        for _, reagent in ipairs(reagents) do
+            -- {itemID, quantity}
+            local itemID, qty = reagent[1], reagent[2]
+            self:AddToShoppingList(itemID, qty, true, parentName)
+        end
+        self:Print(string.format(L["RECIPE_PARSED"] or "Recipe parsed: %s (%d items)", parentName, #reagents))
+        return -- DONE
+    end
+    
+    -- 4. Scan for Reagents header
+    -- Support multiple languages/formats via Globals and Locales
+    -- We avoid hardcoding specific English/Spanish strings here.
+    
+    local headers = {}
+    if SPELL_REAGENTS then table.insert(headers, SPELL_REAGENTS) end
+    
+    -- Add from Locale (allows translators to add multiple separated by |)
+    if L["TOOLTIP_HEADER_REAGENTS"] then
+        for str in string.gmatch(L["TOOLTIP_HEADER_REAGENTS"], "([^|]+)") do
+            table.insert(headers, str)
+        end
+    end
+    
+    -- DEBUG: Headers
+    print("GatherTracker DEBUG: Searching for Headers:", table.concat(headers, ", "))
+
+    local numLines = self.scanTooltip:NumLines() or 0
+    if numLines <= 0 then
+        print("GatherTracker DEBUG: Tooltip is empty! SetHyperlink failed?")
+        return
+    end
+
+    -- Special Case Headers for "Requires" lines (Engineering/Blacksmithing)
+    -- These lines often contain the full list: "Requires ItemA (2), ItemB (1)"
+    local requireHeaders = { "Requires", "Requiere", "Necesitas" }
+
+    local reagentsFound = false
+    -- countAdded is now declared at top of function? No, let's just ensure it's here.
+    -- If I move it to top, I need to find where top is.
+    -- Easier: Initialize it HERE cleanly and remove previous duplicates if any.
+    local countAdded = 0
+
+    for i = 2, numLines do
+        local line = _G["GatherTrackerScanTooltipTextLeft" .. i]
+        if line then
+            local text = line:GetText()
+            if text then
+                local cleanLinkText = text:trim()
+                -- DEBUG: Line Content
+                print(string.format("GatherTracker DEBUG: Line %d: '%s'", i, cleanLinkText))
+                
+                -- Check for Standard Header match (Reagents: ...)
+                if not reagentsFound then
+                    for _, h in ipairs(headers) do
+                        if h and h ~= "" and string.find(cleanLinkText, h) then
+                            reagentsFound = true
+                            print("GatherTracker DEBUG: Header FOUND!")
+                            break
+                        end
+                    end
+                end
+                
+                -- Check for "Requires" line (Single line list)
+                -- If we haven't found a standard header, check if this is a "Requires" line with items
+                local isRequiresLine = false
+                for _, rh in ipairs(requireHeaders) do
+                    if string.find(cleanLinkText, rh) then
+                        isRequiresLine = true
+                        break
+                    end
+                end
+
+                if reagentsFound or isRequiresLine then
+                    -- Strategy:
+                    -- If it's a Requires line, remove the prefix first
+                    local processText = cleanLinkText
+                    if isRequiresLine then
+                        -- Remove "Requires " prefix
+                         for _, rh in ipairs(requireHeaders) do
+                            processText = string.gsub(processText, rh .. "[:%s]*", "") -- Remove "Requires: " or "Requires "
+                         end
+                    end
+
+                    -- Parsing Logic:
+                    -- 1. Standard Line: "2 x ItemName"
+                    -- 2. Requires Line: "ItemA (2), ItemB (4)" (Comma separated)
+                    
+                    -- Let's try comma split first (handles single line lists)
+                    local parts = { strsplit(",", processText) }
+                    
+                    for _, part in ipairs(parts) do
+                        part = part:trim()
+                        if part ~= "" then
+                             local qty = 1
+                             local itemName = part
+                             
+                             -- Pattern A: "ItemName (Qty)" (Common in Requires lines)
+                             local nameP, qtyP = string.match(part, "^(.*)%s+%(%s*(%d+)%s*%)")
+                             if nameP then
+                                 itemName = nameP
+                                 qty = tonumber(qtyP)
+                             else
+                                 -- Pattern B: "x2 ItemName"
+                                 local qMatch, nameMatch = string.match(part, "^x?(%d+)%s+(.*)")
+                                 if qMatch then
+                                     qty = tonumber(qMatch)
+                                     itemName = nameMatch
+                                 else
+                                     -- Pattern C: "ItemName x2"
+                                     local nameRev, qRev = string.match(part, "^(.*)%s+x?(%d+)$")
+                                     if nameRev then
+                                         qty = tonumber(qRev)
+                                         itemName = nameRev
+                                     end
+                                 end
+                             end
+                             
+                             itemName = itemName and itemName:trim()
+                             
+                             -- Filter out non-items (Skill requirements like "Engineering (355)")
+                             -- Skills usually have parens but we parsed them as quantity.
+                             -- So "Engineering (355)" become Item="Engineering", Qty=355.
+                             -- Verify with GetItemInfo. "Engineering" is probably not an item.
+                             
+                             if itemName and itemName ~= "" then
+                                 -- print(string.format("GatherTracker DEBUG: Analyzing part '%s' -> Item: '%s', Qty: %d", part, itemName, qty))
+                                 
+                                 local id
+                                 local _, itemLink = GetItemInfo(itemName)
+                                 
+                                 if itemLink then
+                                     id = GetItemInfoInstant(itemLink)
+                                 else
+                                     -- Fallback: Check Static ID Database
+                                     local locale = GetLocale()
+                                     if addonTable.StaticItemIDs and addonTable.StaticItemIDs[locale] then
+                                         id = addonTable.StaticItemIDs[locale][itemName]
+                                     end
+                                     
+                                     -- Fallback to EN if ES missing? Optional.
+                                     if not id and locale ~= "enUS" and addonTable.StaticItemIDs and addonTable.StaticItemIDs["enUS"] then
+                                          id = addonTable.StaticItemIDs["enUS"][itemName]
+                                     end
+                                 end
+
+                                 if id then
+                                     self:AddToShoppingList(id, qty, true, parentName)
+                                     countAdded = countAdded + 1
+                                     -- print(string.format("GatherTracker DEBUG: Added %s (ID %d) x%d", itemName, id, qty))
+                                 else
+                                    -- Cache Miss or Not an Item (Skill)
+                                    -- print("GatherTracker DEBUG: Not an item or Cache Miss: " .. itemName)
+                                 end
+                             end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    if countAdded > 0 then
+        self:Print(string.format(L["RECIPE_PARSED"] or "Recipe parsed: %s (%d items)", parentName, countAdded))
+    else
+        self:Print(L["ERR_NO_ITEMS_FOUND"] or "No items found in recipe.")
+    end
 end
 
 function GatherTracker:ToggleTracking()
@@ -2160,9 +2430,45 @@ function GatherTracker:SetShowFrame(info, val)
     self:UpdateGUI() 
 end
 
+-- v2.5.4 Universal hook for Chat Links (AtlasLoot, etc.)
+function GatherTracker:OnChatEditInsertLink(text)
+    if self.bulkFrame and self.bulkFrame:IsVisible() then
+        local eb = self.bulkFrame.editBox
+        if eb then
+            local current = eb:GetText()
+            -- Add newline if text exists and doesn't end in newline
+            if current ~= "" and string.sub(current, -1) ~= "\n" then
+                eb:Insert("\n")
+            end
+            eb:Insert(text)
+            eb:Insert("\n") -- Auto-newline for next item
+            return true -- Swallow original call (don't put in chat)
+        end
+    end
+    
+    -- Fallback to original
+    return self.hooks.ChatEdit_InsertLink(text)
+end
+
 -- Hook para permitir pegar links en el StaticPopup (v1.9.2)
 -- Reemplazamos HandleModifiedItemClick para interceptar el Shift+Click antes de que busque el chat
 function GatherTracker:OnHandleModifiedItemClick(link)
+    -- v2.5.4: Restore direct handling for Standard UI (Bags, etc.) 
+    -- because HandleModifiedItemClick won't call ChatEdit_InsertLink if no chat is open.
+    if self.bulkFrame and self.bulkFrame:IsVisible() then
+        local eb = self.bulkFrame.editBox
+        if eb then
+            local current = eb:GetText()
+            -- Add newline if text exists and doesn't end in newline
+            if current ~= "" and string.sub(current, -1) ~= "\n" then
+                eb:Insert("\n")
+            end
+            eb:Insert(link)
+            eb:Insert("\n") -- Auto-newline for next item
+            return -- Stop propagation so we don't double-insert or try to open Chat
+        end
+    end
+
     local frameName = StaticPopup_Visible("GT_ADD_ITEM")
     if frameName then
         local dialog = _G[frameName]
@@ -2450,3 +2756,33 @@ StaticPopupDialogs["GT_SAVE_PRESET"] = {
     hideOnEscape = true,
     preferredIndex = 3,
 }
+
+function GatherTracker:TestDB()
+    self:Print("Testing DB Data for Hellfire Peninsula (1448)...")
+    
+    if not addonTable.Collection or not addonTable.Collection.ScanZone then
+        self:Print("Error: Collection module not loaded properly.")
+        return
+    end
+
+    local results = addonTable.Collection.ScanZone(1448)
+    if not results or next(results) == nil then
+        self:Print("No data found for MapID 1448.")
+        return
+    end
+    
+    for nodeName, data in pairs(results) do
+        local nodeText = nodeName .. ": "
+        if data.total > 0 then
+             nodeText = nodeText .. data.collected .. "/" .. data.total .. " items (" .. math.floor(data.percent) .. "%)"
+        else
+             nodeText = nodeText .. "No items config"
+        end
+        self:Print(nodeText)
+    end
+    
+    -- Test Localization Wrapper
+    local sampleID = 22785 -- Fel Iron Ore
+    local name = addonTable.GetItemName(sampleID)
+    self:Print("Localization Test (22785): " .. tostring(name))
+end

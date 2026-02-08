@@ -317,6 +317,41 @@ GatherTracker.Presets = {
                 }
             }
         }
+    },
+    {
+        name = "Profesiones: TBC (300-375)",
+        id = "PRESET_CAT_TBC",
+        sub = {
+            {
+                name = "Ingeniería: Outland (300-375)",
+                id = "PRESET_TBC_ENG",
+                items = {
+                    { id = 23424, count = 100 }, -- Hierro vil
+                    { id = 23425, count = 150 }, -- Adamantita
+                    { id = 21884, count = 20 },  -- Mote de tierra
+                    { id = 21885, count = 10 },  -- Mote de fuego
+                }
+            },
+            {
+                name = "Alquimia: TBC High-End",
+                id = "PRESET_TBC_ALCH",
+                items = {
+                    { id = 22785, count = 40 }, -- Hierba vil
+                    { id = 22786, count = 40 }, -- Gloria de ensueño
+                    { id = 22791, count = 20 }, -- Flor abisal
+                    { id = 22793, count = 10 }, -- Cardo de maná
+                }
+            },
+            {
+                name = "Herrería: Outland Steel",
+                id = "PRESET_TBC_SMITH",
+                items = {
+                    { id = 23424, count = 200 }, -- Hierro vil
+                    { id = 23425, count = 200 }, -- Adamantita
+                    { id = 23427, count = 20 },  -- Khorium
+                }
+            }
+        }
     }
 }
 
@@ -348,6 +383,12 @@ GatherTracker.ItemLookup = {
     ["mena de hierro negro"] = 11370, ["dark iron ore"] = 11370,
     ["cristal arcano"] = 12363, ["arcane crystal"] = 12363,
 
+    -- MENAS TBC
+    ["mena de hierro vil"] = 23424, ["fel iron ore"] = 23424,
+    ["mena de adamantita"] = 23425, ["adamantite ore"] = 23425,
+    ["mena de khorium"] = 23427, ["khorium ore"] = 23427,
+    ["mena de eternio"] = 23426, ["eternium ore"] = 23426,
+
     -- HIERBAS / HERBS (Vanilla Complete)
     ["flor de paz"] = 2447, ["peacebloom"] = 2447,
     ["hojaplata"] = 765, ["silverleaf"] = 765,
@@ -375,6 +416,18 @@ GatherTracker.ItemLookup = {
     ["capuchina"] = 13467, ["icecap"] = 13467,
     ["loto negro"] = 13468, ["black lotus"] = 13468,
     ["cardo veloz"] = 2453, ["swiftthistle"] = 2453,
+
+    -- HIERBAS TBC (Outland)
+    ["hierba vil"] = 22785, ["felweed"] = 22785,
+    ["gloria de ensueño"] = 22786, ["dreaming glory"] = 22786,
+    ["musgo de trapo"] = 22787, ["ragveil"] = 22787,
+    ["casco de llamas"] = 22788, ["flame cap"] = 22788,
+    ["terocono"] = 22789, ["terocone"] = 22789,
+    ["liquen antiguo"] = 22790, ["ancient lichen"] = 22790,
+    ["flor abisal"] = 22791, ["netherbloom"] = 22791,
+    ["vid de pesadilla"] = 22792, ["nightmare vine"] = 22792,
+    ["cardo de maná"] = 22793, ["mana thistle"] = 22793,
+    ["flor de vil"] = 22794, ["fel blossom"] = 22794,
 
     -- CUEROS / LEATHER
     ["cuero ligero"] = 2318, ["light leather"] = 2318,
@@ -425,6 +478,20 @@ GatherTracker.ItemLookup = {
     ["diamante de azeroth"] = 12361, ["azerothian diamond"] = 12361,
     ["zafiro azul"] = 12364, ["blue sapphire"] = 12364,
     ["esmeralda enorme"] = 12362, ["huge emerald"] = 12362,
+
+    -- GEMAS TBC
+    ["granate de sangre"] = 23077, ["blood garnet"] = 23077,
+    ["espesartita de llama"] = 23079, ["flame spessarite"] = 23079,
+    ["peridoto intenso"] = 23081, ["deep peridot"] = 23081,
+    ["draenita de las sombras"] = 23082, ["shadow draenite"] = 23082,
+    ["piedra lunar azur"] = 23080, ["azure moonstone"] = 23080,
+    ["draenita dorada"] = 23078, ["golden draenite"] = 23078,
+    ["rubí vivo"] = 23095, ["living ruby"] = 23095,
+    ["estrella de elune"] = 23097, ["star of elune"] = 23097,
+    ["piedra del alba"] = 23099, ["dawnstone"] = 23099,
+    ["ojo de noche"] = 23101, ["nightseye"] = 23101,
+    ["topacio noble"] = 23103, ["noble topaz"] = 23103,
+    ["talasita"] = 23105, ["talasite"] = 23105,
 
     -- ALQUIMIA / VIALS & REAGENTS
     ["vial de cristal"] = 3371, ["crystal vial"] = 3371,
