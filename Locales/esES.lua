@@ -67,6 +67,7 @@ L["BTN_IMPORT"] = "Importar"
 L["IMPORT_FINISHED"] = "Importación finalizada. %d objetos procesados."
 L["RECIPE_PARSED"] = "Receta procesada: %s (%d materiales)."
 L["ERR_CACHE_MISS"] = "No se encontró ID para material: %s (No en caché)."
+L["ERR_NO_ITEMS_FOUND"] = "No se encontraron materiales en la receta."
 L["TOOLTIP_HEADER_REAGENTS"] = "Componentes|Materiales|Ingredientes" -- Support multiple with pipe delimiter or just handle in code
 L["PRESET_CAT_ENG"] = "Profesiones: Ingeniería (1-300)"
 L["PRESET_CAT_ALCH_FARM"] = "Alquimia: Ingredientes (Para Farmear)"

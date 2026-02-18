@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.8.0] - 2026-02-18
+
+### 🚀 Major Refactor (Clean DB)
+
+* **Static TBC Database**: Implemented a comprehensive, standalone TBC recipe database (7,600+ recipes) covering Spells, Items, and Vendor Plans.
+* **Zero-Dep**: The newly generated database is pure Lua, requiring no external dependencies or additional addons to function.
+* **Instant Parsing**: Parsing "Recipe" and "Profession" links is now instant and 100% accurate, bypassing the need for unreliable tooltip scanning.
+
+## [v2.7.0] - 2026-02-18
+
+### 🚀 Major Refactor
+
+* **Static Database**: Introduced `Data/Recipes_TBC.lua` to store "Meta" TBC recipes statically. This replaces the unreliable tooltip scanning method.
+* **Consumables Support**: Added hardcoded support for major TBC consumables: Flasks (Pure Death, Relentless Assault, etc.), Potions (Haste, Destruction), Drums (Battle, War), and Weapon Enhancements.
+* **Code Cleanup**: Removed the deprecated `DeepScan` tool and `UserItemIDs` persistence, as the static DB approach renders them obsolete.
+
+## [v2.6.12] - 2026-02-18
+
+### 🐛 Bug Fixes
+
+* **ID Correction**: Updated Static DB with correct TBC Standard IDs (e.g., Deep Peridot 23079) to match user's server data, resolving incorrect item imports.
+* **Debug Tool**: Added `/run GatherTracker:FindID("Name")` for future ID verification.
+
+## [v2.6.11] - 2026-02-18
+
+### 🔧 Utilities
+
+* **FindID Tool**: Added internal tool to scan local item cache for ID debugging.
+
+## [v2.6.10] - 2026-02-18
+
+### 🐛 Bug Fixes
+
+* **AtlasLoot Advanced Debug**: Added global identity `GatherTrackerBulkEditBox` and telemetry hooks.
+
+## [v2.6.3] - 2026-02-18
+
+## [v2.6.1] - 2026-02-18
+
+* **Auto-Refresh**: Added logic to automatically refresh item names and icons in the HUD if they were initially loaded from a cold cache.
+
+## [v2.6.0] - 2026-02-18
+
+### ✨ KnowledgeDB: ATT Integration
+
+* **Multi-Expansion Support**: The data extraction script now pulls recipes from **Retail, Classic, SoD, and TBC** (Outland).
+* **Exhaustive Extraction**: Scans all AllTheThings databases (`ReagentsDB`, `LootDB`) and categories, recovering previously hidden data.
+* **Jewelcrafting Recovery**: Successfully extracted **3,103 recipes** for Jewelcrafting, including TBC gems.
+* **Smart Detection**: Automatically finds recipes in dungeons and quest rewards using recursive scanning and `requireSkill` detection.
+* **Enchanting Support**: Captured **570 enchantments** by SpellID, including rare drops (e.g., +25 Agility on 2H).
+* **Modular Loading**: Created a dynamic indexing system (`Recipes.xml`) that loads profession-specific data files only if they exist.
+* **Runtime Merger**: A new fusion engine in `GatherTracker.lua` automatically merges extracted knowledge into the main recipe database.
+
+### 🛠 Technical Improvements
+
+* **Automated Extraction**: Refactored `extract_att.py` to handle consolidated reagent databases from AllTheThings.
+* **Addon Architecture**: Standardized the `KnowledgeDB` structure for future manual and third-party data integrations.
+
 ## [v2.5.5] - 2026-02-08
 
 ### ✨ Hybrid Recipe Import
@@ -20,6 +78,10 @@ All notable changes to this project will be documented in this file.
 * **Localization**: Improved parsing logic to support English, Spanish, and German client headers.
 * **Crash Fix**: Resolved a Lua error when parsing recipes with empty tooltips.
 
+### 📚 Documentation
+
+* **New Manual**: Added `GATHERTRACKER_MANUAL.md` detailing all addon capabilities, from Smart Tracking to Gamification.
+
 ## [v2.5.2] - 2026-02-07
 
 ### ✨ TBC Expansion Support
@@ -31,7 +93,7 @@ All notable changes to this project will be documented in this file.
 
 ## [v2.5.1] - 2026-02-07
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v2.5.1)
 
 * **Combat Messages**: Fixed an issue where "Detenido." messages would appear upon entering combat even if the tracker was not active.
 
@@ -170,7 +232,7 @@ All notable changes to this project will be documented in this file.
   * **Bag Space**: Free/Total slots counter.
   * **Junk Value**: Total gold value of gray items in bags.
 
-### 🛠 Improvements
+### 🛠 Improvements (v1.9.0)
 
 * **Global Priority**: Critical alerts (Repair/Bags) now override the tracking icon to ensure visibility.
 * **Visuals**: Alert icons are always displayed in full color (never desaturated).

@@ -13,6 +13,7 @@ Mining and Herbalism shouldn't feel like a second job. **GatherTracker** is the 
 * **Titan Panel & LDB Support:** Fully integrated with LibDataBroker for info-bar displays and standalone Minimap Icon. 🔘📊
 * **Shopping List:** Track specific materials or recipes with a detached, resizable window and presets. 📝🔍
 * **Custom Presets & Bulk Import:** Create your own farming kits and import materials in batch from any text source. 📥📦
+* **Static Recipe DB (New v2.8):** Instant, lag-free recipe importing for TBC and Classic without tooltip scanning. 📚⚡
 * **Utility Mode:** Monitors your Durability (Repair Alert) and Bag Space when you aren't gathering. 🛠️🎒
 * **Trophy Room:** A dedicated UI to track your lifetime stats, achievements, and earnings. 🏆💰
 * **Context Aware:** Automatically pauses during Combat, Stealth, Resting, or inside Dungeons. 🧠🛡️
@@ -64,7 +65,7 @@ Created by **Petazo**. 🍕
 **Deja de Farmear. Empieza a DOMINAR.** 🌍💎
 
 > [!IMPORTANT]
-> **NOTA DEL DESARROLLADOR:** ¡Estoy LITERALMENTE obsesionado con vuestros comentarios! 🤯 Mi paso las noches bebiendo café de Azeroth y cazando bugs como si fuera Hemet Nesingwary en plena cacería. Si encuentras un error o tienes una idea loca, ¡DÍMELO! Estoy muy atento para hacer de este el mejor addon que hayas instalado jamás. ¡Construyamos el futuro del farmeo JUNTOS! 💥🔨
+> **NOTA DEL DESARROLLADOR:** ¡Estoy LITERALMENTE obsesionado con vuestros comentarios! 🤯 Paso mis noches bebiendo café de Azeroth y cazando bugs como si fuera Hemet Nesingwary en plena cacería. Si encuentras un error o tienes una idea loca, ¡DÍMELO! Estoy a tope para hacer de este el mejor addon que hayas instalado jamás. ¡Construyamos el futuro del farmeo JUNTOS! 💥🔨
 
 La Minería y la Herboristería no deberían sentirse como un segundo trabajo. **GatherTracker** es la inyección de adrenalina definitiva para tus profesiones. 💉 Convertimos la mirada perdida al minimapa en una **experiencia RPG** fluida, automatizada y gratificante. Solucionamos el problema de "tengo dos profesiones pero solo puedo rastrear una" ciclándolas más rápido que un pícaro con Subidón de Adrenalina. 🏃💨 ¡No vuelvas a perderte un nodo!
 
@@ -74,6 +75,7 @@ La Minería y la Herboristería no deberían sentirse como un segundo trabajo. *
 * **Soporte Titan Panel & LDB:** Integración total con LibDataBroker e icono de minimapa independiente. 🔘📊
 * **Lista de Compra:** Rastrea materiales o recetas en una ventana independiente, redimensionable y con presets. 📝🔍
 * **Presets Personalizados e Importación Masiva:** Crea tus propios kits de farmeo e importa materiales en lote desde cualquier fuente de texto. 📥📦
+* **Base de Datos Estática (Nuevo v2.8):** Importación de recetas instantánea y sin lag para TBC y Classic. 📚⚡
 * **Modo Utilidad:** Monitorea tu Durabilidad (Alerta de Reparar) y Espacio en Bolsas cuando no estás recolectando. 🛠️🎒
 * **Sala de Trofeos:** Una interfaz dedicada para ver tus estadísticas, logros y ganancias de por vida. 🏆💰
 * **Conciencia de Contexto:** Se pausa automáticamente en Combate, Sigilo, Descanso o Mazmorras. 🧠🛡️

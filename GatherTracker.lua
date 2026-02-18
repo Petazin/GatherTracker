@@ -81,31 +81,6 @@ StaticPopupDialogs["GT_CLEAR_SHOP_CONFIRM"] = {
     preferredIndex = 3,
 }
 
-StaticPopupDialogs["GT_SAVE_PRESET"] = {
-    text = "Save current Shopping List as Preset.\nEnter name:",
-    button1 = SAVE,
-    button2 = CANCEL,
-    hasEditBox = true,
-    maxLetters = 30,
-    OnAccept = function(self)
-        local editBox = self.editBox or _G[self:GetName().."EditBox"]
-        local text = editBox and editBox:GetText() or ""
-        GatherTracker:SaveCurrentListAsPreset(text)
-    end,
-    EditBoxOnEnterPressed = function(self)
-        local text = self:GetText()
-        GatherTracker:SaveCurrentListAsPreset(text)
-        self:GetParent():Hide()
-    end,
-    OnShow = function(self)
-        local editBox = self.editBox or _G[self:GetName().."EditBox"]
-        if editBox then editBox:SetFocus() end
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3,
-}
 
 local miningIDs = {
     -- Classic Ores
@@ -888,6 +863,15 @@ end
 function GatherTracker:AddToShoppingList(itemID, amountTarget, isRecipe, parentName)
     if not itemID or not amountTarget then return end
     
+    -- Robustez: Asegurar que itemID sea un número (puede venir como string de Presets antiguos)
+    if type(itemID) == "string" then
+        -- Si es un string corrupto tipo "123:Receta", extraer solo el número
+        local cleanID = string.match(itemID, "^(%d+)")
+        itemID = tonumber(cleanID)
+    end
+    
+    if not itemID then return end
+
     local name, _, _, _, _, _, _, _, _, icon = GetItemInfo(itemID)
     if not name then 
         name = "Item " .. itemID
@@ -1262,6 +1246,16 @@ function GatherTracker:UpdateShoppingListUI()
         row:Show()
         
         local d = itemInfo.data
+        
+        -- v2.6.1: Si el nombre es genérico (Item ID), intentar refrescarlo
+        if d.name and string.find(d.name, "^Item %d+") then
+            local newName, _, _, _, _, _, _, _, _, newIcon = GetItemInfo(d.itemID)
+            if newName then
+                d.name = newName
+                if newIcon then d.icon = newIcon end
+            end
+        end
+
         row.icon:SetTexture(d.icon or GetItemIcon(d.itemID))
         
         local color = "|cffFFFFFF"
@@ -1316,6 +1310,11 @@ end
 
 function GatherTracker:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("GatherTrackerDB", defaults, true)
+    
+    -- v2.6.12: Persist User Learned IDs
+    if not self.db.global.UserItemIDs then self.db.global.UserItemIDs = {} end
+    -- Reference sync: acts as a pointer to the SavedVariable table
+    addonTable.UserItemIDs = self.db.global.UserItemIDs
 
     LibStub('AceConfig-3.0'):RegisterOptionsTable('GatherTracker', options)
     self.optionsFrame = LibStub('AceConfigDialog-3.0'):AddToBlizOptions('GatherTracker', 'GatherTracker')
@@ -1334,8 +1333,24 @@ function GatherTracker:OnInitialize()
     
     -- v2.5.4 Universal Smart Entry (AtlasLoot, etc.)
     -- We use RawHook to intercept completely if our window is open
-    if self.RawHook and not self:IsHooked("ChatEdit_InsertLink") then
-        self:RawHook("ChatEdit_InsertLink", "OnChatEditInsertLink", true)
+    if self.RawHook then
+        if not self:IsHooked("ChatEdit_InsertLink") then
+            self:RawHook("ChatEdit_InsertLink", "OnChatEditInsertLink", true)
+        end
+        -- v2.6.3: Force AtlasLoot compatibility by spoofing active chat window
+        if not self:IsHooked("ChatEdit_GetActiveWindow") then
+            self:RawHook("ChatEdit_GetActiveWindow", "OnChatEditGetActiveWindow", true)
+        end
+        if not self:IsHooked("ChatEdit_GetLastActiveWindow") then
+            self:RawHook("ChatEdit_GetLastActiveWindow", "OnChatEditGetActiveWindow", true)
+        end
+        
+        -- v2.6.6: Direct Deep Hook for AtlasLoot (Catching their custom AddChatLink)
+        if AtlasLoot and AtlasLoot.Button and AtlasLoot.Button.AddChatLink then
+            if not self:IsHooked(AtlasLoot.Button, "AddChatLink") then
+                self:RawHook(AtlasLoot.Button, "AddChatLink", "OnAtlasLootAddChatLink", true)
+            end
+        end
     end
     
     -- Eventos
@@ -1376,8 +1391,45 @@ function GatherTracker:OnInitialize()
     -- Evento de Loot
     self:RegisterEvent("CHAT_MSG_LOOT", "OnLootMsg")
     
+    -- v2.6.0 Merge Knowledge DB (ATT Data)
+    self:MergeRecipes()
+    
+    -- v2.8.0 Migration: Clean up Helper DB
+    if _G.GatherTracker_DB and _G.GatherTracker_DB.UserItemIDs then
+        _G.GatherTracker_DB.UserItemIDs = nil
+        -- self:Print(L["DB_CLEANUP_MSG"] or "Limpieza de base de datos completada (v2.8).")
+    end
+    
     local version = C_AddOns and C_AddOns.GetAddOnMetadata("GatherTracker", "Version") or GetAddOnMetadata("GatherTracker", "Version")
     print("|cff00ff00GatherTracker:|r v" .. (version or "Unknown") .. " " .. L["LOAD_MESSAGE"])
+end
+
+function GatherTracker:MergeRecipes()
+    if not addonTable.KnowledgeDB or not addonTable.KnowledgeDB.Recipes then return end
+    if not addonTable.RecipeDB then addonTable.RecipeDB = {} end
+    
+    -- Exponer globalmente para tests y depuración
+    self.RecipeDB = addonTable.RecipeDB
+    
+    local count = 0
+    for prof, data in pairs(addonTable.KnowledgeDB.Recipes) do
+        for id, reagents in pairs(data) do
+            -- Format: { {itemID, quantity}, ... }
+            -- Reagents from extraction are: [ItemID] = Quantity
+            local formatted = {}
+            for rID, qty in pairs(reagents) do
+                table.insert(formatted, { rID, qty })
+            end
+            
+            -- Only overwrite if not already manually defined in GatherTracker_DB.lua
+            if not addonTable.RecipeDB[id] then
+                addonTable.RecipeDB[id] = formatted
+                count = count + 1
+            end
+        end
+    end
+    -- Silenciar para no saturar al usuario, pero útil para debug
+    -- self:Print("KnowledgeDB: Cargas " .. count .. " recetas adicionales.")
 end
 
 function GatherTracker:GET_ITEM_INFO_RECEIVED(event, itemID, success)
@@ -1978,38 +2030,8 @@ function GatherTracker:ProcessAddCommand(input, silent)
     local itemID
     local quantity = 1
     
-    -- v2.5.5 Check for Spell/Recipe/Enchant Links FIRST
-    -- |cffffd000|Htrade:195094:45:45:30:7FFFFFFF:712B292C2D2F28707C74235E445F333C3E43:2:24:24:14:14|h[Alchemy]|h|r
-    -- |cffffd000|Hspell:28591|h[Flask of Pure Death]|h|r
-    
-    local spellID = string.match(input, "Hspell:(%d+)")
-    local tradeID = string.match(input, "Htrade:(%d+)")
-    
-    if spellID or tradeID then
-        -- Recipe Decomposition Strategy
-        self:AddRecipeByLink(input)
-        return true
-    end
-
-    -- 1. Intentar detectar Item Link: |Hitem:12345|h
-    local link = string.match(input, "|Hitem:(%d+).-|h")
-    
-    -- Special Case: Linked Item might be a Recipe Item (e.g. Scroll)
-    if link then
-        local _, _, _, _, _, classType, subClassType = GetItemInfo(link)
-        -- Class 9 = Recipe
-        if classType and (classType == "Recipe" or classType == "Receta" or classType == "Formula" or classType == "Fórmula" or classType == "Consumible" or classType == "Consumable") then
-             -- DEBUG: Found Recipe Item
-             print("GatherTracker DEBUG: Recipe Item found: " .. (link or "nil"))
-             self:AddRecipeByLink(input)
-             return true
-        else
-             -- DEBUG: Not a recipe item?
-             print(string.format("GatherTracker DEBUG: Item: %s, Type: %s, SubType: %s", link, tostring(classType), tostring(subClassType)))
-        end
-    end
-    
-    -- 2. Intentar parsear cantidad (ej: "Mena x20", "Mena x 20", "Mena 20", "20x Mena")
+    -- v2.7: Parsing Quantity FIRST to support "ItemLink x20"
+    -- 1. Intentar parsear cantidad (ej: "Mena x20", "Mena 20", "20x Mena")
     -- Caso A: Cantidad al final (soporta ' x5', ' x 5', ' 20', ' 20x')
     local qtyMatch = string.match(input, "[%s]+x?%s*(%d+)%s*x?$")
     if qtyMatch then 
@@ -2021,6 +2043,35 @@ function GatherTracker:ProcessAddCommand(input, silent)
         if qtyMatch then
             quantity = tonumber(qtyMatch)
             input = string.gsub(input, "^%d+%s*x?%s+", ""):trim()
+        end
+    end
+    
+    -- v2.5.5 Check for Spell/Recipe/Enchant Links (Now with multiplier support)
+    -- |cffffd000|Htrade:195094...|h[Alchemy]|h|r
+    -- |cffffd000|Hspell:28591|h[Flask of Pure Death]|h|r
+    
+    -- v2.6.2: Universal pattern for spells/recipes/trades (Supports AtlasLoot Raw Links)
+    -- Formatos: |Hspell:123|h, spell:123, |Htrade:123|h, trade:123, |Henchant:123|h
+    local spellID = string.match(input, "spell:(%d+)")
+    local tradeID = string.match(input, "trade:(%d+)")
+    local enchantID = string.match(input, "enchant:(%d+)")
+    
+    if spellID or tradeID or enchantID then
+        -- Recipe Decomposition Strategy
+        self:AddRecipeByLink(input, quantity)
+        return true
+    end
+
+    -- 2. Intentar detectar Item Link (Formatos: |Hitem:123|h o item:123)
+    local link = string.match(input, "item:(%d+)")
+    
+    -- Special Case: Linked Item might be a Recipe Item (e.g. Scroll)
+    if link then
+        local _, _, _, _, _, classType, subClassType = GetItemInfo(link)
+        -- Class 9 = Recipe (Only trigger decomposition for actual recipe items, NOT final consumables)
+        if classType and (classType == "Recipe" or classType == "Receta" or classType == "Formula" or classType == "Fórmula") then
+             self:AddRecipeByLink(input, quantity)
+             return true
         end
     end
 
@@ -2073,11 +2124,12 @@ function GatherTracker:ProcessAddCommand(input, silent)
 end
 
 -- v2.5.5 Recipe Decomposition (Tooltip Scanning)
--- v2.5.5 Recipe Decomposition (Tooltip Scanning)
-function GatherTracker:AddRecipeByLink(link)
+-- v2.7: Support multiplier for bulk crafting (x20)
+function GatherTracker:AddRecipeByLink(link, multiplier)
     if not link then return end
+    multiplier = multiplier or 1
     
-    -- 1. Create Scanner if not exists
+    -- 1. Create Scanner if not exists (Lazy Load)
     if not self.scanTooltip then
         self.scanTooltip = CreateFrame("GameTooltip", "GatherTrackerScanTooltip", nil, "GameTooltipTemplate")
         self.scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
@@ -2092,24 +2144,75 @@ function GatherTracker:AddRecipeByLink(link)
     local regionName = _G["GatherTrackerScanTooltipTextLeft1"]
     local parentName = (regionName and regionName:GetText()) or "Unknown Recipe"
     
-    -- 3.5 Check Static Recipe DB (New Hybrid System)
-    -- If we have data for this ID, use it directly!
+    -- v2.6.10: Handle Trade Links explicitly
+    -- Trade links structure: trade:SpellID:SkillLevel:MaxSkill:GUID:RecipeID...
+    -- We want the RecipeID (usually roughly same as SpellID for parsing purposes) or SpellID.
+    -- If normal SetHyperlink worked, parentName should be set. If not, we might need to force it.
+    
     local recipeID
-    local linkType, linkID = string.match(link, "|H(%a+):(%d+)")
-    if linkType and linkID then
+    -- v2.6.2 Flexible ID capture
+    -- Captures spell:123 or trade:123
+    local _, linkID = string.match(link, "(%a+):(%d+)")
+    
+    -- Special handling for trade links to extract the 6th argument (Real RecipeID) if present, or fallback to first.
+    -- trade:SkillLine:Cur:Max:GUID:RecipeID
+    if string.find(link, "trade:") then
+        local parts = { strsplit(":", link) }
+        -- part 1 is "trade" (or the whole string if inside |H)
+        -- Let's extract numbers using gmatch to be safe
+        local nums = {}
+        for num in string.gmatch(link, "(%d+)") do
+            table.insert(nums, tonumber(num))
+        end
+        -- Typically: SkillLine, Cur, Max, GUID, RECIPEID
+        -- If we have enough numbers, the last one is the recipe.
+        -- Usage of trade links in macros suggests: /cast Trade(RecipeID) matches standard spells.
+        
+        -- Strategy: Use the LAST number if valid, otherwise first.
+        if #nums > 1 then
+             local candidate = nums[#nums]
+             if candidate > 100 then -- heuristic
+                 linkID = candidate 
+                 -- Override link with a clean spell link for scanning!
+                 -- Trade tooltips are notoriously bad for scanning reagents. Spell tooltips are better.
+                 link = "spell:" .. linkID
+             end
+        elseif nums[1] then 
+             linkID = nums[1] 
+        end
+    end
+
+    if linkID then
         recipeID = tonumber(linkID)
     end
     
-    if recipeID and addonTable.RecipeDB and addonTable.RecipeDB[recipeID] then
-        -- FOUND IN DB! Skip scanning.
-        local reagents = addonTable.RecipeDB[recipeID]
-        for _, reagent in ipairs(reagents) do
-            -- {itemID, quantity}
-            local itemID, qty = reagent[1], reagent[2]
-            self:AddToShoppingList(itemID, qty, true, parentName)
+    -- v2.8 Static DB Support (Generated TBC Data)
+    if recipeID and addonTable.RecipeDB and addonTable.RecipeDB["TBC"] then
+        local tbcNode = addonTable.RecipeDB["TBC"][recipeID]
+        if tbcNode then
+            local count = 0
+            for itemID, qty in pairs(tbcNode.mats) do
+                self:AddToShoppingList(itemID, qty * multiplier, true, parentName)
+                count = count + 1
+            end
+            self:Print(string.format(L["RECIPE_PARSED"] or "Recipe parsed: %s (%d items) [Static TBC]", parentName, count))
+            return
         end
-        self:Print(string.format(L["RECIPE_PARSED"] or "Recipe parsed: %s (%d items)", parentName, #reagents))
-        return -- DONE
+    end
+
+    -- v2.7 Legacy Static DB Support
+    if recipeID and addonTable.Recipes then
+        local recipeNode = addonTable.Recipes.Items[recipeID] or addonTable.Recipes.Spells[recipeID]
+        if recipeNode then
+            -- FOUND IN DB! Skip scanning.
+            local count = 0
+            for itemID, qty in pairs(recipeNode) do
+                self:AddToShoppingList(itemID, qty * multiplier, true, parentName)
+                count = count + 1
+            end
+            self:Print(string.format(L["RECIPE_PARSED"] or "Recipe parsed: %s (%d items) [Static]", parentName, count))
+            return -- DONE
+        end
     end
     
     -- 4. Scan for Reagents header
@@ -2126,12 +2229,19 @@ function GatherTracker:AddRecipeByLink(link)
         end
     end
     
-    -- DEBUG: Headers
-    print("GatherTracker DEBUG: Searching for Headers:", table.concat(headers, ", "))
+    
+    local headers = {}
+    if SPELL_REAGENTS then table.insert(headers, SPELL_REAGENTS) end
+    
+    -- Add from Locale (allows translators to add multiple separated by |)
+    if L["TOOLTIP_HEADER_REAGENTS"] then
+        for str in string.gmatch(L["TOOLTIP_HEADER_REAGENTS"], "([^|]+)") do
+            table.insert(headers, str)
+        end
+    end
 
     local numLines = self.scanTooltip:NumLines() or 0
     if numLines <= 0 then
-        print("GatherTracker DEBUG: Tooltip is empty! SetHyperlink failed?")
         return
     end
 
@@ -2151,15 +2261,12 @@ function GatherTracker:AddRecipeByLink(link)
             local text = line:GetText()
             if text then
                 local cleanLinkText = text:trim()
-                -- DEBUG: Line Content
-                print(string.format("GatherTracker DEBUG: Line %d: '%s'", i, cleanLinkText))
                 
                 -- Check for Standard Header match (Reagents: ...)
                 if not reagentsFound then
                     for _, h in ipairs(headers) do
                         if h and h ~= "" and string.find(cleanLinkText, h) then
                             reagentsFound = true
-                            print("GatherTracker DEBUG: Header FOUND!")
                             break
                         end
                     end
@@ -2176,6 +2283,7 @@ function GatherTracker:AddRecipeByLink(link)
                 end
 
                 if reagentsFound or isRequiresLine then
+                    
                     -- Strategy:
                     -- If it's a Requires line, remove the prefix first
                     local processText = cleanLinkText
@@ -2193,26 +2301,29 @@ function GatherTracker:AddRecipeByLink(link)
                     -- Let's try comma split first (handles single line lists)
                     local parts = { strsplit(",", processText) }
                     
-                    for _, part in ipairs(parts) do
+                    for i, part in ipairs(parts) do
+                        -- print(string.format("GT DEBUG: Part %d: '%s'", i, tostring(part)))
                         part = part:trim()
                         if part ~= "" then
                              local qty = 1
                              local itemName = part
                              
-                             -- Pattern A: "ItemName (Qty)" (Common in Requires lines)
-                             local nameP, qtyP = string.match(part, "^(.*)%s+%(%s*(%d+)%s*%)")
+                             -- v2.6.10: More robust regex for "ItemName (Qty)"
+                             -- Handles leading spaces, and ensures we capture the name before the parens.
+                             -- Format: "  Some Item Name (3) "
+                             local nameP, qtyP = string.match(part, "^%s*(.-)%s+%(%s*(%d+)%s*%)")
                              if nameP then
                                  itemName = nameP
                                  qty = tonumber(qtyP)
                              else
                                  -- Pattern B: "x2 ItemName"
-                                 local qMatch, nameMatch = string.match(part, "^x?(%d+)%s+(.*)")
+                                 local qMatch, nameMatch = string.match(part, "^%s*x?(%d+)%s+(.*)")
                                  if qMatch then
                                      qty = tonumber(qMatch)
                                      itemName = nameMatch
                                  else
                                      -- Pattern C: "ItemName x2"
-                                     local nameRev, qRev = string.match(part, "^(.*)%s+x?(%d+)$")
+                                     local nameRev, qRev = string.match(part, "^%s*(.*)%s+x?(%d+)%s*$")
                                      if nameRev then
                                          qty = tonumber(qRev)
                                          itemName = nameRev
@@ -2229,23 +2340,33 @@ function GatherTracker:AddRecipeByLink(link)
                              
                              if itemName and itemName ~= "" then
                                  -- print(string.format("GatherTracker DEBUG: Analyzing part '%s' -> Item: '%s', Qty: %d", part, itemName, qty))
+                                 -- print(string.format("GT DEBUG: Analyzed: Item='%s', Qty=%d", itemName, qty))
                                  
                                  local id
                                  local _, itemLink = GetItemInfo(itemName)
                                  
                                  if itemLink then
                                      id = GetItemInfoInstant(itemLink)
+                                     id = GetItemInfoInstant(itemLink)
                                  else
-                                     -- Fallback: Check Static ID Database
+                                     -- v2.6.10: Cache Miss detected?
+                                     -- v2.6.10: Cache Miss detected?
+                                     -- Fallback 1: Check Static ID Database
                                      local locale = GetLocale()
+                                     -- print("GT DEBUG: Current Locale: " .. tostring(locale))
+                                     
                                      if addonTable.StaticItemIDs and addonTable.StaticItemIDs[locale] then
                                          id = addonTable.StaticItemIDs[locale][itemName]
                                      end
                                      
-                                     -- Fallback to EN if ES missing? Optional.
-                                     if not id and locale ~= "enUS" and addonTable.StaticItemIDs and addonTable.StaticItemIDs["enUS"] then
-                                          id = addonTable.StaticItemIDs["enUS"][itemName]
+                                     -- Fallback 2: Check User Learned IDs (v2.6.12)
+                                     if not id and addonTable.UserItemIDs and addonTable.UserItemIDs[itemName] then
+                                         id = addonTable.UserItemIDs[itemName]
+                                         id = addonTable.UserItemIDs[itemName]
                                      end
+
+                                     -- Fallback 3: Removed DeepScan (v2.7)
+                                     -- if not id then ... end
                                  end
 
                                  if id then
@@ -2448,6 +2569,34 @@ function GatherTracker:OnChatEditInsertLink(text)
     
     -- Fallback to original
     return self.hooks.ChatEdit_InsertLink(text)
+end
+
+-- v2.6.3: Smart Chat Window spoofing for AtlasLoot
+function GatherTracker:OnChatEditGetActiveWindow()
+    if self.bulkFrame and self.bulkFrame:IsVisible() then
+        -- DEBUG
+        print("GatherTracker DEBUG: OnChatEditGetActiveWindow spoofing to BulkEditBox")
+        return self.bulkFrame.editBox
+    end
+    -- Fallback to original
+    if self.hooks.ChatEdit_GetActiveWindow then
+        return self.hooks.ChatEdit_GetActiveWindow()
+    elseif self.hooks.ChatEdit_GetLastActiveWindow then
+         return self.hooks.ChatEdit_GetLastActiveWindow()
+    end
+    return nil
+end
+
+-- v2.6.6: Direct interceptor for AtlasLoot's custom link system
+function GatherTracker:OnAtlasLootAddChatLink(atlasButton, link)
+    -- If our window is open, we take it!
+    if self.bulkFrame and self.bulkFrame:IsVisible() then
+        self:OnChatEditInsertLink(link)
+        return
+    end
+    
+    -- Otherwise, let AtlasLoot do its thing
+    self.hooks[AtlasLoot.Button].AddChatLink(atlasButton, link)
 end
 
 -- Hook para permitir pegar links en el StaticPopup (v1.9.2)
@@ -2654,7 +2803,7 @@ function GatherTracker:ShowBulkImportUI()
         bgEdit:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
         bgEdit:SetVertexColor(0.05, 0.05, 0.05, 0.5)
 
-        local eb = CreateFrame("EditBox", nil, sf)
+        local eb = CreateFrame("EditBox", "GatherTrackerBulkEditBox", sf)
         eb:SetMultiLine(true)
         eb:SetMaxLetters(5000)
         eb:SetFontObject("GameFontHighlight")
@@ -2720,7 +2869,8 @@ function GatherTracker:SaveCurrentListAsPreset(name)
     -- Serializar lista actual
     local items = {}
     for id, data in pairs(self.db.profile.shoppingList) do
-        table.insert(items, { id = id, count = data.targetCount })
+        -- v2.6.1 FIX: Guardar data.itemID (numérico) en lugar de id (la clave compuesta)
+        table.insert(items, { id = data.itemID or tonumber(string.match(id, "^(%d+)")), count = data.targetCount })
     end
     
     if not self.db.profile.customPresets then self.db.profile.customPresets = {} end
@@ -2735,21 +2885,30 @@ StaticPopupDialogs["GT_SAVE_PRESET"] = {
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = true,
+    maxLetters = 32,
     OnAccept = function(self)
-        local text = self.editBox:GetText()
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        local text = editBox and editBox:GetText() or ""
         GatherTracker:SaveCurrentListAsPreset(text)
     end,
     EditBoxOnEnterPressed = function(self)
-        local text = self:GetParent().editBox:GetText()
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        local text = editBox and editBox:GetText() or ""
         GatherTracker:SaveCurrentListAsPreset(text)
         self:GetParent():Hide()
     end,
     OnShow = function(self)
-        self.editBox:SetFocus()
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        if editBox then
+            editBox:SetFocus()
+        end
     end,
     OnHide = function(self)
         ChatEdit_FocusActiveWindow()
-        self.editBox:SetText("")
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        if editBox then
+            editBox:SetText("")
+        end
     end,
     timeout = 0,
     whileDead = true,
@@ -2786,3 +2945,5 @@ function GatherTracker:TestDB()
     local name = addonTable.GetItemName(sampleID)
     self:Print("Localization Test (22785): " .. tostring(name))
 end
+
+-- v2.7: DeepScan Removed (Was unreliable)
