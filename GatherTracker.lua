@@ -1436,7 +1436,6 @@ function GatherTracker:GET_ITEM_INFO_RECEIVED(event, itemID, success)
     if not success or not itemID then return end
     
     -- Check if this item is in our shopping list
-    -- The list might use composite keys "id:parentName", so we check itemID property
     local needsUpdate = false
     local list = self.db.profile.shoppingList
     
@@ -1446,8 +1445,16 @@ function GatherTracker:GET_ITEM_INFO_RECEIVED(event, itemID, success)
             if name and name ~= entry.name then
                 entry.name = name
                 needsUpdate = true
-                -- print("Updated name for " .. itemID .. " to " .. name)
             end
+        end
+    end
+    
+    -- v2.8.1: También actualizar nombres en la sesión de botín
+    if self.lootSession and self.lootSession[itemID] then
+        local name = GetItemInfo(itemID)
+        if name then
+            self.lootSession[itemID].name = name
+            -- Si el tooltip está abierto, se refrescará en el siguiente OnUpdate o al re-entrar
         end
     end
     
@@ -1476,15 +1483,13 @@ function GatherTracker:OnLootMsg(event, msg)
     local link = string.match(msg, "|Hitem:.-|h")
     if not link then return end
 
-    -- Convertir patrones de Blizzard en patrones de búsqueda Lua
-    -- Pasamos de "Recibes botín: %s." a "Recibes botín: .-"
-    local p1 = string.gsub(LOOT_ITEM_SELF, "%%s", ".-")
-    local p2 = string.gsub(LOOT_ITEM_SELF_MULTIPLE, "%%s", ".-")
-    p2 = string.gsub(p2, "%%d", "%%d+")
+    -- v2.8.1 Fix: Escapar caracteres de patrón ANTES de insertar comodines
+    local p1 = string.gsub(LOOT_ITEM_SELF, "([%.%(%)%+%-%*%%])", "%%%1")
+    p1 = string.gsub(p1, "%%%%s", ".-")
     
-    -- Escapar caracteres especiales del patrón de Blizzard (como puntos o paréntesis)
-    p1 = string.gsub(p1, "([%.%(%)])", "%%%1")
-    p2 = string.gsub(p2, "([%.%(%)])", "%%%1")
+    local p2 = string.gsub(LOOT_ITEM_SELF_MULTIPLE, "([%.%(%)%+%-%*%%])", "%%%1")
+    p2 = string.gsub(p2, "%%%%s", ".-")
+    p2 = string.gsub(p2, "%%%%d", "%%d+")
 
     if string.match(msg, p1) or string.match(msg, p2) then
         isLoot = true
@@ -1506,7 +1511,8 @@ function GatherTracker:OnLootMsg(event, msg)
     
     -- Guardar en sesión
     if not self.lootSession[itemID] then
-        self.lootSession[itemID] = { count = 0, name = name, link = link }
+        -- v2.8.1: Placeholder if name is not yet cached
+        self.lootSession[itemID] = { count = 0, name = name or ("Item " .. itemID), link = link }
     end
     self.lootSession[itemID].count = self.lootSession[itemID].count + count
     
@@ -1809,7 +1815,9 @@ function GatherTracker:UpdateTooltip(frame)
             local totalAH = (ahPrice > 0) and GetCoinTextureString(ahPrice * data.count) or "|cff808080N/A|r"
             
             -- Alineación " | "
-            GameTooltip:AddDoubleLine(data.name .. " x" .. data.count, totalVendor .. " | " .. totalAH, 1, 1, 1, 1, 1, 1)
+            -- v2.8.1: Nil check for name to prevent tooltip crash
+            local displayName = data.name or ("Item " .. (id or "???"))
+            GameTooltip:AddDoubleLine(displayName .. " x" .. data.count, totalVendor .. " | " .. totalAH, 1, 1, 1, 1, 1, 1)
         end
         
         if not anyItem then

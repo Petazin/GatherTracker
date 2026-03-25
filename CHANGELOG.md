@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.8.1] - 2026-03-25
+
+### 🐛 Bug Fixes (Session Farm)
+
+* **Loot Capture**: Fixed an escaping issue in the `CHAT_MSG_LOOT` patterns that prevented the addon from recognizing looted items.
+* **Tooltip Stability**: Added nil checks for item names in the HUD tooltip to prevent UI crashes when items are not in the local cache.
+* **Async Resolution**: Improved the `GET_ITEM_INFO_RECEIVED` handler to update session loot names as they arrive from the server.
+
 ## [v2.8.0] - 2026-02-18
 
 ### 🚀 Major Refactor (Clean DB)
