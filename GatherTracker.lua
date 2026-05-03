@@ -243,6 +243,10 @@ local options = { -- GatherTracker:options
         pauseTargetEnemy = { order = 33, name = L["OPT_PAUSE_ENEMY"], type = "toggle", get = 'GetPauseTargetEnemy', set = 'SetPauseTargetEnemy' },
         pauseInInstance = { order = 34, name = L["OPT_PAUSE_INSTANCE"], type = "toggle", get = 'GetPauseInInstance', set = 'SetPauseInInstance' },
 
+        headerInterface = { order = 40, type = "header", name = L["OPT_HEADER_INTERFACE"] or "Interface" },
+        showShoppingHUD = { order = 41, name = L["OPT_SHOW_SHOPPING_LIST"], desc = L["OPT_SHOW_SHOPPING_LIST_DESC"], type = "toggle", get = function() return GatherTracker.db.profile.showShoppingHUD end, set = function(_, val) GatherTracker.db.profile.showShoppingHUD = val; GatherTracker:UpdateShoppingListUI() end, width = "full" },
+        disableAchievements = { order = 42, name = L["OPT_DISABLE_ACHIEVEMENTS"], desc = L["OPT_DISABLE_ACHIEVEMENTS_DESC"], type = "toggle", get = function() return GatherTracker.db.profile.disableAchievements end, set = function(_, val) GatherTracker.db.profile.disableAchievements = val end, width = "full" },
+
     }
 }
 
@@ -275,7 +279,8 @@ local defaults = {
         -- v2.2 Custom Presets
         customPresets = {},
         shoppingListCollapsed = false,
-        showShoppingHUD = true
+        showShoppingHUD = true,
+        disableAchievements = false
     },
     global = {
         history = {
@@ -336,7 +341,9 @@ function GatherTracker:CreateGUI()
     f:SetScript("OnClick", function(self, button)
         if button == "LeftButton" then
             if IsShiftKeyDown() then
-                GatherTracker:CreateHistoryUI()
+                if not GatherTracker.db.profile.disableAchievements then
+                    GatherTracker:CreateHistoryUI()
+                end
             -- v2.0.0 Alt Action: Toggle Shopping List
             elseif IsAltKeyDown() then
                 GatherTracker.db.profile.showShoppingHUD = not GatherTracker.db.profile.showShoppingHUD
@@ -794,6 +801,7 @@ function GatherTracker:CreateToastFrame()
 end
 
 function GatherTracker:ShowToast(achievementID)
+    if self.db.profile.disableAchievements then return end
     if not self.toastFrame then self:CreateToastFrame() end
     
     local ach = nil
@@ -1521,6 +1529,7 @@ function GatherTracker:OnLootMsg(event, msg)
 end
 
 function GatherTracker:UpdateHistory(itemID, count)
+    if self.db.profile.disableAchievements then return end
     if not itemID or not count then return end
     
     -- Asegurar inicialización (por si acaso)
@@ -1543,6 +1552,7 @@ function GatherTracker:UpdateHistory(itemID, count)
 end
 
 function GatherTracker:CheckAchievements()
+    if self.db.profile.disableAchievements then return end
     local h = self.db.global.history
     if not h then return end
     

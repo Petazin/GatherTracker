@@ -21,6 +21,12 @@ L["OPT_MUTE_SOUND_DESC"] = "Desactiva el sonido al cambiar de rastreo."
 L["OPT_ANNOUNCE_GUILD"] = "Anunciar Logros a Hermandad"
 L["OPT_ANNOUNCE_GUILD_DESC"] = "Envía un mensaje al chat de hermandad cuando desbloqueas un logro."
 
+L["OPT_HEADER_INTERFACE"] = "Interfaz y HUD"
+L["OPT_DISABLE_ACHIEVEMENTS"] = "Desactivar Sistema de Logros"
+L["OPT_DISABLE_ACHIEVEMENTS_DESC"] = "Desactiva completamente la Sala de Trofeos, el seguimiento de estadísticas y las notificaciones de desbloqueo."
+L["OPT_SHOW_SHOPPING_LIST"] = "Mostrar Lista de Compras"
+L["OPT_SHOW_SHOPPING_LIST_DESC"] = "Alterna la visibilidad del HUD de la Lista de Compras."
+
 L["OPT_HEADER_TOOLTIP"] = "Información del Tooltip"
 L["OPT_SHOW_DURABILITY"] = "Mostrar Durabilidad"
 L["OPT_SHOW_SKILL"] = "Nivel de Profesión"

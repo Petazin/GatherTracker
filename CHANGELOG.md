@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.8.2] - 2026-05-03
+
+### ✨ Features (Interface & Achievements)
+
+* **Achievement Control**: Added a new option to completely disable the Achievements system (Trophy Room). When active, statistics tracking, unlock notifications, and sounds are fully disabled.
+* **Trophy Room Access**: Access to the Trophy Room (Shift + Click) is now blocked if achievements are disabled to ensure UI consistency.
+* **Shopping List Visibility**: Integrated a manual toggle for the Shopping List HUD directly in the options menu, improving discoverability for users who don't use the Alt + Click shortcut.
+* **Interface Category**: Created a dedicated "Interface & HUD" category in the options menu to group visibility and UI preferences.
+
 ## [v2.8.1] - 2026-03-25
 
 ### 🐛 Bug Fixes (Session Farm)

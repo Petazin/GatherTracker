@@ -21,6 +21,12 @@ L["OPT_MUTE_SOUND_DESC"] = "Disables the sound when switching tracking."
 L["OPT_ANNOUNCE_GUILD"] = "Announce Achievements to Guild"
 L["OPT_ANNOUNCE_GUILD_DESC"] = "Sends a message to guild chat when you unlock an achievement."
 
+L["OPT_HEADER_INTERFACE"] = "Interface & HUD"
+L["OPT_DISABLE_ACHIEVEMENTS"] = "Disable Achievements System"
+L["OPT_DISABLE_ACHIEVEMENTS_DESC"] = "Completely disables the Trophy Room, statistics tracking, and unlock notifications."
+L["OPT_SHOW_SHOPPING_LIST"] = "Show Shopping List"
+L["OPT_SHOW_SHOPPING_LIST_DESC"] = "Toggles the visibility of the Shopping List HUD."
+
 L["OPT_HEADER_TOOLTIP"] = "Tooltip Information"
 L["OPT_SHOW_DURABILITY"] = "Show Durability"
 L["OPT_SHOW_SKILL"] = "Profession Level"
