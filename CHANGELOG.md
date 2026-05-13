@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.9.0] - 2026-05-13
+
+### ✨ Features (TSM-Like Gathering & AH Integration)
+
+* **Dynamic Recipe Multiplier**: Recipes in the Shopping List now display their target craft count in the header. Added `[+]` and `[-]` buttons to easily scale up or down the required materials based on the amount of items you want to craft. You can also **Shift+Click** these buttons to type the exact amount you want to craft.
+* **Inventory Priority Pool**: Materials are now allocated to recipes based on priority rather than showing the total bag count on every identical item. E.g. If you have 3 herbs and 2 recipes needing 2 each, the first recipe will show 2/2 (completed) and the second will show 1/2.
+* **Recipe Reordering**: Added `[▲]` and `[▼]` buttons to the recipe headers, allowing you to prioritize which recipe gets the materials first.
+* **TSM Scan Assist**: Added a "TSM Scan" button directly at the bottom of your Shopping List. This button dynamically unlocks when you interact with the Auction House and generates a ready-to-copy bulk search string for TSM (`/exact`), bypassing recent TSM4 third-party integration blocks.
+* **UI Improvements**: Fixed the shopping list UI layout to be completely responsive when resizing the container. Also fixed overlapping issues and hidden frames when collapsing the frame.
+
+## [v2.8.3] - 2026-05-13
+
+### 🐛 Bug Fixes (UI & Resizing)
+
+* **Shopping List UI**: Added security limits to window resizing to prevent the Shopping List from expanding beyond the maximum screen dimensions.
+* **New Command**: Added the `/gt resetui` command to instantly restore the Shopping List window to its default size and position in case of visual bugs or clipping.
+
 ## [v2.8.2] - 2026-05-03
 
 ### ✨ Features (Interface & Achievements)

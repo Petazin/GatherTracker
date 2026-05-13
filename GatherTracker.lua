@@ -81,6 +81,59 @@ StaticPopupDialogs["GT_CLEAR_SHOP_CONFIRM"] = {
     preferredIndex = 3,
 }
 
+StaticPopupDialogs["GT_SET_RECIPE_AMOUNT"] = {
+    text = "Introduce la cantidad exacta:",
+    button1 = ACCEPT,
+    button2 = CANCEL,
+    hasEditBox = true,
+    maxLetters = 4,
+    OnAccept = function(self, data)
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        local text = editBox and editBox:GetText() or ""
+        local num = tonumber(text)
+        if num and num > 0 then
+            GatherTracker:SetRecipeMultiplier(data, num)
+        end
+    end,
+    EditBoxOnEnterPressed = function(self)
+        local text = self:GetText()
+        local num = tonumber(text)
+        if num and num > 0 then
+            GatherTracker:SetRecipeMultiplier(self:GetParent().data, num)
+        end
+        self:GetParent():Hide()
+    end,
+    OnShow = function(self)
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        if editBox then editBox:SetFocus() editBox:SetText("") end
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+}
+
+StaticPopupDialogs["GT_TSM_COPY"] = {
+    text = "Presiona Ctrl+C para copiar la búsqueda, luego pégala (Ctrl+V) en TSM:",
+    button1 = "Cerrar",
+    hasEditBox = true,
+    OnShow = function(self, data)
+        local editBox = self.editBox or _G[self:GetName().."EditBox"]
+        if editBox then
+            editBox:SetText(data or "")
+            if data and data ~= "" then
+                editBox:HighlightText()
+            end
+            editBox:SetFocus()
+        end
+    end,
+    EditBoxOnEscapePressed = function(self)
+        self:GetParent():Hide()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+}
+
 
 local miningIDs = {
     -- Classic Ores
@@ -280,7 +333,11 @@ local defaults = {
         customPresets = {},
         shoppingListCollapsed = false,
         showShoppingHUD = true,
-        disableAchievements = false
+        disableAchievements = false,
+        
+        -- v2.9 TSM-like Gathering
+        craftingQueue = {},
+        recipeOrder = {}
     },
     global = {
         history = {
@@ -908,8 +965,16 @@ function GatherTracker:AddToShoppingList(itemID, amountTarget, isRecipe, parentN
     -- Sumar a la meta existente (acumulativo por fuente)
     list[storageKey].targetCount = list[storageKey].targetCount + amountTarget
     
+    -- v2.9: Register parent if recipe
+    if isRecipe and parentName and parentName ~= "" then
+        if not self.db.profile.craftingQueue[parentName] then
+            self.db.profile.craftingQueue[parentName] = 1
+        end
+        self:EnsureRecipeInOrder(parentName)
+    end
+    
     -- Actualizar conteo actual inmediatamente
-    self:UpdateShoppingItemCount(storageKey)
+    self:ScanBagsForTracking()
     
     -- self:Print(string.format(L["ADDED_TO_LIST"] or "Added %s x%d to Shopping List.", name, amountTarget))
     -- No longer printing here to let ProcessAddCommand or other UI handlers handle the feedback if needed,
@@ -933,34 +998,164 @@ function GatherTracker:ClearShoppingList()
 end
 
 function GatherTracker:UpdateShoppingItemCount(storageKey)
-    local entry = self.db.profile.shoppingList[storageKey]
-    if not entry then return end
-    
-    -- Use entry.itemID instead of the composite key
-    local itemID = entry.itemID or tonumber(string.match(storageKey, "^(%d+)"))
-    if not itemID then return end
-    
-    local countBag = GetItemCount(itemID) 
-    entry.currentCount = countBag
-
-    -- v2.4.0 Completion Alert
-    if entry.targetCount > 0 and entry.currentCount >= entry.targetCount and not entry.alerted then
-        entry.alerted = true
-        print(string.format("|cff00ff00[GatherTracker]|r |cffFFFF00%s |r%s |cff00ff00(%d/%d)|r", 
-            entry.name, L["ALERT_COMPLETED"] or "recolectado!", entry.currentCount, entry.targetCount))
-        PlaySound(888) -- Quest Objective Complete
-    elseif entry.currentCount < entry.targetCount then
-        -- Reset alerted if we consume items (optional but good for repeatability)
-        entry.alerted = false
-    end
+    -- v2.9: Deprecated for individual calls. Delegate to ScanBagsForTracking to respect priority pools.
+    self:ScanBagsForTracking()
 end
 
 function GatherTracker:ScanBagsForTracking()
-    -- Actualizar TODOS los items de la lista
-    for id, _ in pairs(self.db.profile.shoppingList) do
-        self:UpdateShoppingItemCount(id)
+    local list = self.db.profile.shoppingList
+    if not list or next(list) == nil then return end
+
+    -- 1. Snapshot global del inventario
+    local bagCache = {}
+    for key, data in pairs(list) do
+        local itemID = data.itemID or tonumber(string.match(key, "^(%d+)"))
+        if itemID and not bagCache[itemID] then
+            bagCache[itemID] = GetItemCount(itemID)
+        end
     end
+
+    -- 2. Ordenar las claves basándonos en recipeOrder
+    local orderIndex = {}
+    if self.db.profile.recipeOrder then
+        for i, recipeName in ipairs(self.db.profile.recipeOrder) do
+            orderIndex[recipeName] = i
+        end
+    end
+
+    local orderedKeys = {}
+    for key, _ in pairs(list) do
+        table.insert(orderedKeys, key)
+    end
+
+    table.sort(orderedKeys, function(a, b)
+        local dataA = list[a]
+        local dataB = list[b]
+        local parentA = dataA.parentRecipe or "Z_Manual"
+        local parentB = dataB.parentRecipe or "Z_Manual"
+        
+        local idxA = orderIndex[parentA] or 9999
+        local idxB = orderIndex[parentB] or 9999
+        
+        if idxA == idxB then
+            if parentA == parentB then
+                return (dataA.name or "") < (dataB.name or "")
+            end
+            return parentA < parentB
+        end
+        return idxA < idxB
+    end)
+
+    -- 3. Asignar inventario
+    for _, key in ipairs(orderedKeys) do
+        local entry = list[key]
+        local itemID = entry.itemID or tonumber(string.match(key, "^(%d+)"))
+        
+        if itemID then
+            local available = bagCache[itemID] or 0
+            local needed = entry.targetCount or 0
+            
+            if available >= needed then
+                entry.currentCount = needed
+                bagCache[itemID] = available - needed
+            else
+                entry.currentCount = available
+                bagCache[itemID] = 0
+            end
+
+            -- Alertas
+            if needed > 0 and entry.currentCount >= needed and not entry.alerted then
+                entry.alerted = true
+                print(string.format("|cff00ff00[GatherTracker]|r |cffFFFF00%s |r%s |cff00ff00(%d/%d)|r", 
+                    entry.name, L["ALERT_COMPLETED"] or "recolectado!", entry.currentCount, needed))
+                PlaySound(888) -- Quest Objective Complete
+            elseif entry.currentCount < needed then
+                entry.alerted = false
+            end
+        end
+    end
+
     self:UpdateGUI()
+end
+
+-- ============================================================================
+-- 3.3 TSM-like Features (v2.9)
+-- ============================================================================
+
+function GatherTracker:UpdateRecipeMultiplier(parentName, delta)
+    if not parentName or parentName == "" then return end
+    
+    local queue = self.db.profile.craftingQueue
+    local currentMult = queue[parentName] or 1
+    local newMult = currentMult + delta
+    
+    if newMult < 1 then newMult = 1 end
+    queue[parentName] = newMult
+    
+    for key, data in pairs(self.db.profile.shoppingList) do
+        if data.parentRecipe == parentName then
+            local baseQty = math.floor((data.targetCount / currentMult) + 0.5)
+            if baseQty < 1 then baseQty = 1 end
+            data.targetCount = baseQty * newMult
+        end
+    end
+    
+    self:ScanBagsForTracking()
+end
+
+function GatherTracker:SetRecipeMultiplier(parentName, exactMult)
+    if not parentName or parentName == "" then return end
+    if type(exactMult) ~= "number" then return end
+    
+    local queue = self.db.profile.craftingQueue
+    local currentMult = queue[parentName] or 1
+    local newMult = exactMult
+    
+    if newMult < 1 then newMult = 1 end
+    queue[parentName] = newMult
+    
+    for key, data in pairs(self.db.profile.shoppingList) do
+        if data.parentRecipe == parentName then
+            local baseQty = math.floor((data.targetCount / currentMult) + 0.5)
+            if baseQty < 1 then baseQty = 1 end
+            data.targetCount = baseQty * newMult
+        end
+    end
+    
+    self:ScanBagsForTracking()
+end
+
+function GatherTracker:EnsureRecipeInOrder(parentName)
+    if not parentName or parentName == "" then return end
+    local order = self.db.profile.recipeOrder
+    for _, name in ipairs(order) do
+        if name == parentName then return end
+    end
+    table.insert(order, parentName)
+end
+
+function GatherTracker:MoveRecipeUp(parentName)
+    local order = self.db.profile.recipeOrder
+    self:EnsureRecipeInOrder(parentName)
+    for i, name in ipairs(order) do
+        if name == parentName and i > 1 then
+            order[i], order[i-1] = order[i-1], order[i]
+            break
+        end
+    end
+    self:ScanBagsForTracking()
+end
+
+function GatherTracker:MoveRecipeDown(parentName)
+    local order = self.db.profile.recipeOrder
+    self:EnsureRecipeInOrder(parentName)
+    for i, name in ipairs(order) do
+        if name == parentName and i < #order then
+            order[i], order[i+1] = order[i+1], order[i]
+            break
+        end
+    end
+    self:ScanBagsForTracking()
 end
 
 -- ============================================================================
@@ -1004,8 +1199,16 @@ function GatherTracker:CreateShoppingListUI()
     end)
     f:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
-        local point, _, relativePoint, xOfs, yOfs = self:GetPoint()
-        GatherTracker.db.profile.shoppingFramePos = { point = point, x = xOfs, y = yOfs }
+        -- Always anchor from TOPLEFT to prevent Blizzard UI sizing bugs
+        local left, top = self:GetLeft(), self:GetTop()
+        if left and top then
+            self:ClearAllPoints()
+            self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+            GatherTracker.db.profile.shoppingFramePos = { point = "TOPLEFT", x = left, y = top - (UIParent:GetHeight() or 0) }
+        else
+            local point, _, _, xOfs, yOfs = self:GetPoint()
+            GatherTracker.db.profile.shoppingFramePos = { point = point, x = xOfs, y = yOfs }
+        end
     end)
     
     -- Restaurar Posición y Tamaño
@@ -1019,7 +1222,9 @@ function GatherTracker:CreateShoppingListUI()
     
     local size = self.db.profile.shoppingFrameSize
     if size then
-        f:SetSize(size.width, size.height)
+        local maxW = UIParent:GetWidth() or 1000
+        local maxH = UIParent:GetHeight() or 800
+        f:SetSize(math.min(size.width, maxW), math.min(size.height, maxH))
     else
         f:SetSize(250, 300)
     end
@@ -1032,10 +1237,25 @@ function GatherTracker:CreateShoppingListUI()
     grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
     grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
     
-    grip:SetScript("OnMouseDown", function() f:StartSizing("BOTTOMRIGHT") end)
+    grip:SetScript("OnMouseDown", function() 
+        local left, top = f:GetLeft(), f:GetTop()
+        if left and top then
+            f:ClearAllPoints()
+            f:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+        end
+        f:StartSizing("BOTTOMRIGHT") 
+    end)
     grip:SetScript("OnMouseUp", function() 
         f:StopMovingOrSizing()
-        GatherTracker.db.profile.shoppingFrameSize = { width = f:GetWidth(), height = f:GetHeight() }
+        local maxW = UIParent:GetWidth() or 1000
+        local maxH = UIParent:GetHeight() or 800
+        local w = math.min(f:GetWidth(), maxW)
+        local h = math.min(f:GetHeight(), maxH)
+        f:SetSize(w, h)
+        GatherTracker.db.profile.shoppingFrameSize = { width = w, height = h }
+        if f.scrollFrame and f.content then
+            f.content:SetWidth(f.scrollFrame:GetWidth())
+        end
         -- Refrescar scroll
         GatherTracker:UpdateShoppingListUI()
     end)
@@ -1119,6 +1339,24 @@ function GatherTracker:CreateShoppingListUI()
         end
     end)
     f.btnClear = btnClear
+    
+    f.tsmBtn = CreateFrame("Button", nil, f.footer, "UIPanelButtonTemplate")
+    f.tsmBtn:SetPoint("LEFT", btnAdd, "RIGHT", 5, 0)
+    f.tsmBtn:SetPoint("RIGHT", btnClear, "LEFT", -5, 0)
+    f.tsmBtn:SetHeight(22)
+    f.tsmBtn:SetText("TSM Scan")
+    f.tsmBtn:Disable()
+    f.tsmBtn:SetScript("OnClick", function()
+        local str = GatherTracker:GenerateTSMSearchString()
+        if str and str ~= "" then
+            local d = StaticPopup_Show("GT_TSM_COPY", nil, nil, str)
+            if d then d.data = str end
+        else
+            GatherTracker:Print("No hay faltantes para buscar.")
+        end
+    end)
+
+
 
     -- SCROLL FRAME (Contenido)
     local sf = CreateFrame("ScrollFrame", "GTShoppingListScroll", f, "UIPanelScrollFrameTemplate")
@@ -1171,7 +1409,9 @@ function GatherTracker:UpdateShoppingListUI()
         else
             -- Restaurar altura usuario
             local size = self.db.profile.shoppingFrameSize or {width=250, height=300}
-            self.shoppingFrame:SetSize(size.width, size.height)
+            local maxW = UIParent:GetWidth() or 1000
+            local maxH = UIParent:GetHeight() or 800
+            self.shoppingFrame:SetSize(math.min(size.width, maxW), math.min(size.height, maxH))
             self.shoppingFrame.scrollFrame:Show()
             self.shoppingFrame.footer:Show()
             self.shoppingFrame.grip:Show()
@@ -1206,15 +1446,19 @@ function GatherTracker:UpdateShoppingListUI()
         return
     else
         local size = self.db.profile.shoppingFrameSize or {width=250, height=300}
-        self.shoppingFrame:SetSize(size.width, size.height)
+        local maxW = UIParent:GetWidth() or 1000
+        local maxH = UIParent:GetHeight() or 800
+        self.shoppingFrame:SetSize(math.min(size.width, maxW), math.min(size.height, maxH))
         self.shoppingFrame.scrollFrame:Show()
         self.shoppingFrame.footer:Show()
         self.shoppingFrame.grip:Show()
         self.shoppingFrame.btnMin:SetText("_")
     end
 
+    local sfWidth = self.shoppingFrame.scrollFrame:GetWidth()
+    self.shoppingFrame.content:SetWidth(sfWidth)
+    local contentWidth = sfWidth
     local yOffset = 0
-    local contentWidth = self.shoppingFrame.content:GetWidth()
     
     -- Helper Row
     local function DrawRow(itemInfo, isChild)
@@ -1278,23 +1522,122 @@ function GatherTracker:UpdateShoppingListUI()
         local idx = #self.shoppingFrame.groupFrames + 1
         local h = self.shoppingFrame.groupFrames[idx]
         if not h then
-            -- Header también más visible
-            h = self.shoppingFrame.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            h:SetJustifyH("LEFT")
+            h = CreateFrame("Frame", nil, self.shoppingFrame.content)
+            h:SetSize(contentWidth, 16)
+            
+            h.text = h:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            h.text:SetPoint("LEFT", 0, 0)
+            h.text:SetPoint("RIGHT", h, "RIGHT", -85, 0)
+            h.text:SetJustifyH("LEFT")
+            h.text:SetWordWrap(false)
+            
+            -- Botones de control
+            -- Move Down [v]
+            h.btnDown = CreateFrame("Button", nil, h, "UIPanelButtonTemplate")
+            h.btnDown:SetSize(18, 18)
+            h.btnDown:SetPoint("RIGHT", h, "RIGHT", -5, 0)
+            h.btnDown:SetText("v")
+            h.btnDown:SetScript("OnClick", function(s) 
+                GatherTracker:MoveRecipeDown(s:GetParent().recipeName)
+            end)
+            
+            -- Move Up [^]
+            h.btnUp = CreateFrame("Button", nil, h, "UIPanelButtonTemplate")
+            h.btnUp:SetSize(18, 18)
+            h.btnUp:SetPoint("RIGHT", h.btnDown, "LEFT", -2, 0)
+            h.btnUp:SetText("^")
+            h.btnUp:SetScript("OnClick", function(s) 
+                GatherTracker:MoveRecipeUp(s:GetParent().recipeName)
+            end)
+
+            -- Add [+]
+            h.btnAdd = CreateFrame("Button", nil, h, "UIPanelButtonTemplate")
+            h.btnAdd:SetSize(18, 18)
+            h.btnAdd:SetPoint("RIGHT", h.btnUp, "LEFT", -8, 0)
+            h.btnAdd:SetText("+")
+            h.btnAdd:SetScript("OnEnter", function(s)
+                GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
+                GameTooltip:AddLine("Sumar")
+                GameTooltip:AddLine("Shift+Clic: Establecer cantidad", 1, 1, 1)
+                GameTooltip:Show()
+            end)
+            h.btnAdd:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            h.btnAdd:SetScript("OnClick", function(s) 
+                if IsShiftKeyDown() then
+                    local d = StaticPopup_Show("GT_SET_RECIPE_AMOUNT")
+                    if d then d.data = s:GetParent().recipeName end
+                else
+                    GatherTracker:UpdateRecipeMultiplier(s:GetParent().recipeName, 1)
+                end
+            end)
+
+            -- Sub [-]
+            h.btnSub = CreateFrame("Button", nil, h, "UIPanelButtonTemplate")
+            h.btnSub:SetSize(18, 18)
+            h.btnSub:SetPoint("RIGHT", h.btnAdd, "LEFT", -2, 0)
+            h.btnSub:SetText("-")
+            h.btnSub:SetScript("OnEnter", function(s)
+                GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
+                GameTooltip:AddLine("Restar")
+                GameTooltip:AddLine("Shift+Clic: Establecer cantidad", 1, 1, 1)
+                GameTooltip:Show()
+            end)
+            h.btnSub:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            h.btnSub:SetScript("OnClick", function(s) 
+                if IsShiftKeyDown() then
+                    local d = StaticPopup_Show("GT_SET_RECIPE_AMOUNT")
+                    if d then d.data = s:GetParent().recipeName end
+                else
+                    GatherTracker:UpdateRecipeMultiplier(s:GetParent().recipeName, -1)
+                end
+            end)
+
             self.shoppingFrame.groupFrames[idx] = h
         end
         h:ClearAllPoints()
+        h:SetWidth(contentWidth)
         h:SetPoint("TOPLEFT", 0, -yOffset)
-        h:SetText(title)
+        h.recipeName = title
+        
+        -- Formatear título si es del queue
+        local displayTitle = "|cffFFD100" .. title .. "|r"
+        if self.db.profile.craftingQueue and self.db.profile.craftingQueue[title] then
+            displayTitle = string.format("|cffFFFFFF[%dx]|r |cffFFD100%s|r", self.db.profile.craftingQueue[title], title)
+            h.btnAdd:Show()
+            h.btnSub:Show()
+            h.btnUp:Show()
+            h.btnDown:Show()
+        elseif title == (L["GROUP_MANUAL"] or "Otros") then
+            h.btnAdd:Hide()
+            h.btnSub:Hide()
+            h.btnUp:Hide()
+            h.btnDown:Hide()
+        end
+        
+        h.text:SetText(displayTitle)
         h:Show()
-        yOffset = yOffset + 16
+        yOffset = yOffset + 18
     end
 
     -- Recetas
+    local order = self.db.profile.recipeOrder or {}
+    local drawnGroups = {}
+    
+    for _, parentName in ipairs(order) do
+        if groups[parentName] then
+            DrawHeader(parentName)
+            for _, item in ipairs(groups[parentName]) do DrawRow(item, true) end
+            yOffset = yOffset + 5
+            drawnGroups[parentName] = true
+        end
+    end
+    
     for parentName, items in pairs(groups) do
-        DrawHeader(parentName)
-        for _, item in ipairs(items) do DrawRow(item, true) end
-        yOffset = yOffset + 5
+        if not drawnGroups[parentName] then
+            DrawHeader(parentName)
+            for _, item in ipairs(items) do DrawRow(item, true) end
+            yOffset = yOffset + 5
+        end
     end
     
     -- Manuales
@@ -1372,6 +1715,9 @@ function GatherTracker:OnInitialize()
     self:RegisterEvent("UPDATE_INVENTORY_DURABILITY", "UpdateGUI")
     -- self:RegisterEvent("SKILL_LINES_CHANGED", "CheckProfessions") -- Obsolte, now fully dynamic on tracking update
     
+    -- v2.9 TSM-like
+    self:RegisterEvent("AUCTION_HOUSE_SHOW", "OnAuctionHouseShow")
+    self:RegisterEvent("AUCTION_HOUSE_CLOSED", "OnAuctionHouseClosed")
     if not self.db.profile.castInterval then self.db.profile.castInterval = 2 end
     
     self:ScanTrackingSpells() -- Escaneo inicial
@@ -2037,6 +2383,16 @@ function GatherTracker:ChatCommand(input)
         end
     elseif cmd == "clear" then
         self:ClearShoppingList()
+    elseif cmd == "resetui" then
+        self.db.profile.shoppingFramePos = nil
+        self.db.profile.shoppingFrameSize = nil
+        if self.shoppingFrame then
+            self.shoppingFrame:ClearAllPoints()
+            self.shoppingFrame:SetPoint("CENTER", 100, 0)
+            self.shoppingFrame:SetSize(250, 300)
+            self:UpdateShoppingListUI()
+        end
+        self:Print("|cff00ff00[GatherTracker]|r Interfaz restaurada a su tamaño original.")
     else
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
     end
@@ -2934,6 +3290,7 @@ StaticPopupDialogs["GT_SAVE_PRESET"] = {
     preferredIndex = 3,
 }
 
+
 function GatherTracker:TestDB()
     self:Print("Testing DB Data for Hellfire Peninsula (1448)...")
     
@@ -2965,3 +3322,47 @@ function GatherTracker:TestDB()
 end
 
 -- v2.7: DeepScan Removed (Was unreliable)
+
+-- ============================================================================
+-- 5. AUCTION HOUSE INTEGRATION (v2.9)
+-- ============================================================================
+
+function GatherTracker:OnAuctionHouseShow()
+    if self.shoppingFrame and self.shoppingFrame.tsmBtn then
+        self.shoppingFrame.tsmBtn:Enable()
+    end
+end
+
+function GatherTracker:OnAuctionHouseClosed()
+    if self.shoppingFrame and self.shoppingFrame.tsmBtn then
+        self.shoppingFrame.tsmBtn:Disable()
+    end
+end
+
+function GatherTracker:GenerateTSMSearchString()
+    local list = self.db.profile.shoppingList
+    if not list then return "" end
+    
+    local missing = {}
+    for key, data in pairs(list) do
+        local iid = data.itemID or tonumber(string.match(key, "^(%d+)"))
+        if iid then
+            if not missing[iid] then missing[iid] = { needed = 0, name = data.name } end
+            missing[iid].needed = missing[iid].needed + data.targetCount
+        end
+    end
+    
+    local terms = {}
+    for iid, data in pairs(missing) do
+        local has = GetItemCount(iid, true)
+        local diff = data.needed - has
+        if diff > 0 and data.name and data.name ~= "" then
+            table.insert(terms, data.name .. "/exact")
+        end
+    end
+    
+    if #terms > 0 then
+        return table.concat(terms, ";")
+    end
+    return ""
+end
