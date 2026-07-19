@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.10.0] - 2026-07-19
+
+### ✨ Features (Vista Consolidada)
+
+* **Consolidated Totales View**: Added an alternate view to the Shopping List HUD that consolidates all required materials by `itemID` instead of grouping them by recipe/consumable. It aggregates quantities needed across all recipes and shows the total amount owned in bags.
+* **Toggle View Button**: Added a square button (`btnToggle`) in the header that switches between "Recipes" (grouped) and "Totals" (consolidated) modes. It saves the preference to the character profile.
+* **Smart Delete**: Pressing the delete button `[x]` on a material in Totales mode removes that ingredient from all active recipes simultaneously.
+
+### 🐛 Bug Fixes (Memory Leak)
+
+* **UI Optimization**: Fixed a critical memory leak in `UpdateShoppingListUI` where new row and group frames were instantiated indefinitely on every inventory update (due to using `#itemFrames + 1`). Replaced it with active local counters to reuse existing frames efficiently.
+
 ## [v2.9.0] - 2026-05-13
 
 ### ✨ Features (TSM-Like Gathering & AH Integration)

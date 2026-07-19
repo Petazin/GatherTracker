@@ -290,3 +290,9 @@ L["ACH_SUENO_ETERNO_NAME"] = "Eternal Dream"
 L["ACH_SUENO_ETERNO_DESC"] = "200 Dreamfoil."
 L["ACH_ESCAMA_DURA_NAME"] = "Tough Scale"
 L["ACH_ESCAMA_DURA_DESC"] = "200 Stonescale Eel."
+
+-- Toggle View Tooltips (v2.10)
+L["TOOLTIP_TOGGLE_RECIPE"] = "View by Recipes"
+L["TOOLTIP_TOGGLE_RECIPE_DESC"] = "Shows materials grouped by each recipe."
+L["TOOLTIP_TOGGLE_TOTALS"] = "View Totals to Farm"
+L["TOOLTIP_TOGGLE_TOTALS_DESC"] = "Shows a consolidated view of all required materials."

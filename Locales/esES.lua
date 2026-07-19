@@ -307,3 +307,9 @@ L["ACH_TEROCONO_NAME"] = "Terocono"
 L["ACH_TEROCONO_DESC"] = "200 Terocono."
 L["ACH_TENAZAS_NAME"] = "Tenazas Tenaces"
 L["ACH_TENAZAS_DESC"] = "50 Cigalas Furiosas."
+
+-- Toggle View Tooltips (v2.10)
+L["TOOLTIP_TOGGLE_RECIPE"] = "Ver por Recetas"
+L["TOOLTIP_TOGGLE_RECIPE_DESC"] = "Muestra los materiales agrupados por cada receta."
+L["TOOLTIP_TOGGLE_TOTALS"] = "Ver Totales a Farmear"
+L["TOOLTIP_TOGGLE_TOTALS_DESC"] = "Muestra una vista consolidada de todos los materiales necesarios."

@@ -337,7 +337,8 @@ local defaults = {
         
         -- v2.9 TSM-like Gathering
         craftingQueue = {},
-        recipeOrder = {}
+        recipeOrder = {},
+        shoppingListViewMode = "recipe"
     },
     global = {
         history = {
@@ -985,9 +986,25 @@ function GatherTracker:AddToShoppingList(itemID, amountTarget, isRecipe, parentN
 end
 
 function GatherTracker:RemoveFromShoppingList(storageKey)
-    if self.db.profile.shoppingList[storageKey] then
-        self.db.profile.shoppingList[storageKey] = nil
+    local list = self.db.profile.shoppingList
+    if list[storageKey] then
+        list[storageKey] = nil
         self:UpdateGUI()
+    else
+        -- Podría ser un itemID en modo consolidado (Totales)
+        local itemID = tonumber(storageKey)
+        if itemID then
+            local found = false
+            for key, data in pairs(list) do
+                if data.itemID == itemID then
+                    list[key] = nil
+                    found = true
+                end
+            end
+            if found then
+                self:UpdateGUI()
+            end
+        end
     end
 end
 
@@ -1307,6 +1324,42 @@ function GatherTracker:CreateShoppingListUI()
     end)
     btnLoad:SetScript("OnLeave", function() GameTooltip:Hide() end)
     f.btnLoad = btnLoad
+
+    -- Botón ALTERNAR VISTA (v2.10)
+    -- A la izquierda de Presets
+    local btnToggle = CreateFrame("Button", nil, f.header, "UIPanelButtonTemplate")
+    btnToggle:SetSize(20, 20)
+    btnToggle:SetPoint("RIGHT", btnLoad, "LEFT", -2, 0)
+    btnToggle:SetNormalTexture("Interface\\Buttons\\UI-SquareButton-Up")
+    btnToggle:SetPushedTexture("Interface\\Buttons\\UI-SquareButton-Down")
+
+    local toggleIcon = btnToggle:CreateTexture(nil, "ARTWORK")
+    toggleIcon:SetSize(12, 12)
+    toggleIcon:SetPoint("CENTER")
+    btnToggle.icon = toggleIcon
+
+    btnToggle:SetScript("OnClick", function()
+        if GatherTracker.db.profile.shoppingListViewMode == "recipe" then
+            GatherTracker.db.profile.shoppingListViewMode = "totals"
+        else
+            GatherTracker.db.profile.shoppingListViewMode = "recipe"
+        end
+        GatherTracker:UpdateShoppingListUI()
+    end)
+    btnToggle:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        local mode = GatherTracker.db.profile.shoppingListViewMode or "recipe"
+        if mode == "recipe" then
+            GameTooltip:AddLine(L["TOOLTIP_TOGGLE_TOTALS"] or "Ver Totales a Farmear")
+            GameTooltip:AddLine(L["TOOLTIP_TOGGLE_TOTALS_DESC"] or "Muestra una vista consolidada de todos los materiales.", 1, 1, 1)
+        else
+            GameTooltip:AddLine(L["TOOLTIP_TOGGLE_RECIPE"] or "Ver por Recetas")
+            GameTooltip:AddLine(L["TOOLTIP_TOGGLE_RECIPE_DESC"] or "Muestra los materiales agrupados por cada receta.", 1, 1, 1)
+        end
+        GameTooltip:Show()
+    end)
+    btnToggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f.btnToggle = btnToggle
     
     -- PIE (Footer) con Botones Grandes
     f.footer = CreateFrame("Frame", nil, f)
@@ -1395,6 +1448,23 @@ function GatherTracker:UpdateShoppingListUI()
     for _, f in pairs(self.shoppingFrame.groupFrames) do f:Hide() end
     for _, f in pairs(self.shoppingFrame.itemFrames) do f:Hide() end
     
+    -- Sincronizar icono del botón de alternar vista
+    if self.shoppingFrame.btnToggle then
+        local mode = self.db.profile.shoppingListViewMode or "recipe"
+        if mode == "recipe" then
+            self.shoppingFrame.btnToggle.icon:SetTexture("Interface\\Icons\\INV_Misc_Bag_07")
+        else
+            self.shoppingFrame.btnToggle.icon:SetTexture("Interface\\Icons\\INV_Scroll_03")
+        end
+    end
+
+    -- Título dinámico
+    local titleText = "Shopping List"
+    if self.db.profile.shoppingListViewMode == "totals" then
+        titleText = "Shopping List (Totales)"
+    end
+    self.shoppingFrame.header.title:SetText(titleText)
+
     local collapsed = self.db.profile.shoppingListCollapsed
     
     -- Si vacío, mostrar marco pero vacío (botones activados)
@@ -1420,21 +1490,6 @@ function GatherTracker:UpdateShoppingListUI()
         return
     end
     
-    -- 1. AGRUPACIÓN LÓGICA
-    local groups = {} 
-    local manualItems = {}
-    
-    for id, data in pairs(list) do
-        local parent = data.parentRecipe
-        if parent and parent ~= "" then
-            if not groups[parent] then groups[parent] = {} end
-            table.insert(groups[parent], { id = id, data = data })
-        else
-            table.insert(manualItems, { id = id, data = data })
-        end
-    end
-    
-    -- 2. RENDERIZADO
     self.shoppingFrame:Show()
     
     if collapsed then
@@ -1460,10 +1515,14 @@ function GatherTracker:UpdateShoppingListUI()
     local contentWidth = sfWidth
     local yOffset = 0
     
+    -- Contadores locales para evitar fugar memoria creando infinitos frames
+    local activeRows = 0
+    local activeGroups = 0
+    
     -- Helper Row
     local function DrawRow(itemInfo, isChild)
-        local idx = #self.shoppingFrame.itemFrames + 1
-        local row = self.shoppingFrame.itemFrames[idx]
+        activeRows = activeRows + 1
+        local row = self.shoppingFrame.itemFrames[activeRows]
         if not row then
             row = CreateFrame("Frame", nil, self.shoppingFrame.content)
             row:SetSize(contentWidth, 20) -- Aumentado a 20 (v2.1.1)
@@ -1486,10 +1545,10 @@ function GatherTracker:UpdateShoppingListUI()
             end)
             row.delBtn = del
             
-            self.shoppingFrame.itemFrames[idx] = row
+            self.shoppingFrame.itemFrames[activeRows] = row
         end
         
-        row.storageKey = itemInfo.id -- This is actually the storageKey (composite)
+        row.storageKey = itemInfo.id -- This is actually the storageKey (composite or itemID)
         row:ClearAllPoints()
         
         local xOff = isChild and 15 or 0 
@@ -1519,8 +1578,8 @@ function GatherTracker:UpdateShoppingListUI()
     
     -- Helper Header
     local function DrawHeader(title)
-        local idx = #self.shoppingFrame.groupFrames + 1
-        local h = self.shoppingFrame.groupFrames[idx]
+        activeGroups = activeGroups + 1
+        local h = self.shoppingFrame.groupFrames[activeGroups]
         if not h then
             h = CreateFrame("Frame", nil, self.shoppingFrame.content)
             h:SetSize(contentWidth, 16)
@@ -1592,7 +1651,7 @@ function GatherTracker:UpdateShoppingListUI()
                 end
             end)
 
-            self.shoppingFrame.groupFrames[idx] = h
+            self.shoppingFrame.groupFrames[activeGroups] = h
         end
         h:ClearAllPoints()
         h:SetWidth(contentWidth)
@@ -1619,31 +1678,86 @@ function GatherTracker:UpdateShoppingListUI()
         yOffset = yOffset + 18
     end
 
-    -- Recetas
-    local order = self.db.profile.recipeOrder or {}
-    local drawnGroups = {}
+    local mode = self.db.profile.shoppingListViewMode or "recipe"
     
-    for _, parentName in ipairs(order) do
-        if groups[parentName] then
-            DrawHeader(parentName)
-            for _, item in ipairs(groups[parentName]) do DrawRow(item, true) end
-            yOffset = yOffset + 5
-            drawnGroups[parentName] = true
+    if mode == "totals" then
+        -- 1. AGRUPAR Y CONSOLIDAR POR ITEMID
+        local totals = {}
+        for id, data in pairs(list) do
+            local itemID = data.itemID
+            if itemID then
+                if not totals[itemID] then
+                    totals[itemID] = {
+                        itemID = itemID,
+                        name = data.name,
+                        icon = data.icon,
+                        targetCount = 0,
+                        currentCount = GetItemCount(itemID) or 0
+                    }
+                end
+                totals[itemID].targetCount = totals[itemID].targetCount + data.targetCount
+            end
         end
-    end
-    
-    for parentName, items in pairs(groups) do
-        if not drawnGroups[parentName] then
-            DrawHeader(parentName)
-            for _, item in ipairs(items) do DrawRow(item, true) end
-            yOffset = yOffset + 5
+        
+        -- 2. ORDENAR ALFABÉTICAMENTE
+        local orderedTotals = {}
+        for itemID, data in pairs(totals) do
+            table.insert(orderedTotals, data)
         end
-    end
-    
-    -- Manuales
-    if #manualItems > 0 then
-        if next(groups) then DrawHeader(L["GROUP_MANUAL"] or "Otros") end
-        for _, item in ipairs(manualItems) do DrawRow(item, false) end
+        table.sort(orderedTotals, function(a, b)
+            return (a.name or "") < (b.name or "")
+        end)
+        
+        -- 3. RENDERIZAR FILAS CONSOLIDADAS
+        for _, itemData in ipairs(orderedTotals) do
+            local itemInfo = {
+                id = tostring(itemData.itemID),
+                data = itemData
+            }
+            DrawRow(itemInfo, false) -- isChild = false
+        end
+    else
+        -- LÓGICA DE VISTA POR RECETAS (AGRUPADA)
+        -- 1. AGRUPACIÓN LÓGICA
+        local groups = {} 
+        local manualItems = {}
+        
+        for id, data in pairs(list) do
+            local parent = data.parentRecipe
+            if parent and parent ~= "" then
+                if not groups[parent] then groups[parent] = {} end
+                table.insert(groups[parent], { id = id, data = data })
+            else
+                table.insert(manualItems, { id = id, data = data })
+            end
+        end
+        
+        -- 2. RENDERIZADO POR RECETAS
+        local order = self.db.profile.recipeOrder or {}
+        local drawnGroups = {}
+        
+        for _, parentName in ipairs(order) do
+            if groups[parentName] then
+                DrawHeader(parentName)
+                for _, item in ipairs(groups[parentName]) do DrawRow(item, true) end
+                yOffset = yOffset + 5
+                drawnGroups[parentName] = true
+            end
+        end
+        
+        for parentName, items in pairs(groups) do
+            if not drawnGroups[parentName] then
+                DrawHeader(parentName)
+                for _, item in ipairs(items) do DrawRow(item, true) end
+                yOffset = yOffset + 5
+            end
+        end
+        
+        -- Manuales
+        if #manualItems > 0 then
+            if next(groups) then DrawHeader(L["GROUP_MANUAL"] or "Otros") end
+            for _, item in ipairs(manualItems) do DrawRow(item, false) end
+        end
     end
     
     -- Ajustar altura de contenido para scroll
