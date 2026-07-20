@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.12.0] - 2026-07-20
+
+### ✨ Features (Valorización en Oro de Sesiones - Subasta AH)
+
+* **Gold Value Integration**: Added auction-based gold value estimates for farmed items using TSM, Auctionator, or Aux database APIs.
+* **Active Session Header**: Real-time display of total gold value and average gold/hour rate in the active session panel using classic WoW coin formats.
+* **Item List Gold Column**: Added a dedicated `row.gold` column in active sessions and history tables showing the cumulative value of loot.
+* **Detailed Tooltips**: Implemented custom item hover tooltips showing unit and total auction prices using `GameTooltip_SetDefaultAnchor` to respect user's tooltip layout.
+* **Account-wide Statistics**: Lifetime gold totals and gold/hour rates integrated globally and into efficiently ranked maps and classes.
+
+### 🐛 Bug Fixes (UI & Layout)
+
+* **Anti-Overlap Grid**: Re-designed horizontal cell layouts to flow dynamically from right to left using relative Cascading Anchors (Tasa -> Gold -> Qty -> Name), preventing any text overlaps.
+* **Clear History Button Superposition**: Moved the "Clear" button from the main bottom panel to a dedicated upper `historyHeader` container in the Historial tab, resolving overlaps with main navigation buttons.
+* **Recursive Stack Overflow**: Fixed UI stack overflow error by removing redundant event redefinitions on `UpdateStatsUI`.
+
+## [v2.11.0] - 2026-07-19
+
+### ✨ Features (Rastreador de Sesiones & Estadísticas Avanzadas)
+
+* **Farm Sessions**: Added a session tracker that records duration, startup maps, character class, and individual items dropped during farm. Supports auto-starting on first gather.
+* **Flexible Loot Accumulation**: Once a session starts, any drop (fishing, loot, chests) is tracked in the active list while keeping the main gather database safe.
+* **Stats HUD UI**: Flashing dragable 3-tab window: Active Session control, historical sessions scroll, and global map efficiency rankings.
+
+### 🐛 Bug Fixes (TOC & Loading)
+
+* **Addon Loading Order**: Moved `Core/StatsUI.lua` from `# Core` to `# Modules` in `GatherTracker.toc` to ensure the addon instance exists before modules load.
+
 ## [v2.10.0] - 2026-07-19
 
 ### ✨ Features (Vista Consolidada)

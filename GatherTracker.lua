@@ -338,9 +338,24 @@ local defaults = {
         -- v2.9 TSM-like Gathering
         craftingQueue = {},
         recipeOrder = {},
-        shoppingListViewMode = "recipe"
+        shoppingListViewMode = "recipe",
+        -- v2.11 Farming Session
+        currentSession = {
+            isActive = false,
+            startTime = 0,
+            paused = false,
+            pauseDuration = 0,
+            pauseStartTime = 0,
+            zone = "",
+            charName = "",
+            charClass = "",
+            items = {},
+            totalItems = 0
+        },
+        autoStartSession = true
     },
     global = {
+        sessions = {},
         history = {
             totalItems = 0,
             items = {},
@@ -1176,6 +1191,120 @@ function GatherTracker:MoveRecipeDown(parentName)
 end
 
 -- ============================================================================
+-- 3.3.5 GATHERING SESSION MANAGER (v2.11)
+-- ============================================================================
+
+function GatherTracker:StartFarmingSession()
+    local session = self.db.profile.currentSession
+    session.isActive = true
+    session.startTime = time()
+    session.paused = false
+    session.pauseDuration = 0
+    session.pauseStartTime = 0
+    session.zone = GetZoneText() or "Unknown"
+    session.charName = UnitName("player")
+    session.charClass = select(2, UnitClass("player"))
+    session.items = session.items or {}
+    wipe(session.items)
+    session.totalItems = 0
+    
+    -- Limpiar lootSession temporal también para consistencia
+    wipe(self.lootSession)
+    
+    self:UpdateStatsUI()
+    self:Print("Sesión de farmeo iniciada en: " .. session.zone)
+end
+
+function GatherTracker:PauseFarmingSession()
+    local session = self.db.profile.currentSession
+    if not session.isActive or session.paused then return end
+    
+    session.paused = true
+    session.pauseStartTime = time()
+    
+    self:UpdateStatsUI()
+end
+
+function GatherTracker:ResumeFarmingSession()
+    local session = self.db.profile.currentSession
+    if not session.isActive or not session.paused then return end
+    
+    local pauseTime = time() - (session.pauseStartTime or time())
+    session.pauseDuration = (session.pauseDuration or 0) + pauseTime
+    session.paused = false
+    session.pauseStartTime = 0
+    
+    self:UpdateStatsUI()
+end
+
+function GatherTracker:StopFarmingSession(save)
+    local session = self.db.profile.currentSession
+    if not session.isActive then return end
+    
+    if save then
+        -- Calcular duración final
+        local endTime = time()
+        local rawDuration = endTime - session.startTime
+        local pauseTime = 0
+        if session.paused then
+            pauseTime = endTime - (session.pauseStartTime or endTime)
+        end
+        local totalPause = (session.pauseDuration or 0) + pauseTime
+        local activeDuration = rawDuration - totalPause
+        if activeDuration < 1 then activeDuration = 1 end
+        
+        -- Formatear duración a texto legible
+        local durText = ""
+        if activeDuration >= 3600 then
+            durText = string.format("%dh %dm", math.floor(activeDuration/3600), math.floor((activeDuration%3600)/60))
+        else
+            durText = string.format("%dm %ds", math.floor(activeDuration/60), activeDuration%60)
+        end
+
+        local totalValue = 0
+        local record = {
+            id = session.startTime,
+            charName = session.charName or UnitName("player"),
+            charClass = session.charClass or select(2, UnitClass("player")),
+            zone = session.zone or "Unknown",
+            startTime = session.startTime,
+            duration = activeDuration,
+            totalItems = session.totalItems or 0,
+            items = {}
+        }
+        for itemID, qty in pairs(session.items) do
+            record.items[tostring(itemID)] = qty
+            
+            local _, link = GetItemInfo(itemID)
+            if link then
+                local price = self:GetAuctionPrice(link) or 0
+                totalValue = totalValue + (price * qty)
+            end
+        end
+        record.totalValue = totalValue
+        
+        table.insert(self.db.global.sessions, record)
+        self:Print(string.format(L["MSG_SESSION_SAVED"] or "Sesión guardada (%d objetos en %s).", record.totalItems, durText))
+    else
+        self:Print(L["MSG_SESSION_DISCARDED"] or "Sesión de farmeo descartada.")
+    end
+    
+    session.isActive = false
+    session.startTime = 0
+    session.paused = false
+    session.pauseDuration = 0
+    session.pauseStartTime = 0
+    session.totalItems = 0
+    session.items = session.items or {}
+    wipe(session.items)
+    
+    -- Limpiar lootSession temporal
+    wipe(self.lootSession)
+    
+    self:UpdateStatsUI()
+end
+
+-- ============================================================================
 -- 3.4 SHOPPING LIST HUD (v1.9.1)
 -- ============================================================================
 
@@ -1332,6 +1461,31 @@ function GatherTracker:CreateShoppingListUI()
     btnToggle:SetPoint("RIGHT", btnLoad, "LEFT", -2, 0)
     btnToggle:SetNormalTexture("Interface\\Buttons\\UI-SquareButton-Up")
     btnToggle:SetPushedTexture("Interface\\Buttons\\UI-SquareButton-Down")
+
+    -- Botón ESTADÍSTICAS Y SESIÓN (v2.11)
+    -- A la izquierda de Alternar Vista
+    local btnStats = CreateFrame("Button", nil, f.header, "UIPanelButtonTemplate")
+    btnStats:SetSize(20, 20)
+    btnStats:SetPoint("RIGHT", btnToggle, "LEFT", -2, 0)
+    btnStats:SetNormalTexture("Interface\\Buttons\\UI-SquareButton-Up")
+    btnStats:SetPushedTexture("Interface\\Buttons\\UI-SquareButton-Down")
+
+    local statsIcon = btnStats:CreateTexture(nil, "ARTWORK")
+    statsIcon:SetSize(12, 12)
+    statsIcon:SetPoint("CENTER")
+    statsIcon:SetTexture("Interface\\Icons\\INV_Misc_PocketWatch_01")
+    btnStats.icon = statsIcon
+
+    btnStats:SetScript("OnClick", function()
+        GatherTracker:ToggleStatsUI()
+    end)
+    btnStats:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:AddLine(L["STATS_TOOLTIP_STATS_BTN"] or "Ver Estadísticas de Farmeo")
+        GameTooltip:Show()
+    end)
+    btnStats:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f.btnStats = btnStats
 
     local toggleIcon = btnToggle:CreateTexture(nil, "ARTWORK")
     toggleIcon:SetSize(12, 12)
@@ -1965,19 +2119,35 @@ function GatherTracker:OnLootMsg(event, msg)
 
     if not isLoot then return end -- Si es trade, mail o "pushed", ignoramos para logros
 
-    -- Verificar si es un item que nos interesa
     local itemID = GetItemInfoInstant(link)
     if not itemID then return end
-    if not validItemIDs[itemID] then return end 
     
-    local name = GetItemInfo(link)
-
     -- Extraer cantidad
     local count = 1
     local quantityMatch = string.match(msg, "x(%d+)%.")
     if quantityMatch then count = tonumber(quantityMatch) end
     
-    -- Guardar en sesión
+    -- Integración con Farming Session (v2.11)
+    -- Auto-inicio solo si es un item que nos interesa
+    if self.db.profile.autoStartSession and not self.db.profile.currentSession.isActive and validItemIDs[itemID] then
+        self:StartFarmingSession()
+    end
+    
+    local session = self.db.profile.currentSession
+    if session.isActive and not session.paused then
+        session.items = session.items or {}
+        session.items[itemID] = (session.items[itemID] or 0) + count
+        session.totalItems = (session.totalItems or 0) + count
+        session.lastLootTime = time()
+        self:UpdateStatsUI()
+    end
+
+    -- A partir de aquí, lógica del addon original (solo plantas y minerales válidos)
+    if not validItemIDs[itemID] then return end
+    
+    local name = GetItemInfo(link)
+    
+    -- Guardar en sesión temporal
     if not self.lootSession[itemID] then
         -- v2.8.1: Placeholder if name is not yet cached
         self.lootSession[itemID] = { count = 0, name = name or ("Item " .. itemID), link = link }
@@ -2486,6 +2656,8 @@ function GatherTracker:ChatCommand(input)
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
     elseif cmd == "history" or cmd == "logros" then
         self:CreateHistoryUI()
+    elseif cmd == "stats" or cmd == "sesion" or cmd == "session" then
+        self:ToggleStatsUI()
     elseif cmd == "resetdb" then
         -- Redirigir al flujo seguro
         StaticPopup_Show("GT_RESET_CONFIRM")
