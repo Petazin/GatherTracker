@@ -2225,20 +2225,36 @@ end
 
 function GatherTracker:GetAuctionPrice(link)
     -- Soporte para addons de subasta populares (Auctionator, TSM, Aux)
-    -- Auctionator
+    
+    -- 1. Auctionator (API Moderna)
+    if Auctionator and Auctionator.API and Auctionator.API.v1 and Auctionator.API.v1.GetAuctionPriceByItemLink then
+        local price = Auctionator.API.v1.GetAuctionPriceByItemLink("GatherTracker", link)
+        if price and price > 0 then return price end
+    end
+    -- Auctionator (Legacy fallback)
     if Atr_GetAuctionBuyout then 
         return Atr_GetAuctionBuyout(link) 
     end
-    -- TSM (API compleja, intento simple)
+    
+    -- 2. TSM (API compleja, requiere formato "i:ID")
     if TSM_API and TSM_API.GetCustomPriceValue then
-        -- TSM requiere formato "i:ID"
         local itemID = GetItemInfoInstant(link)
         if itemID then
              local price = TSM_API.GetCustomPriceValue("DBMarket", "i:" .. itemID)
              if price then return price end
         end
     end
-    -- Fallback: Aux (Classic)
+    
+    -- 3. Aux Addon (API Moderna)
+    if aux and aux.history and aux.history.value then
+        local itemID = GetItemInfoInstant(link)
+        if itemID then
+            local itemKey = itemID .. ":0"
+            local price = aux.history.value(itemKey)
+            if price and price > 0 then return price end
+        end
+    end
+    -- Aux (Legacy fallback)
     if Aux and Aux.GetMinBuyout then
          return Aux.GetMinBuyout(link)
     end

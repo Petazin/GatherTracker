@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.12.2] - 2026-07-20
+
+### ✨ Features (APIs Modernas de Subasta)
+
+* **Auctionator API v1 Integration**: Added support for the official `Auctionator.API.v1.GetAuctionPriceByItemLink` interface to fetch buyout prices directly from their modern active database.
+* **Aux Addon Modern API Support**: Added support for the internal `aux.history.value` median-based historical calculator for vanilla/classic setups.
+* **Cascading Fallbacks**: Preserved legacy wrappers (`Atr_GetAuctionBuyout` and `Aux.GetMinBuyout`) as backward-compatibility fallbacks.
+
 ## [v2.12.1] - 2026-07-20
 
 ### ✨ Features (Valorización en Oro de Sesiones - Subasta AH)
