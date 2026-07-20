@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v2.12.0] - 2026-07-20
+## [v2.12.1] - 2026-07-20
 
 ### ✨ Features (Valorización en Oro de Sesiones - Subasta AH)
 
@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🐛 Bug Fixes (UI & Layout)
 
+* **History Tooltip Alignment**: Anchored the historical session tooltip directly to the right edge of the main Stats panel (`ANCHOR_RIGHT` over `f`), preventing it from rendering far away and keeping information immediately readable.
 * **Anti-Overlap Grid**: Re-designed horizontal cell layouts to flow dynamically from right to left using relative Cascading Anchors (Tasa -> Gold -> Qty -> Name), preventing any text overlaps.
 * **Clear History Button Superposition**: Moved the "Clear" button from the main bottom panel to a dedicated upper `historyHeader` container in the Historial tab, resolving overlaps with main navigation buttons.
 * **Recursive Stack Overflow**: Fixed UI stack overflow error by removing redundant event redefinitions on `UpdateStatsUI`.

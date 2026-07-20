@@ -474,8 +474,7 @@ function GatherTracker:UpdateStatsUI()
             end
             
             row:SetScript("OnEnter", function(self)
-                GameTooltip:SetOwner(self, "ANCHOR_NONE")
-                GameTooltip_SetDefaultAnchor(GameTooltip, self)
+                GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
                 GameTooltip:AddLine(date("%d/%m/%Y %H:%M", record.startTime), 1, 0.82, 0)
                 GameTooltip:AddDoubleLine("Zona:", record.zone or "Unknown", 0.7, 0.7, 0.7, 1, 1, 1)
                 
