@@ -621,6 +621,94 @@ function GatherTracker:UpdateStatsUI()
                 p.classRows[idx] = r
             end
             
+            -- Mejores Objetos (Top 5) (v2.13.0)
+            local titleItems = p:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+            titleItems:SetPoint("TOPLEFT", 10, -295)
+            titleItems:SetText("Mejores Objetos")
+            p.titleItems = titleItems
+            
+            -- Inicializar estados en f si no existen
+            f.itemFilter = f.itemFilter or "ALL"
+            f.itemSortMode = f.itemSortMode or "QTY"
+            
+            -- Crear botones de Filtro de Categoría
+            local categories = {
+                { key = "ALL", text = "Todo", x = 15 },
+                { key = "CAT_MINING", text = "Minería", x = 57 },
+                { key = "CAT_HERBALISM", text = "Hierbas", x = 117 },
+                { key = "CAT_OTHER", text = "Otros", x = 177 },
+            }
+            p.catButtons = {}
+            for _, cat in ipairs(categories) do
+                local btn = CreateFrame("Button", nil, p, "UIPanelButtonTemplate")
+                btn:SetSize(40, 16)
+                if cat.key == "CAT_MINING" or cat.key == "CAT_HERBALISM" then
+                    btn:SetSize(58, 16)
+                elseif cat.key == "CAT_OTHER" then
+                    btn:SetSize(46, 16)
+                end
+                btn:SetPoint("TOPLEFT", cat.x, -315)
+                btn:SetText(cat.text)
+                btn:SetNormalFontObject("GameFontNormalSmall")
+                btn:SetHighlightFontObject("GameFontHighlightSmall")
+                btn:SetDisabledFontObject("GameFontDisableSmall")
+                btn:SetScript("OnClick", function()
+                    f.itemFilter = cat.key
+                    GatherTracker:UpdateStatsUI()
+                end)
+                p.catButtons[cat.key] = btn
+            end
+            
+            -- Crear botones de Ordenación
+            local sortModes = {
+                { key = "QTY", text = "Cantidad", x = 250 },
+                { key = "GOLD", text = "Valor Oro", x = 312 },
+            }
+            p.sortButtons = {}
+            for _, mode in ipairs(sortModes) do
+                local btn = CreateFrame("Button", nil, p, "UIPanelButtonTemplate")
+                btn:SetSize(60, 16)
+                btn:SetPoint("TOPLEFT", mode.x, -315)
+                btn:SetText(mode.text)
+                btn:SetNormalFontObject("GameFontNormalSmall")
+                btn:SetHighlightFontObject("GameFontHighlightSmall")
+                btn:SetDisabledFontObject("GameFontDisableSmall")
+                btn:SetScript("OnClick", function()
+                    f.itemSortMode = mode.key
+                    GatherTracker:UpdateStatsUI()
+                end)
+                p.sortButtons[mode.key] = btn
+            end
+            
+            -- Filas de items (Top 5)
+            p.itemRows = {}
+            for idx = 1, 5 do
+                local row = CreateFrame("Frame", nil, p)
+                row:SetSize(width - 30, 20)
+                row:SetPoint("TOPLEFT", 15, -317 - (idx * 20))
+                
+                row.icon = row:CreateTexture(nil, "ARTWORK")
+                row.icon:SetSize(14, 14)
+                row.icon:SetPoint("LEFT", 5, 0)
+                
+                row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+                row.name:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
+                row.name:SetJustifyH("LEFT")
+                row.name:SetWordWrap(false)
+                
+                row.qty = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+                row.qty:SetPoint("RIGHT", -120, 0)
+                row.qty:SetWidth(50)
+                row.qty:SetJustifyH("RIGHT")
+                
+                row.gold = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+                row.gold:SetPoint("RIGHT", -5, 0)
+                row.gold:SetWidth(110)
+                row.gold:SetJustifyH("RIGHT")
+                
+                p.itemRows[idx] = row
+            end
+            
             f.statsPanel = p
         end
         
@@ -724,8 +812,109 @@ function GatherTracker:UpdateStatsUI()
                 textRow:Hide()
             end
         end
+        -- Habilitar/Deshabilitar botones de Categoría según el filtro activo
+        for catKey, btn in pairs(p.catButtons) do
+            if f.itemFilter == catKey then
+                btn:Disable()
+            else
+                btn:Enable()
+            end
+        end
         
-        content:SetHeight(350)
+        -- Habilitar/Deshabilitar botones de Ordenación según el modo activo
+        for sortKey, btn in pairs(p.sortButtons) do
+            if f.itemSortMode == sortKey then
+                btn:Disable()
+            else
+                btn:Enable()
+            end
+        end
+        
+        -- Consolidar Mejores Objetos (Top 5) de por vida
+        local itemTotals = {}
+        for _, record in ipairs(history) do
+            for itemIDStr, qty in pairs(record.items or {}) do
+                local itemID = tonumber(itemIDStr) or itemIDStr
+                
+                -- Verificar categoría
+                local cat = self:GetItemCategory(itemID)
+                local match = false
+                if f.itemFilter == "ALL" then
+                    match = true
+                elseif f.itemFilter == "CAT_MINING" then
+                    match = (cat == "CAT_MINING" or cat == "CAT_TREASURES")
+                elseif f.itemFilter == "CAT_HERBALISM" then
+                    match = (cat == "CAT_HERBALISM")
+                elseif f.itemFilter == "CAT_OTHER" then
+                    match = (cat == "CAT_FISHING" or cat == "CAT_GENERAL")
+                end
+                
+                if match then
+                    itemTotals[itemID] = (itemTotals[itemID] or 0) + qty
+                end
+            end
+        end
+        
+        local sortedItems = {}
+        for itemID, qty in pairs(itemTotals) do
+            local name, link, _, _, _, _, _, _, _, icon = GetItemInfo(itemID)
+            if not name then
+                local _, _, _, _, iconInstant = GetItemInfoInstant(itemID)
+                name = "Item " .. itemID
+                icon = iconInstant
+            end
+            
+            -- Obtener precio actual de subasta de hoy
+            local priceUnit = self:GetAuctionPrice(link) or 0
+            local goldActual = priceUnit * qty
+            
+            table.insert(sortedItems, {
+                id = itemID,
+                name = name,
+                link = link,
+                qty = qty,
+                gold = goldActual,
+                icon = icon or GetItemIcon(itemID)
+            })
+        end
+        
+        -- Ordenamiento dual
+        if f.itemSortMode == "QTY" then
+            table.sort(sortedItems, function(a, b) return a.qty > b.qty end)
+        else
+            table.sort(sortedItems, function(a, b) return a.gold > b.gold end)
+        end
+        
+        -- Pintar el ranking Top 5
+        for idx = 1, 5 do
+            local row = p.itemRows[idx]
+            local iRecord = sortedItems[idx]
+            if iRecord then
+                row.icon:SetTexture(iRecord.icon)
+                row.name:SetText(idx .. ". " .. iRecord.name)
+                row.qty:SetText("x" .. iRecord.qty)
+                row.gold:SetText((iRecord.gold > 0) and GetCoinTextureString(iRecord.gold) or "|cff808080N/A|r")
+                
+                -- Tooltip interactivo con ANCHOR_RIGHT sobre f
+                local link = iRecord.link
+                local name = iRecord.name
+                row:SetScript("OnEnter", function(self)
+                    GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
+                    if link then
+                        GameTooltip:SetHyperlink(link)
+                    else
+                        GameTooltip:AddLine(name)
+                    end
+                    GameTooltip:Show()
+                end)
+                row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+                row:Show()
+            else
+                row:Hide()
+            end
+        end
+        
+        content:SetHeight(510)
     end
 end
 

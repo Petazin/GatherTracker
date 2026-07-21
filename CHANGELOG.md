@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.13.0] - 2026-07-21
+
+### ✨ Features (Mejores Objetos en Estadísticas)
+
+* **Top 5 Items Section**: Integrated a new "Mejores Objetos" section in the Stats tab that consolidates and ranks the top 5 gathered items across all historical sessions.
+* **Category Filters**: Added secondary filter buttons (`[Todo]`, `[Minería]`, `[Hierbas]`, and `[Otros]`) to instantly narrow down the ranking by profession/category.
+* **Dual Sorting**: Added toggle buttons (`[Cantidad]` and `[Valor Oro]`) to instantly re-rank the top 5 based on total units gathered or their current total market value.
+* **Real-time Price Valuation**: Item values in the stats panel are calculated on the fly using live auction prices (via active Auctionator, TSM, or Aux APIs) to show their current economic worth today, rather than frozen historical prices.
+* **Item Tooltips**: Hovering over a ranked item opens its native game link tooltip anchored to the right side of the frame for clear visibility.
+
 ## [v2.12.2] - 2026-07-20
 
 ### ✨ Features (APIs Modernas de Subasta)
