@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.13.1] - 2026-07-23
+
+### 🐛 Bug Fixes (Auction Price & Uncached Item Safety)
+
+* **Nil Link Protection in GetAuctionPrice**: Added strict `if not link then return 0 end` guard in `GatherTracker:GetAuctionPrice` to prevent LUA errors (`bad argument #1 to GetItemInfoInstant`) when querying uncached items.
+* **Item ID Fallback**: Updated all auction price lookup sites to fall back to `itemID` if `GetItemInfo(itemID)` has not yet cached the item link string.
+
 ## [v2.13.0] - 2026-07-21
 
 ### ✨ Features (Mejores Objetos en Estadísticas)

@@ -260,10 +260,8 @@ function GatherTracker:UpdateStatsUI()
         local totalValue = 0
         for itemID, qty in pairs(session.items) do
             local _, link = GetItemInfo(itemID)
-            if link then
-                local price = self:GetAuctionPrice(link) or 0
-                totalValue = totalValue + (price * qty)
-            end
+            local price = self:GetAuctionPrice(link or itemID) or 0
+            totalValue = totalValue + (price * qty)
         end
         
         local goldPerHour = 0
@@ -340,10 +338,7 @@ function GatherTracker:UpdateStatsUI()
             row.qty:SetText("x" .. itemData.qty)
             
             -- Calcular valor de subasta del item en tiempo real
-            local price = 0
-            if link then
-                price = self:GetAuctionPrice(link) or 0
-            end
+            local price = self:GetAuctionPrice(link or itemData.id) or 0
             local totalItemGold = price * itemData.qty
             row.gold:SetText((totalItemGold > 0) and GetCoinTextureString(totalItemGold) or "|cff808080N/A|r")
             
@@ -496,10 +491,7 @@ function GatherTracker:UpdateStatsUI()
                     local name, link = GetItemInfo(itemID)
                     if not name then name = "Item " .. itemIDStr end
                     
-                    local price = 0
-                    if link then
-                        price = GatherTracker:GetAuctionPrice(link) or 0
-                    end
+                    local price = GatherTracker:GetAuctionPrice(link or itemID) or 0
                     local itemTotalGold = price * qty
                     
                     local lineRight = "x" .. qty
@@ -865,7 +857,7 @@ function GatherTracker:UpdateStatsUI()
             end
             
             -- Obtener precio actual de subasta de hoy
-            local priceUnit = self:GetAuctionPrice(link) or 0
+            local priceUnit = self:GetAuctionPrice(link or itemID) or 0
             local goldActual = priceUnit * qty
             
             table.insert(sortedItems, {

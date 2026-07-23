@@ -1276,10 +1276,8 @@ function GatherTracker:StopFarmingSession(save)
             record.items[tostring(itemID)] = qty
             
             local _, link = GetItemInfo(itemID)
-            if link then
-                local price = self:GetAuctionPrice(link) or 0
-                totalValue = totalValue + (price * qty)
-            end
+            local price = self:GetAuctionPrice(link or itemID) or 0
+            totalValue = totalValue + (price * qty)
         end
         record.totalValue = totalValue
         
@@ -2224,30 +2222,36 @@ function GatherTracker:CheckAchievements()
 end
 
 function GatherTracker:GetAuctionPrice(link)
-    -- Soporte para addons de subasta populares (Auctionator, TSM, Aux)
+    if not link then return 0 end
     
     -- 1. Auctionator (API Moderna)
-    if Auctionator and Auctionator.API and Auctionator.API.v1 and Auctionator.API.v1.GetAuctionPriceByItemLink then
-        local price = Auctionator.API.v1.GetAuctionPriceByItemLink("GatherTracker", link)
+    if Auctionator and Auctionator.API and Auctionator.API.v1 then
+        local price
+        if type(link) == "number" and Auctionator.API.v1.GetAuctionPriceByItemID then
+            price = Auctionator.API.v1.GetAuctionPriceByItemID("GatherTracker", link)
+        elseif Auctionator.API.v1.GetAuctionPriceByItemLink then
+            price = Auctionator.API.v1.GetAuctionPriceByItemLink("GatherTracker", tostring(link))
+        end
         if price and price > 0 then return price end
     end
     -- Auctionator (Legacy fallback)
     if Atr_GetAuctionBuyout then 
-        return Atr_GetAuctionBuyout(link) 
+        local price = Atr_GetAuctionBuyout(link)
+        if price and price > 0 then return price end
     end
     
     -- 2. TSM (API compleja, requiere formato "i:ID")
     if TSM_API and TSM_API.GetCustomPriceValue then
-        local itemID = GetItemInfoInstant(link)
+        local itemID = (type(link) == "number") and link or GetItemInfoInstant(link)
         if itemID then
              local price = TSM_API.GetCustomPriceValue("DBMarket", "i:" .. itemID)
-             if price then return price end
+             if price and price > 0 then return price end
         end
     end
     
     -- 3. Aux Addon (API Moderna)
     if aux and aux.history and aux.history.value then
-        local itemID = GetItemInfoInstant(link)
+        local itemID = (type(link) == "number") and link or GetItemInfoInstant(link)
         if itemID then
             local itemKey = itemID .. ":0"
             local price = aux.history.value(itemKey)
@@ -2256,7 +2260,8 @@ function GatherTracker:GetAuctionPrice(link)
     end
     -- Aux (Legacy fallback)
     if Aux and Aux.GetMinBuyout then
-         return Aux.GetMinBuyout(link)
+         local price = Aux.GetMinBuyout(link)
+         if price and price > 0 then return price end
     end
     
     return 0
