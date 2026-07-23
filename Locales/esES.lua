@@ -337,3 +337,9 @@ L["STATS_TOOLTIP_STATS_BTN"] = "Ver Estadísticas de Farmeo"
 L["CONFIRM_CLEAR_HISTORY"] = "¿Estás seguro de que deseas BORRAR todo el historial de sesiones?"
 L["MSG_SESSION_SAVED"] = "Sesión guardada en el historial (%d objetos en %s)."
 L["MSG_SESSION_DISCARDED"] = "Sesión de farmeo descartada."
+
+-- Window Position Reset
+L["RESET_POS_TITLE"] = "Restaurar Posición"
+L["RESET_POS_DESC"] = "Restablece la posición de la ventana de estadísticas al centro de la pantalla."
+L["STATS_POS_RESET_MSG"] = "|cff00ff00[GatherTracker]|r Posición de la ventana de estadísticas restaurada al centro."
+

@@ -328,6 +328,7 @@ local defaults = {
         -- v2.0.0 Detached UI
         shoppingFramePos = { point = "CENTER", x = 100, y = 0 },
         shoppingFrameSize = { width = 250, height = 300 },
+        statsFramePos = { point = "CENTER", x = 0, y = 0 },
         
         -- v2.2 Custom Presets
         customPresets = {},
@@ -2693,13 +2694,19 @@ function GatherTracker:ChatCommand(input)
     elseif cmd == "resetui" then
         self.db.profile.shoppingFramePos = nil
         self.db.profile.shoppingFrameSize = nil
+        self.db.profile.statsFramePos = nil
         if self.shoppingFrame then
             self.shoppingFrame:ClearAllPoints()
             self.shoppingFrame:SetPoint("CENTER", 100, 0)
             self.shoppingFrame:SetSize(250, 300)
             self:UpdateShoppingListUI()
         end
-        self:Print("|cff00ff00[GatherTracker]|r Interfaz restaurada a su tamaño original.")
+        if self.statsFrame then
+            self.statsFrame:ClearAllPoints()
+            self.statsFrame:SetPoint("CENTER")
+        end
+        self:Print("|cff00ff00[GatherTracker]|r Interfaz restaurada a su tamaño u origen por defecto.")
+
     else
         LibStub("AceConfigDialog-3.0"):Open("GatherTracker")
     end

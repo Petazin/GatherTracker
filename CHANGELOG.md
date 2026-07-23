@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.13.2] - 2026-07-23
+
+### ✨ Features & UX (Persistencia y Restauración de Posición en Estadísticas)
+
+* **Position Persistence**: The Farming Stats & Sessions window (`GatherTrackerStatsFrame`) now saves its position to `statsFramePos` in the AceDB profile on drag stop.
+* **Auto Restore**: Automatically restores the saved window position on `/reload`, zone change, or game restart instead of resetting to the screen center.
+* **Reset Position Button**: Added a dedicated position reset button `[↺]` in the header next to the close button to quickly reset the window to the screen center.
+* **Command Integration**: Updated the `/gt resetui` command to clear saved stats window coordinates along with shopping frame settings.
+
 ## [v2.13.1] - 2026-07-23
+
 
 ### 🐛 Bug Fixes (Auction Price & Uncached Item Safety)
 

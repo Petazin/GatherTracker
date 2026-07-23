@@ -30,7 +30,13 @@ function GatherTracker:CreateStatsUI()
 
     local f = CreateFrame("Frame", "GatherTrackerStatsFrame", UIParent, "BackdropTemplate")
     f:SetSize(460, 420)
-    f:SetPoint("CENTER")
+    local pos = self.db.profile.statsFramePos
+    if pos then
+        f:ClearAllPoints()
+        f:SetPoint(pos.point, UIParent, pos.point, pos.x, pos.y)
+    else
+        f:SetPoint("CENTER")
+    end
     f:SetMovable(true)
     f:EnableMouse(true)
     f:RegisterForDrag("LeftButton")
@@ -45,8 +51,21 @@ function GatherTracker:CreateStatsUI()
     f:SetBackdropColor(0.05, 0.05, 0.05, 0.95)
     f:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
 
-    f:SetScript("OnDragStart", f.StartMoving)
-    f:SetScript("OnDragStop", f.StopMovingOrSizing)
+    f:SetScript("OnDragStart", function(self)
+        self:StartMoving()
+    end)
+    f:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        local left, top = self:GetLeft(), self:GetTop()
+        if left and top then
+            self:ClearAllPoints()
+            self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+            GatherTracker.db.profile.statsFramePos = { point = "TOPLEFT", x = left, y = top - (UIParent:GetHeight() or 0) }
+        else
+            local point, _, _, xOfs, yOfs = self:GetPoint()
+            GatherTracker.db.profile.statsFramePos = { point = point, x = xOfs, y = yOfs }
+        end
+    end)
     
     -- Cabecera
     f.header = CreateFrame("Frame", nil, f)
@@ -63,6 +82,30 @@ function GatherTracker:CreateStatsUI()
     btnClose:SetPoint("RIGHT", 0, 0)
     btnClose:SetScript("OnClick", function() GatherTracker:ToggleStatsUI() end)
     f.btnClose = btnClose
+
+    -- Botón de Restaurar Posición
+    local btnResetPos = CreateFrame("Button", nil, f.header)
+    btnResetPos:SetSize(18, 18)
+    btnResetPos:SetPoint("RIGHT", btnClose, "LEFT", -2, 0)
+    btnResetPos:SetNormalTexture("Interface\\Buttons\\UI-RefreshButton")
+    btnResetPos:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
+    btnResetPos:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:AddLine(L["RESET_POS_TITLE"] or "Restaurar Posición", 1, 1, 1)
+        GameTooltip:AddLine(L["RESET_POS_DESC"] or "Restablece la posición de la ventana de estadísticas al centro de la pantalla.", 0.8, 0.8, 0.8, true)
+        GameTooltip:Show()
+    end)
+    btnResetPos:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    btnResetPos:SetScript("OnClick", function()
+        GatherTracker.db.profile.statsFramePos = nil
+        f:ClearAllPoints()
+        f:SetPoint("CENTER")
+        GatherTracker:Print(L["STATS_POS_RESET_MSG"] or "|cff00ff00[GatherTracker]|r Posición de la ventana de estadísticas restaurada al centro.")
+    end)
+    f.btnResetPos = btnResetPos
+
     
     -- Separador superior
     local line = f:CreateTexture(nil, "ARTWORK")

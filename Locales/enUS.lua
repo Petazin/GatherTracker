@@ -320,3 +320,9 @@ L["STATS_TOOLTIP_STATS_BTN"] = "View Farming Stats"
 L["CONFIRM_CLEAR_HISTORY"] = "Are you sure you want to CLEAR the entire session history?"
 L["MSG_SESSION_SAVED"] = "Session saved to history (%d items in %s)."
 L["MSG_SESSION_DISCARDED"] = "Farming session discarded."
+
+-- Window Position Reset
+L["RESET_POS_TITLE"] = "Reset Position"
+L["RESET_POS_DESC"] = "Resets the stats window position to the center of the screen."
+L["STATS_POS_RESET_MSG"] = "|cff00ff00[GatherTracker]|r Stats window position reset to center."
+
